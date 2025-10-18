@@ -215,7 +215,7 @@ const analysisProtocols = {
       "PBS 완충액: 냉장보관 (4℃) (제조 후) - 오염 주의"
     ],
     formulas: [
-      <span>CAT activity (μmol/min/mL) = (ΔA<sub>240</sub>/min) × total volume × 1000 / (39.4 × enzyme volume)</span>,
+      <span>CAT activity (μmol/min/mL) = (ΔA<sub>240</sub>/min) × total volume × 1000 / (43.6 × enzyme volume)</span>,
       "CAT activity (μmol/min/mg DW) = unit/mL / enzyme (mg/mL)"
     ],
     unit: "μmol/min/mg DW",
