@@ -214,7 +214,7 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
                </div>
              </div>
              <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-               {enzyme.toUpperCase()} activity = (<HighlightedValue value={params[enzyme]?.delta_A} placeholder="ΔA"/> × <HighlightedValue value={params[enzyme]?.total_vol} placeholder="total_vol"/> × 1000) / ({enzyme === 'cat' ? '39.4' : '26.6'} × <HighlightedValue value={params[enzyme]?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params[enzyme]?.enzyme_conc} placeholder="enzyme_conc"/>
+               {enzyme.toUpperCase()} activity = (<HighlightedValue value={params[enzyme]?.delta_A} placeholder="ΔA"/> × <HighlightedValue value={params[enzyme]?.total_vol} placeholder="total_vol"/> × 1000) / ({enzyme === 'cat' ? '43.6' : '26.6'} × <HighlightedValue value={params[enzyme]?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params[enzyme]?.enzyme_conc} placeholder="enzyme_conc"/>
              </p>
            </div>
          );
