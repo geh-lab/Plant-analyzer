@@ -217,7 +217,7 @@ export default function Results() {
         case "cat": {
             const { delta_A, total_vol, enzyme_vol, enzyme_conc } = p.cat || {};
             if (!delta_A || !total_vol || !enzyme_vol || !enzyme_conc) return { result: 0, unit: "μmol/min/mg DW" };
-            const activity_per_ml = (parseFloat(delta_A) * parseFloat(total_vol) * 1000) / (39.4 * parseFloat(enzyme_vol));
+            const activity_per_ml = (parseFloat(delta_A) * parseFloat(total_vol) * 1000) / (43.6 * parseFloat(enzyme_vol));
             return { result: activity_per_ml / parseFloat(enzyme_conc), unit: "μmol/min/mg DW" };
         }
         case "pod": {
