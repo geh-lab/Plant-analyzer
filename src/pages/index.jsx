@@ -10,6 +10,9 @@ import HPLC from "./HPLC";
 
 import HPLC_Results from "./HPLC_Results";
 
+import Kjeldahl from "./Kjeldahl";
+
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -23,6 +26,9 @@ const PAGES = {
     HPLC: HPLC,
     
     HPLC_Results: HPLC_Results,
+
+    Kjeldahl: Kjeldahl,
+
     
 }
 
@@ -60,6 +66,9 @@ function PagesContent() {
                 <Route path="/HPLC" element={<HPLC />} />
                 
                 <Route path="/HPLC_Results" element={<HPLC_Results />} />
+
+                <Route path="/Kjeldahl" element={<Kjeldahl />} />
+
                 
             </Routes>
         </Layout>

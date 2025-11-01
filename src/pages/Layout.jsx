@@ -139,20 +139,7 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <Home className="h-4 w-4" />
                   </Link>
-                  <Link 
-                    to={createPageUrl("Analysis")}
-                    className={`nav-button ${isAnalysisPage ? 'active' : ''}`}
-                    title="흡광도"
-                  >
-                    <TestTube className="h-4 w-4" />
-                  </Link>
-                  <Link 
-                    to={createPageUrl("HPLC")}
-                    className={`nav-button ${isHPLCPage ? 'active' : ''}`}
-                    title="HPLC"
-                  >
-                    <FlaskConical className="h-4 w-4" />
-                  </Link>
+
                 </div>
               </div>
             </div>
