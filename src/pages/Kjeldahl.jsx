@@ -359,27 +359,30 @@ const stepInfo = {
   </div>
 
 
-                  {/* 참고 영상 */}
-                  <div className="mt-10">
-                    <h4 className="flex items-center text-gray-900 font-semibold mb-3">
-                      <Video className="h-5 w-5 mr-2 text-blue-700" />
-                      참고 영상
-                    </h4>
-                    <div className="aspect-video rounded-xl overflow-hidden border">
-                      <iframe
-                        src={
-                          selectedStep === "step1"
-                            ? "https://www.youtube.com/embed/example_digestion"
-                            : selectedStep === "step2"
-                            ? "https://www.youtube.com/embed/example_distillation"
-                            : "https://www.youtube.com/embed/example_titration"
-                        }
-                        title="reference-video"
-                        allowFullScreen
-                        className="w-full h-full"
-                      ></iframe>
-                    </div>
-                  </div>
+{/* 참고 영상 */}
+<div className="mt-10">
+  <h4 className="flex items-center text-gray-900 font-bold text-lg sm:text-xl mb-3">
+
+    <Video className="h-5 w-5 mr-2 text-blue-700" />
+    참고 영상
+  </h4>
+  <div className="aspect-video rounded-xl overflow-hidden border">
+    <iframe
+      src={
+        selectedStep === "step1"
+          ? "https://www.youtube.com/embed/9oXqw1Umg8o?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
+          : selectedStep === "step2"
+          ? "https://www.youtube.com/embed/example_distillation?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
+          : "https://www.youtube.com/embed/example_titration?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
+      }
+      title="reference-video"
+      allow="fullscreen; picture-in-picture"
+      allowFullScreen
+      className="w-full h-full"
+    ></iframe>
+  </div>
+</div>
+
                 </CardContent>
               </Card>
             </motion.div>
