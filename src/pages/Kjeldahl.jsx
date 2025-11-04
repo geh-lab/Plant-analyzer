@@ -372,8 +372,8 @@ const stepInfo = {
         selectedStep === "step1"
           ? "https://www.youtube.com/embed/9oXqw1Umg8o?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
           : selectedStep === "step2"
-          ? "https://www.youtube.com/embed/example_distillation?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
-          : "https://www.youtube.com/embed/example_titration?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
+          ? "https://www.youtube.com/embed/m_c3lnD0kn0?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
+          : "https://www.youtube.com/embed/aRHpBCz7R18?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
       }
       title="reference-video"
       allow="fullscreen; picture-in-picture"
