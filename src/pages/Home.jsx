@@ -4,6 +4,7 @@ import { ArrowRight, TestTube, FlaskConical, Beaker } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { createPageUrl } from '@/utils';
 
+
 const AnalysisCard = ({ icon, title, description, onClick }) => (
   <motion.button
     onClick={onClick}

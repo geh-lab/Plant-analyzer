@@ -12,6 +12,11 @@ import HPLC_Results from "./HPLC_Results";
 
 import Kjeldahl from "./Kjeldahl";
 
+import MainHome from "./MainHome";
+
+import PhysiologicalMeasurement from "./PhysiologicalMeasurement";
+
+import Li6800 from "./Li6800";  
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -28,6 +33,10 @@ const PAGES = {
     HPLC_Results: HPLC_Results,
 
     Kjeldahl: Kjeldahl,
+
+    Physiological: PhysiologicalMeasurement,
+
+     Li6800: Li6800,
 
     
 }
@@ -54,7 +63,7 @@ function PagesContent() {
         <Layout currentPageName={currentPage}>
             <Routes>            
                 
-                    <Route path="/" element={<Home />} />
+                <Route path="/" element={<MainHome />} />
                 
                 
                 <Route path="/Analysis" element={<Analysis />} />
@@ -68,6 +77,13 @@ function PagesContent() {
                 <Route path="/HPLC_Results" element={<HPLC_Results />} />
 
                 <Route path="/Kjeldahl" element={<Kjeldahl />} />
+
+                <Route path="/Physiological" element={<PhysiologicalMeasurement />} />
+
+                <Route path="/Li6800" element={<Li6800 />} />
+
+
+
 
                 
             </Routes>

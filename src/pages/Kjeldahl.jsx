@@ -1,393 +1,443 @@
-// src/pages/Kjeldahl.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FlaskConical, Beaker, Microscope, Video, Calculator, AlertTriangle } from "lucide-react";
-
-
+import { FlaskConical, Beaker, Microscope, Video, Calculator, AlertTriangle, Settings, Wrench } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function Kjeldahl() {
-  const [selectedStep, setSelectedStep] = useState("");
+  const [selectedProtocol, setSelectedProtocol] = useState("");
 
-// 이미지 경로 헬퍼 함수 (Vite 기준)
-// 실제 경로: /src/images/Step_1-1.png 형식
-const img = (file) => new URL(`../images/${file}`, import.meta.url).href;
+  // --------------------------------------------------------------------------------
+  // 🖼️ 이미지 경로 헬퍼 함수
+  // --------------------------------------------------------------------------------
+  const img = (file) => {
+    // [로컬 Vite 환경용 코드]
+    // 로컬에서 이미지가 보이지 않을 경우 아래 주석을 해제하고 return 문을 활성화하세요.
+    try {
+      return new URL(`../images/${file}`, import.meta.url).href;
+    } catch (e) {
+      // [현재 미리보기 환경용 코드]
+      // import.meta가 지원되지 않는 환경에서는 정적 경로를 반환합니다.
+      return `/images/${file}`;
+    }
+  };
 
-
-
-  // 단계별 사진 + 설명
-const stepDetails = {
-step1: [
-  {
-    title: "시료 준비",
-    image: img("Step_1-1.png"),
-    text: "건조된 식물체를 마쇄하여 0.1g(채 300μm)을 계량한 뒤 라벨링된 시험관에 넣습니다.",
-  },
-  {
-    title: "히트블록 설정 및 농황산 첨가",
-    image: img("Step_1-2.png"),
-    text: "히트블록 모드로 300℃ 이상 설정해 270℃에 빨리 도달시킵니다. 농황산은 벽면 타고 천천히 넣습니다. 넣은 시료는 즉시 히트블록에 삽입합니다. 270℃ 초과 시 전원 차단 후 농황산 넣고 다 넣어갈 때 재가동합니다.",
-  },
-  {
-    title: "270°C 예열 및 주의사항",
-    image: img("Step_1-3.png"),
-    text: "270℃ 히트블록에 시료를 5분간 넣을 때 전원은 켜거나 꺼도 됩니다. 황산 증기 위험으로 머리를 넣지 않습니다. 켈텍 알약 4g을 가볍게 쳐서 2g씩 반으로 나눕니다. 재삽입 시 430℃로 설정해 빠르게 370℃로 올립니다.",
-  },
-  {
-    title: "400°C 분해 과정",
-    image: img("Step_1-4.png"),
-    text: "재삽입 시 400℃에서 넣되 370℃쯤 켈텍을 넣기 시작합니다. 390℃부터 히트블록에 삽입하며 설정은 430℃ 유지합니다. 이후 설정온도를 400℃로 변경합니다. 블록에서 시료 빼는 데 15~30분 소요됩니다.",
-  },
-  {
-    title: "색 변화 확인",
-    image: img("Step_1-5.png"),
-    text: "시료 색상이 검정 → 짙은 갈색 → 투명한 초록 → 파란색으로 변하면 꺼냅니다. 15분쯤에 꺼내 색상을 확인합니다.",
-  },
-  {
-    title: "냉각 및 안정화",
-    image: img("Step_1-6.png"),
-    text: "완성된 시료는 상온 방치 시 하늘색으로 변합니다. 꺼내 상온에 두어도 되며, 연기 빠진 후 밖에 꺼내 식히고 알루미늄 호일로 먼지 방지합니다. 2~3일 상온 방치 괜찮습니다.",
-  },
-],
-
-
-step2: [
-    {
-      title: "시료 용해 및 준비",
-      image: img("Step_2-1.png"),
-      text: "준비한 분해 시료에 증류수 20 mL를 넣고 완전히 녹여 균질하게 만듭니다.",
+  // ----------------------------------------------------------------
+  // 📊 통합 데이터 구조 (Protocol + Visual Guide + Settings)
+  // ----------------------------------------------------------------
+  const kjeldahlProtocols = {
+    step1: {
+      title: "1단계: 분해 (Digestion)",
+      subtitle: "Organic N → Ammonium",
+      tags: ["Heat Block", "H₂SO₄", "270℃→400℃"],
+      icon: <FlaskConical className="h-5 w-5" />,
+      protocol: [
+        "건조 시료 0.1g(채 300μm)을 켈달 튜브에 넣고 라벨링",
+        "농황산(H₂SO₄)을 벽면을 타고 흘러내리도록 천천히 주입",
+        "270℃ 예열된 히트블록에 5분간 삽입 (탄화 과정, 튀는 것 방지)",
+        "꺼내서 식힌 후 촉매(Kjeltab) 2g 투입",
+        "400℃로 온도 올려서 15~30분간 분해 (맑은 초록색/파란색 될 때까지)"
+      ],
+      configurations: [
+        "설정 온도 1: 270℃ (초기 탄화, 5분)",
+        "설정 온도 2: 400℃ (본 분해, 15~30분)",
+        "시료량: 0.1g / 촉매: 2g / 농황산: 적당량"
+      ],
+      notes: [
+        "히트블록 온도를 400℃로 올릴 때, 설정 온도를 430℃로 해두면 더 빨리 도달함",
+        "색 변화: 검정 → 짙은 갈색 → 투명한 초록(완료) → 파랑(냉각 시)",
+        "황산 증기가 매우 위험하므로 반드시 후드 내에서 진행하고 머리를 넣지 말 것"
+      ],
+      visualSteps: [
+        {
+          title: "시료 및 장비 준비",
+          image: img("Step_1-1.png"),
+          text: "건조된 시료 0.1g을 튜브에 넣습니다. 히트블록은 미리 예열합니다."
+        },
+        {
+          title: "온도 설정 (Heat Block)",
+          image: img("Step_1-2.png"),
+          text: "Mode 버튼을 눌러 목표 온도를 설정합니다. 270℃ 도달을 위해 300℃ 이상으로 설정해두면 빠릅니다."
+        },
+        {
+          title: "270℃ 탄화 과정",
+          image: img("Step_1-3.png"),
+          text: "시료를 270℃ 블록에 5분간 넣어 탄화시킵니다. 이때 끓어넘치지 않도록 주의합니다."
+        },
+        {
+          title: "400℃ 본 분해",
+          image: img("Step_1-4.png"),
+          text: "촉매를 넣고 400℃에서 분해합니다. 검은색에서 맑은 색이 될 때까지 가열합니다."
+        },
+        {
+          title: "색 변화 확인 (완료)",
+          image: img("Step_1-5.png"),
+          text: "검붉은색에서 맑은 초록색(청록색)으로 변하면 분해가 완료된 것입니다."
+        },
+        {
+          title: "냉각 및 보관",
+          image: img("Step_1-6.png"),
+          text: "상온에서 식히면 하늘색으로 변합니다. 먼지가 들어가지 않게 호일로 덮어 보관합니다."
+        }
+      ],
+      videoId: "9oXqw1Umg8o"
     },
-    {
-      title: "증류장치 세팅 및 붕산 포집 준비",
-      image: img("Step_2-2.png"),
-      text: "둥근 플라스크에 증류수를 2/3 이상 채우고 코크를 잠가 증기가 새지 않게 합니다. 증류수가 부족하면 전자레인지로 데운 증류수를 추가합니다. 냉각관에 수돗물을 흐르게 합니다. 2% 지시약이 든 붕산용액 50 mL를 삼각플라스크에 넣고 주둥이가 용액에 잠기도록 배치합니다.",
-    },
-    {
-      title: "NaOH 주입 및 증류 시작",
-      image: img("Step_2-3.png"),
-      text: "분해된 켈달 플라스크를 증류장치에 장착하고 NaOH 깔때기 코크를 닫아 45% NaOH 15 mL를 넣습니다. 코크를 열어 모두 내려가면 다시 닫습니다. 삼각플라스크가 약 100 mL 되면 둥근 플라스크 위 코크를 열어 압력을 제거한 후 플라스크들을 제거합니다. 유리관 부피로 넘쳐 보일 수 있으니 살짝 빼고 넣기를 반복하여 100 mL로 맞춥니다.",
-    },
-    {
-      title: "증류 종료 및 분리",
-      image: img("Step_2-4.png"),
-      text: "대략 90 mL가 되면 높이 조절기를 최대한 낮추고 한 손으로 삼각플라스크를 들고 빼낼 준비를 합니다. 실험이 끝나면 기기의 열이 모두 식은 후 냉각수를 끕니다.",
-    },
-  ],
-// 단계별 사진 + 설명 중 step3 수정
-step3: [
-  {
-    title: "장비 세팅 및 적정 준비",
-    image: img("Step_3-1.png"),
-    text: "On/Off는 기기를 켜고 끌 때 사용합니다. 영점조절은 용량을 재고 0으로 맞출 때 사용합니다. Fill은 하단 탱크에서 황산을 기계에 채울 때 사용합니다."
-  },
-  {
-    title: "용액 주입 및 공기층 제거",
-    image: img("Step_3-2.png"),
-    text: "Fill로 기계에 용액을 채울 때 공기가 들어갈 수 있으므로 용액을 조금씩 빼면서 공기층을 제거합니다."
-  },
-  {
-    title: "자석 교반 설정 및 적정 시작",
-    image: img("Step_3-3.png"),
-    text: "삼각플라스크에 자석바를 넣고 황산을 조금씩 주입하며 색 변화 지점을 관찰합니다. 자석바 강도는 5~6으로 설정합니다. 황산 주입 시 오른쪽 바퀴를 시계 반대 방향으로만 돌립니다."
-  },
-  {
-    title: "1차 색 변화 관찰",
-    image: img("Step_3-4.png"),
-    text: "황산 주입 중 1차 색 변화 시 해당 수치값을 기록합니다."
-  },
-  {
-    title: "2차 색 변화 및 종말점 기록",
-    image: img("Step_3-5.png"),
-    text: "이후 더 밝은 주황색으로 변하면 해당 수치값을 기록합니다. 이 수치가 전질소 함량 계산에 사용됩니다."
-  },
-  {
-    title: "색 비교 및 질소 함량 계산",
-    image: img("Step_3-6.png"),
-    text: "최초 삼각플라스크를 옆에 두고 색을 비교하며 황산을 주입합니다. 더 밝은 주황색으로 변하는 시점의 수치 × 0.7 = 시료 0.1 g당 전질소 함량(%)입니다."
-  }
-],
 
-};
+    step2: {
+      title: "2단계: 증류 (Distillation)",
+      subtitle: "Ammonium → Ammonia Gas",
+      tags: ["NaOH", "Steam", "Boric Acid"],
+      icon: <Beaker className="h-5 w-5" />,
+      protocol: [
+        "분해된 시료에 증류수 20mL를 넣고 흔들어 완전히 녹임 (굳어있을 수 있음)",
+        "증류 장치 세팅: 둥근 플라스크 증류수 확인, 냉각수(수돗물) ON",
+        "삼각플라스크(포집액)에 2% 붕산+지시약 50mL 준비하여 냉각관 아래 배치",
+        "켈달 튜브 장착 후 45% NaOH 15mL 주입 (코크 조작 주의)",
+        "증류 시작: 포집액이 약 100mL가 될 때까지 진행 (약 90mL 시점부터 주시)"
+      ],
+      configurations: [
+        "NaOH 농도: 45% (강알칼리 환경 조성)",
+        "NaOH 주입량: 15mL",
+        "포집 목표량: 100mL (삼각플라스크 눈금 확인)"
+      ],
+      notes: [
+        "NaOH 주입 시 코크를 다 열어두면 증기가 새어나올 수 있으므로 용액이 다 들어가면 즉시 잠글 것",
+        "삼각플라스크 안의 유리관 끝부분이 용액에 잠겨 있어야 암모니아 가스 포집 가능",
+        "증류수 부족 시 전자레인지로 데워서 추가 (찬물 넣으면 압력 때문에 넘침)"
+      ],
+      visualSteps: [
+        {
+          title: "시료 용해",
+          image: img("Step_2-1.png"),
+          text: "분해된 시료에 증류수 20mL를 넣고 흔들어 녹입니다."
+        },
+        {
+          title: "증류 장치 및 포집 준비",
+          image: img("Step_2-2.png"),
+          text: "냉각수를 틀고, 붕산 용액이 담긴 삼각플라스크를 냉각관 출구에 배치합니다."
+        },
+        {
+          title: "NaOH 주입 및 증류",
+          image: img("Step_2-3.png"),
+          text: "NaOH 15mL를 넣고 코크를 닫습니다. 증류가 시작되면 포집액 색이 변하며 양이 늘어납니다."
+        },
+        {
+          title: "증류 종료 (100mL)",
+          image: img("Step_2-4.png"),
+          text: "약 100mL가 되면 받침대를 낮춰 플라스크를 빼내고 냉각수를 끕니다."
+        }
+      ],
+      videoId: "m_c3lnD0kn0"
+    },
 
-const stepInfo = {
-  step1: {
-    icon: <FlaskConical className="h-5 w-5 text-blue-700" />,
-    titleKo: "1단계: 분해",
-    titleEn: "Digestion",
-    description:
-      "농황산과 촉매로 유기질소를 암모늄(황산암모늄)으로 전환하는 단계입니다.",
-  },
-  step2: {
-    icon: <Beaker className="h-5 w-5 text-green-700" />,
-    titleKo: "2단계: 증류",
-    titleEn: "Distillation",
-    description: "강알칼리(45% NaOH)로 암모니아를 유리시켜 증류하고 붕산 용액에 포집하는 단계입니다.",
-  },
-  step3: {
-    icon: <Microscope className="h-5 w-5 text-purple-700" />,
-    titleKo: "3단계: 적정",
-    titleEn: "Titration",
-    description:
-      "붕산에 포집된 암모늄보레이트를 표준 황산(0.05 N)으로 적정해 전질소 함량을 계산하는 단계입니다.",
-  },
-};
-
+    step3: {
+      title: "3단계: 적정 (Titration)",
+      subtitle: "Quantification of Nitrogen",
+      tags: ["0.05N H₂SO₄", "Color Change"],
+      icon: <Microscope className="h-5 w-5" />,
+      protocol: [
+        "자동 적정기(Burette) 전원 ON 및 영점 조절",
+        "탱크의 0.05N 황산 용액을 기기에 채움 (Fill 버튼, 공기 방울 제거 필수)",
+        "삼각플라스크에 마그네틱 바를 넣고 교반 시작 (강도 5~6)",
+        "황산을 조금씩 적하하며 색 변화 관찰 (청색 → 옅은 분홍/주황색)",
+        "종말점의 황산 주입량을 기록하여 함량 계산"
+      ],
+      configurations: [
+        "표준 용액: 0.05N H₂SO₄",
+        "교반 속도: 5~6 (튀지 않을 정도)",
+        "계산식: 황산 주입량(mL) × 0.7 = 전질소 함량(%) (시료 0.1g 기준)"
+      ],
+      notes: [
+        "Fill 작업 시 호스에 공기가 차면 정량 주입이 안 되므로 용액을 버리면서 공기 빼기",
+        "오른쪽 조절 바퀴는 반드시 '시계 반대 방향'으로만 돌려야 함",
+        "비교군(Reference) 색상을 옆에 두고 비교하며 적정하면 정확함"
+      ],
+      visualSteps: [
+        {
+          title: "적정기 세팅",
+          image: img("Step_3-1.png"),
+          text: "On/Off 및 영점 조절. Fill 버튼으로 용액을 채웁니다."
+        },
+        {
+          title: "공기 방울 제거",
+          image: img("Step_3-2.png"),
+          text: "노즐 끝의 공기를 완전히 제거해야 정확한 부피 측정이 가능합니다."
+        },
+        {
+          title: "교반 및 적정 시작",
+          image: img("Step_3-3.png"),
+          text: "마그네틱 바를 넣고 교반하며 황산을 천천히 주입합니다."
+        },
+        {
+          title: "1차 색 변화",
+          image: img("Step_3-4.png"),
+          text: "청색에서 1차적으로 색이 변하는 시점을 주시합니다."
+        },
+        {
+          title: "종말점 확인",
+          image: img("Step_3-5.png"),
+          text: "더 밝은 주황색(붉은색)으로 변하는 순간의 수치를 기록합니다."
+        },
+        {
+          title: "결과 계산",
+          image: img("Step_3-6.png"),
+          text: "최종 주입량에 0.7을 곱하여 전질소 함량을 계산합니다."
+        }
+      ],
+      videoId: "aRHpBCz7R18"
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* 제목 */}
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+        
+        {/* 1. 헤더 및 타이틀 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Kjeldahl 질소 분석
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+             Kjeldahl 질소 분석
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
-            시약 및 준비물, 단계별 실험 절차와 계산 방법을 확인하세요.
+            시약 준비부터 적정까지, 단계별 실험 절차 및 시각적 가이드
           </p>
         </motion.div>
 
-       {/* 🧪 공통 시약 및 장비 (예시와 동일 톤의 2열 카드) */}
-<Card className="bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg rounded-2xl overflow-hidden mb-10">
-  {/* 헤더: 아이콘 + 제목(가로), 영문 부제 */}
-  <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-4 sm:p-6 border-b border-gray-100">
-    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center">
-      <Beaker className="h-5 w-5 text-blue-700" />
-    </div>
-    <div className="text-left">
-      <CardTitle className="text-gray-900 text-lg sm:text-xl font-bold leading-tight">
-        공통 시약 및 장비
-      </CardTitle>
-      <p className="text-gray-600 text-sm sm:text-base mt-1 leading-relaxed">
-        Common reagents &amp; equipment
-      </p>
-    </div>
-  </CardHeader>
-
-  {/* 본문: 2열 그리드 — 래퍼 삭제, 패딩을 그리드에 직접 부여 */}
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 px-4 sm:px-6 py-4 sm:py-6">
-    {/* 왼쪽: 실험 프로토콜 + 계산 공식 */}
-    <div className="space-y-6">
-      {/* 실험 프로토콜 */}
-      <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
-        <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-          <FlaskConical className="h-4 w-4" />
-          <span>실험 프로토콜</span>
-        </h3>
-        <ol className="space-y-3">
-          {[
-            "건조 시료(0.3 g) 기준, 소화 → 증류 → 적정 순으로 진행합니다.",
-            "살리실산 혼합은 후드 내에서 손으로 천천히 1–2시간 교반합니다.",
-            "분해 완료 후 알루미늄 포일로 덮어 안정화한 뒤, 증류 및 적정을 수행합니다.",
-            "적정 결과(황산 주입량)를 이용해 전질소 함량(%)을 계산합니다."
-          ].map((t, i) => (
-            <li key={i} className="flex items-start space-x-3">
-              <span className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold">
-                {i + 1}
-              </span>
-              <span className="text-gray-700 text-sm leading-relaxed">{t}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      {/* 계산 공식 */}
-      <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
-        <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-          <Calculator className="h-4 w-4" />
-          <span>계산 공식</span>
-        </h3>
-        <div className="space-y-3">
-          <p className="text-gray-800 text-sm leading-relaxed">
-            0.05N 황산으로 청색 → 분홍색(또는 주황색)으로 변하는 시점을 종말점으로 기록합니다.
-          </p>
-          <p className="text-gray-800 text-sm leading-relaxed">
-            더 밝은 주황색 시점의 황산 주입 부피(mL) × <strong>0.7</strong> = 전질소 함량(%) (시료 0.1 g 기준)
-          </p>
-          <div className="p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200">
-            <p className="text-gray-900 font-mono font-semibold text-center text-sm">
-              전질소 함량(%) = 황산 주입량 × 0.7
-            </p>
+        {/* 2. 공통 시약 준비 카드 */}
+        <Card className="bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg rounded-2xl overflow-hidden">
+          <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-4 sm:p-6 border-b border-gray-100">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center">
+              <Beaker className="h-5 w-5 text-blue-700" />
+            </div>
+            <div className="text-left">
+              <CardTitle className="text-gray-900 text-lg sm:text-xl font-bold leading-tight">
+                필수 시약 및 안전 수칙
+              </CardTitle>
+              <p className="text-gray-600 text-sm sm:text-base mt-1 leading-relaxed">
+                Reagents Preparation & Safety
+              </p>
+            </div>
+          </CardHeader>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 px-4 sm:px-6 py-4 sm:py-6">
+            <div className="space-y-6">
+              <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
+                <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
+                  <Calculator className="h-4 w-4" />
+                  <span>시약 제조 레시피</span>
+                </h3>
+                <ul className="space-y-3 list-disc pl-4 text-sm text-gray-700 leading-relaxed">
+                  <li>
+                    <strong>농황산+살리실산:</strong> 농황산 200mL + 살리실산 10g. (기계 교반 금지, 손으로 천천히 흔들어 1~2시간 용해)
+                  </li>
+                  <li>
+                    <strong>45% NaOH:</strong> 증류수에 NaOH 450g 용해 후 1L Mass up. (발열 심함, 후드 내 제조, 조금씩 투입)
+                  </li>
+                  <li>
+                    <strong>2% 붕산용액:</strong> 붕산 20g + 증류수 + 혼합지시약 5mL → 1L Mass up.
+                  </li>
+                  <li>
+                    <strong>혼합지시약:</strong> Bromocresol green 0.5g + Methyl red 0.1g in 95% EtOH (100mL).
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
+                <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>안전 주의사항</span>
+                </h3>
+                <div className="space-y-2">
+                  <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-gray-800">
+                    <strong>후드 사용:</strong> 황산 증기 및 NaOH 가스 발생 시 절대 흡입 금지.
+                  </div>
+                  <div className="p-3 bg-red-50 rounded-lg border border-red-200 text-sm text-red-800">
+                    <strong>폭발/화상 주의:</strong> 물에 산/알칼리를 넣어야 함 (반대 금지). 반응열 주의.
+                  </div>
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-800">
+                    <strong>보관:</strong> 혼합지시약은 냉장/차광 보관, 붕산 용액은 사용 직전 제조 권장.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </Card>
 
-    {/* 오른쪽: 시약별 보관조건 주의 */}
-    <div className="space-y-4">
-      <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
-        <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-          <AlertTriangle className="h-4 w-4" />
-          <span>시약별 보관조건 주의</span>
-        </h3>
-
-        <div className="space-y-3">
-          <div className="p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-xl border border-yellow-200">
-            <p className="text-gray-800 text-sm leading-relaxed"><strong>농황산(H₂SO₄):</strong> 갈색병·밀봉 보관, 후드 취급, 열·습기 차단</p>
-          </div>
-          <div className="p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-xl border border-yellow-200">
-            <p className="text-gray-800 text-sm leading-relaxed"><strong>NaOH 용액:</strong> CO₂ 흡수 방지 위해 밀봉, 건냉소 보관, 후드 취급</p>
-          </div>
-          <div className="p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-xl border border-yellow-200">
-            <p className="text-gray-800 text-sm leading-relaxed"><strong>혼합지시약:</strong> 4℃ 냉장, 갈색병 또는 호일 차광, 500 mL 이상 제조 권장</p>
-          </div>
-          <div className="p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-xl border border-yellow-200">
-            <p className="text-gray-800 text-sm leading-relaxed"><strong>붕산(Boric acid) 용액:</strong> 냉장(4℃), 장기보관 지양 — 필요 시 신선 제조</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</Card>
-
-
-{/* 단계 선택 버튼 */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-  {Object.keys(stepInfo).map((key) => (
-    <motion.button
-      key={key}
-      onClick={() => setSelectedStep(selectedStep === key ? "" : key)}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      className={`p-6 sm:p-8 text-left rounded-3xl border transition-all duration-300 ${
-        selectedStep === key
-          ? "bg-blue-600 text-white border-blue-600 shadow-xl"
-          : "bg-white/80 text-gray-700 border-gray-200 hover:bg-blue-50 hover:border-blue-300"
-      }`}
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-            selectedStep === key ? "bg-white/20" : "bg-blue-100"
-          }`}
-        >
-          {stepInfo[key].icon}
-        </div>
-
-        {/* 제목 블록: 한글(위, bold) + 영어(아래, smaller) */}
-        <div className="min-w-0">
-          <h3 className="text-base sm:text-lg font-bold leading-tight">
-            {stepInfo[key].titleKo}
-          </h3>
-          <p
-            className={`text-xs sm:text-sm ${
-              selectedStep === key ? "text-blue-100/90" : "text-gray-500"
-            }`}
-          >
-            {stepInfo[key].titleEn}
-          </p>
-        </div>
-      </div>
-
-      {/* 기존 설명은 유지 (원하면 지워도 됨) */}
-      <p
-        className={`text-sm ${
-          selectedStep === key ? "text-blue-100" : "text-gray-600"
-        }`}
-      >
-        {stepInfo[key].description}
-      </p>
-    </motion.button>
-  ))}
-</div>
-
-
-        {/* 단계별 세부 내용 */}
-        <AnimatePresence mode="wait">
-          {selectedStep && (
-            <motion.div
-              key={selectedStep}
-              initial={{ opacity: 0, scale: 0.96, y: 10 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                transition: { duration: 0.4 },
-              }}
-              exit={{
-                opacity: 0,
-                scale: 0.98,
-                y: -10,
-                transition: { duration: 0.3 },
-              }}
+        {/* 3. 단계 선택 그리드 */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {Object.entries(kjeldahlProtocols).map(([key, protocol]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedProtocol(selectedProtocol === key ? "" : key)}
+              className={`p-4 rounded-2xl border transition-all duration-300 text-left relative overflow-hidden ${
+                selectedProtocol === key
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xl scale-[1.02]'
+                  : 'bg-white/80 text-gray-700 border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+              }`}
             >
-              <Card className="bg-white/90 backdrop-blur-xl border-0 shadow-2xl rounded-3xl overflow-hidden">
-<CardHeader className="p-6 border-b">
-  <div className="flex items-center gap-2">
-    {/* 단계 아이콘 */}
-    {stepInfo[selectedStep].icon}
-
-    {/* 제목 */}
-    <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
-      세부 프로토콜 과정
-    </CardTitle>
-  </div>
-</CardHeader>
-
-<CardContent className="p-6">
-  <div
-    className={`grid gap-6 ${
-      selectedStep === "step1"
-        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // ✅ Step1 → 3×2
-        : selectedStep === "step2"
-        ? "grid-cols-1 sm:grid-cols-2" // ✅ Step2 → 2×2
-        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" // ✅ 나머지 동일
-    }`}
-  >
-    {stepDetails[selectedStep].map((item, idx) => (
-      <div
-        key={idx}
-        className="rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm"
-      >
-        <div className="aspect-[4/3] w-full">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="w-full h-full object-cover"
-          />
+              <div className="flex items-center space-x-3 mb-2 relative z-10">
+                <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${selectedProtocol === key ? 'bg-white/20' : 'bg-blue-100'}`}>
+                  {React.cloneElement(protocol.icon, { 
+                    className: `h-6 w-6 ${selectedProtocol === key ? "text-white" : "text-blue-600"}` 
+                  })}
+                </div>
+                <span className="font-bold text-base sm:text-lg leading-tight">{protocol.title}</span>
+              </div>
+              <p className={`text-xs sm:text-sm relative z-10 ${selectedProtocol === key ? 'text-blue-100' : 'opacity-80'}`}>
+                {protocol.subtitle}
+              </p>
+            </button>
+          ))}
         </div>
-        <div className="p-4 text-center">
-          <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
-          <p className="text-sm text-gray-700 leading-relaxed">{item.text}</p>
-        </div>
-      </div>
-    ))}
-  </div>
 
+        {/* 4. 상세 내용 영역 */}
+        <AnimatePresence mode="wait">
+          {selectedProtocol && (
+            <motion.div
+              key={selectedProtocol}
+              className="space-y-8"
+              initial={{ opacity: 0, y: 20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              {/* 메인 카드 */}
+              <Card className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border-0 overflow-hidden">
+                <CardHeader className="p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+                       {React.cloneElement(kjeldahlProtocols[selectedProtocol].icon, { className: "h-6 w-6 text-blue-600" })}
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {kjeldahlProtocols[selectedProtocol].title}
+                      </CardTitle>
+                      <div className="flex gap-2 mt-1">
+                        {kjeldahlProtocols[selectedProtocol].tags.map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
 
-{/* 참고 영상 */}
-<div className="mt-10">
-  <h4 className="flex items-center text-gray-900 font-bold text-lg sm:text-xl mb-3">
+                <CardContent className="p-6 space-y-10">
+                  
+                  {/* 텍스트 프로토콜 & 설정 */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <Wrench className="h-4 w-4 text-gray-500" /> 실험 절차 (Protocol)
+                      </h3>
+                      <ol className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        {kjeldahlProtocols[selectedProtocol].protocol.map((step, index) => (
+                          <li key={index} className="flex items-start space-x-3">
+                            <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm text-gray-700 leading-relaxed">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                    
+                    <div className="space-y-6">
+                       {kjeldahlProtocols[selectedProtocol].configurations && (
+                          <div>
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                              <Settings className="h-4 w-4 text-gray-500" /> 설정값 (Configuration)
+                            </h3>
+                            <div className="grid gap-2">
+                              {kjeldahlProtocols[selectedProtocol].configurations.map((config, i) => (
+                                <div key={i} className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900 font-medium">
+                                  {config}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                       )}
+                       {kjeldahlProtocols[selectedProtocol].notes && (
+                          <div>
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                              <AlertTriangle className="h-4 w-4 text-gray-500" /> 주의사항
+                            </h3>
+                            <div className="grid gap-2">
+                              {kjeldahlProtocols[selectedProtocol].notes.map((note, i) => (
+                                <div key={i} className="p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-sm text-yellow-900">
+                                  <strong className="mr-1">Check:</strong> {note}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                       )}
+                    </div>
+                  </div>
 
-    <Video className="h-5 w-5 mr-2 text-blue-700" />
-    참고 영상
-  </h4>
-  <div className="aspect-video rounded-xl overflow-hidden border">
-    <iframe
-      src={
-        selectedStep === "step1"
-          ? "https://www.youtube.com/embed/9oXqw1Umg8o?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
-          : selectedStep === "step2"
-          ? "https://www.youtube.com/embed/m_c3lnD0kn0?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
-          : "https://www.youtube.com/embed/aRHpBCz7R18?autoplay=0&mute=0&controls=1&rel=0&playsinline=1"
-      }
-      title="reference-video"
-      allow="fullscreen; picture-in-picture"
-      allowFullScreen
-      className="w-full h-full"
-    ></iframe>
-  </div>
-</div>
+                  {/* Visual Guide 섹션 (이미지 그리드 - Step 2는 2x2, 나머지는 2x3) */}
+                  {kjeldahlProtocols[selectedProtocol].visualSteps.length > 0 && (
+                    <div>
+                       <div className="flex items-center gap-4 my-6">
+                          <div className="h-px bg-gray-200 flex-1"></div>
+                          <span className="text-gray-400 text-sm font-medium uppercase tracking-wider">Visual Guide</span>
+                          <div className="h-px bg-gray-200 flex-1"></div>
+                       </div>
+
+                       <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${
+                          selectedProtocol === 'step2' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'
+                       }`}>
+                          {kjeldahlProtocols[selectedProtocol].visualSteps.map((item, idx) => (
+                            <div key={idx} className="group rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                              <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
+                                <img 
+                                  src={item.image} 
+                                  alt={item.title} 
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  onError={(e) => { 
+                                    e.target.src = "https://placehold.co/600x400?text=No+Image"; 
+                                  }}
+                                />
+                              </div>
+                              <div className="p-4">
+                                <h4 className="font-bold text-gray-900 mb-2 text-sm">{item.title}</h4>
+                                <p className="text-xs text-gray-600 leading-relaxed">{item.text}</p>
+                              </div>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                  )}
+
+                  {/* 참고 영상 (YouTube) */}
+                  {kjeldahlProtocols[selectedProtocol].videoId && (
+                    <div className="mt-8 bg-gray-900 rounded-2xl p-1 overflow-hidden shadow-xl">
+                      <div className="bg-gray-800 p-4 flex items-center text-white gap-2">
+                        <Video className="h-5 w-5 text-blue-400" />
+                        <span className="font-bold">실험 가이드 영상 (Video Tutorial)</span>
+                      </div>
+                      <div className="aspect-video bg-black">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${kjeldahlProtocols[selectedProtocol].videoId}?rel=0`}
+                          title="Tutorial Video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                    </div>
+                  )}
 
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
+
       </div>
     </div>
   );
