@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Activity } from "lucide-react";
 import { createPageUrl } from "@/utils";
-import AnalysisCard from "@/components/AnalysisCard";
+import AnalysisCard from "@/components/analysiscard";
 
 // ← Home.jsx에서 사용한 동일한 카드 컴포넌트 재사용
 
