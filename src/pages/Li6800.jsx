@@ -25,9 +25,9 @@ export default function Li6800() {
       part4: "5Zo2NzJTGaY"  // Part 4: 제로잉
     },
     protocols: {
-      spot_meas: "SPOT_MEAS_VIDEO_ID",
+      spot_meas: "0tN7VzwNprs",
       light_response: "LIGHT_VIDEO_ID",
-      aci_curve: "ACI_VIDEO_ID"
+      aci_curve: "v12OdvKQEUg"
     },
     troubleshooting: "TROUBLESHOOTING_VIDEO_ID" 
   };
