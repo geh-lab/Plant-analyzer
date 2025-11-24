@@ -1,12 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TestTube, Beaker, FlaskConical, Microscope, Calculator, ArrowRight } from "lucide-react";
+import { TestTube, Beaker, FlaskConical, Microscope, Calculator, ArrowRight, TrendingUp, RefreshCw, Settings2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+// --- [컴포넌트] 개선된 SVG Line Chart (축, 레이블 포함) ---
+const SimpleLineChart = ({ data, xKey, yKey, xLabel, yLabel, color = "#2563eb" }) => {
+  if (!data || data.length < 2) return (
+    <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs bg-gray-50 rounded-lg">
+      <span>데이터 부족</span>
+      <span className="text-[10px] mt-1">2개 이상의 농도를 입력하세요</span>
+    </div>
+  );
+
+  // 차트 여백 및 크기 설정
+  const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+  const width = 400; 
+  const height = 250;
+  
+  const innerWidth = width - padding.left - padding.right;
+  const innerHeight = height - padding.top - padding.bottom;
+
+  const xMax = Math.max(...data.map(d => d[xKey]));
+  const yMax = Math.max(...data.map(d => d[yKey]));
+  
+  // 데이터가 0일 경우 방어 코드
+  const xDomain = xMax === 0 ? 1 : xMax;
+  const yDomain = yMax === 0 ? 1 : yMax;
+
+  const points = data.map(d => {
+    const x = padding.left + (d[xKey] / xDomain) * innerWidth;
+    const y = height - padding.bottom - (d[yKey] / yDomain) * innerHeight;
+    return `${x},${y}`;
+  }).join(" ");
+
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full" style={{ overflow: 'visible' }}>
+        {/* Y축 Grid Lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => {
+          const y = height - padding.bottom - (tick * innerHeight);
+          return (
+            <g key={i}>
+              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 4" />
+              <text x={padding.left - 10} y={y + 4} textAnchor="end" fontSize="10" fill="#64748b">
+                {Math.round(tick * yDomain)}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* X축 & Y축 Main Lines */}
+        <line x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} stroke="#94a3b8" strokeWidth="2" />
+        <line x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} stroke="#94a3b8" strokeWidth="2" />
+        
+        {/* Line Path */}
+        <polyline fill="none" stroke={color} strokeWidth="2.5" points={points} strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Data Points & Tooltips */}
+        {data.map((d, i) => {
+           const x = padding.left + (d[xKey] / xDomain) * innerWidth;
+           const y = height - padding.bottom - (d[yKey] / yDomain) * innerHeight;
+           return (
+             <g key={i} className="group">
+               <circle cx={x} cy={y} r="4" fill="white" stroke={color} strokeWidth="2" className="cursor-pointer hover:r-5 transition-all" />
+               {/* Tooltip (Hover 시 표시) */}
+               <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                 <rect x={x - 30} y={y - 30} width="60" height="20" rx="4" fill="#1e293b" />
+                 <text x={x} y={y - 17} textAnchor="middle" fontSize="10" fill="white" fontWeight="bold">
+                   {d[xKey]} / {d[yKey]}
+                 </text>
+                 {/* 작은 삼각형 */}
+                 <polygon points={`${x-4},${y-10} ${x+4},${y-10} ${x},${y-6}`} fill="#1e293b" />
+               </g>
+             </g>
+           );
+        })}
+
+        {/* Labels */}
+        <text x={width / 2} y={height - 10} textAnchor="middle" fontSize="12" fontWeight="600" fill="#334155">
+          {xLabel}
+        </text>
+        <text x={15} y={height / 2} textAnchor="middle" transform={`rotate(-90, 15, ${height / 2})`} fontSize="12" fontWeight="600" fill="#334155">
+          {yLabel}
+        </text>
+      </svg>
+    </div>
+  );
+};
+
+// --- [데이터] 분석 프로토콜 정의 ---
 const analysisProtocols = {
   chlorophyll_a_b: {
     title: "엽록소 및 카로티노이드",
@@ -54,8 +142,18 @@ const analysisProtocols = {
     reagents: [
       "7.5% Na₂CO₃: 100 mL 증류수에 7.5 g Sodium Carbonate 용해",
       "Folin-Ciocalteu reagent: 상업적으로 구입 (Sigma-Aldrich 등)",
-      "표준곡선: Gallic acid 10 mg + 90% MeOH 10 mL = Gallic acid stock 1 mg/mL. 사용자가 원하는데로 희석 배수에 맞게 조절"
+      "Stock 용액: Gallic acid 10 mg + 90% MeOH 10 mL = 1 mg/mL"
     ],
+    // 표준곡선 설정 (동적 계산용)
+    standard_curve_config: {
+      title: "Gallic Acid 표준곡선 계산기",
+      stock_name: "1 mg/mL Stock",
+      solvent_name: "90% MeOH",
+      stock_conc: 1000, // ug/mL (1mg/mL)
+      unit: "μg/mL",
+      default_total_vol: 1.0, // mL (기본값)
+      default_concs: [0, 20, 40, 60, 80, 100]
+    },
     storage_conditions: [
       "7.5% Na₂CO₃: 냉장 보관 (제조 후)"
     ],
@@ -89,8 +187,17 @@ const analysisProtocols = {
       "95% EtOH: 95 mL 에탄올 + 5 mL 증류수",
       "10% AlCl₃: 100 mL 증류수에 10 g Aluminum Chloride 용해",
       "1 M Potassium acetate: 100 mL 증류수에 9.82 g CH₃COOK 용해",
-      "표준곡선: Quercetin 10 mg + 90% MeOH 10 mL = Quercetin stock 1 mg/mL. 사용자가 원하는데로 희석 배수에 맞게 조절"
+      "Stock 용액: Quercetin 10 mg + 90% MeOH 10 mL = 1 mg/mL"
     ],
+    standard_curve_config: {
+      title: "Quercetin 표준곡선 계산기",
+      stock_name: "1 mg/mL Stock",
+      solvent_name: "90% MeOH",
+      stock_conc: 1000, // ug/mL
+      unit: "μg/mL",
+      default_total_vol: 1.0, // mL (기본값)
+      default_concs: [0, 10, 20, 40, 60, 80, 100]
+    },
     formulas: [
       "Quercetin standard curve 사용하여 함량 계산",
       "농도 = (흡광도 - b) / a"
@@ -321,9 +428,17 @@ const analysisProtocols = {
       "0.1% TCA: 100 mL 증류수에 100 mg trichloroacetic acid 용해",
       "10 mM Potassium phosphate buffer (pH 7.0): 100 mL 증류수에 136 mg KH₂PO₄ + 174 mg K₂HPO₄ 용해",
       "1 M KI: 100 mL 증류수에 16.6 g potassium iodide 용해",
-      "1 mM H₂O₂ Stock: 35% H₂O₂ 원액 5.1 μL + 0.1% TCA 49.995 mL",
-      "H₂O₂ 표준곡선: 1 mM H₂O₂ Stock과 0.1% TCA로 사용자가 원하는데로 각 희석 배수에 맞게 조절"
+      "1 mM H₂O₂ Stock: 35% H₂O₂ 원액 5.1 μL + 0.1% TCA 49.995 mL"
     ],
+    standard_curve_config: {
+      title: "1 mM H₂O₂ 표준곡선 계산기",
+      stock_name: "1 mM Stock",
+      solvent_name: "0.1% TCA",
+      stock_conc: 1.0, // mM
+      unit: "mM",
+      default_total_vol: 2.0, // mL (이미지에 맞게 2mL 기본값)
+      default_concs: [0, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
+    },
     storage_conditions: [
       "H₂O₂: 갈색병 또는 호일 보관 권장, 공기 노출 최소화",
       "KI: 냉장보관 (4℃)",
@@ -352,12 +467,191 @@ const analysisProtocols = {
   }
 };
 
+// --- [컴포넌트] 표준곡선 생성기 (인터랙티브) ---
+const StandardCurveGenerator = ({ config }) => {
+  const [inputStr, setInputStr] = useState("");
+  const [totalVol, setTotalVol] = useState(1); // 총 부피 상태 (mL)
+  
+  // 초기값 설정
+  useEffect(() => {
+    if (config) {
+      setInputStr(config.default_concs.join(", "));
+      setTotalVol(config.default_total_vol || 1.0);
+    }
+  }, [config]);
+
+  // 데이터 계산
+  const { tableData, chartData, isValid, errorMessage } = useMemo(() => {
+    if (!config) return { tableData: [], chartData: [], isValid: false };
+
+    try {
+      const concs = inputStr
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s !== "")
+        .map(s => parseFloat(s));
+      
+      const parsedTotalVol = parseFloat(totalVol);
+
+      if (concs.some(isNaN)) {
+        return { tableData: [], chartData: [], isValid: false, errorMessage: "농도는 숫자만 입력해주세요." };
+      }
+      
+      if (isNaN(parsedTotalVol) || parsedTotalVol <= 0) {
+        return { tableData: [], chartData: [], isValid: false, errorMessage: "총 부피는 0보다 큰 숫자여야 합니다." };
+      }
+
+      // 정렬 및 중복 제거
+      const uniqueConcs = Array.from(new Set(concs)).sort((a, b) => a - b);
+
+      if (uniqueConcs.some(c => c > config.stock_conc)) {
+        return { tableData: [], chartData: [], isValid: false, errorMessage: `농도는 Stock 농도(${config.stock_conc} ${config.unit})보다 클 수 없습니다.` };
+      }
+
+      const rows = uniqueConcs.map(targetConc => {
+        // 희석 공식: V1 = C2 * V2 / C1
+        // V_stock (uL) = (TargetConc * TotalVol(mL) * 1000) / StockConc
+        const stockVol = (targetConc * parsedTotalVol * 1000) / config.stock_conc;
+        const solventVol = (parsedTotalVol * 1000) - stockVol;
+        
+        return {
+          conc: targetConc,
+          stockVol: Math.round(stockVol * 10) / 10, // 소수점 1자리 반올림
+          solventVol: Math.round(solventVol * 10) / 10,
+          totalVol: parsedTotalVol
+        };
+      });
+
+      return { tableData: rows, chartData: rows, isValid: true, errorMessage: null };
+
+    } catch (e) {
+      return { tableData: [], chartData: [], isValid: false, errorMessage: "입력 형식을 확인해주세요." };
+    }
+  }, [inputStr, totalVol, config]);
+
+  return (
+    <div className="bg-blue-50/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-100 transition-all">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+        <h3 className="text-gray-900 font-semibold flex items-center space-x-2 text-sm sm:text-base">
+          <TrendingUp className="h-4 w-4 text-blue-600" />
+          <span>{config.title}</span>
+        </h3>
+        {/* 배지(Badge) 삭제됨 */}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 입력 및 차트 섹션 */}
+        <div className="lg:col-span-1 space-y-5">
+          
+          {/* 총 부피 입력 */}
+          <div>
+            <Label className="text-xs font-semibold text-gray-700 mb-1.5 flex items-center space-x-1">
+              <Settings2 className="h-3.5 w-3.5" />
+              <span>만들고자 하는 총 부피 (mL)</span>
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Input 
+                type="number"
+                value={totalVol}
+                onChange={(e) => setTotalVol(e.target.value)}
+                className="bg-white border-blue-200 focus:border-blue-400 focus:ring-blue-400 font-medium"
+                placeholder="예: 1.0"
+              />
+              <span className="text-sm text-gray-500 whitespace-nowrap">mL / tube</span>
+            </div>
+             <p className="text-[11px] text-gray-400 mt-1">* 2mL 튜브 사용 시 2.0 입력 권장</p>
+          </div>
+
+          {/* 목표 농도 입력 */}
+          <div>
+            <Label className="text-xs font-semibold text-gray-700 mb-1.5 block">
+              목표 농도 입력 ({config.unit})
+            </Label>
+            <div className="flex space-x-2">
+              <Input 
+                value={inputStr}
+                onChange={(e) => setInputStr(e.target.value)}
+                className="bg-white border-blue-200 focus:border-blue-400 focus:ring-blue-400 font-medium"
+                placeholder="예: 0, 20, 40"
+              />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => {
+                  setInputStr(config.default_concs.join(", "));
+                  setTotalVol(config.default_total_vol || 1.0);
+                }}
+                title="초기화"
+                className="border-blue-200 hover:bg-blue-50 text-blue-600 shrink-0"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+            {errorMessage && <p className="text-red-500 text-xs mt-1 font-medium">{errorMessage}</p>}
+          </div>
+
+          {/* 차트 영역 */}
+          <div className="bg-white p-3 rounded-xl border border-blue-100 shadow-sm h-64 flex flex-col items-center">
+            <span className="text-xs font-bold text-gray-500 mb-1 block w-full text-center border-b border-gray-50 pb-2">
+              시약 투입량 분포
+            </span>
+            <div className="flex-1 w-full relative p-2">
+               <SimpleLineChart 
+                  data={chartData} 
+                  xKey="conc" 
+                  yKey="stockVol" 
+                  xLabel={`농도 (${config.unit})`} 
+                  yLabel="Stock (μL)" 
+                  color="#2563eb" 
+               />
+            </div>
+          </div>
+        </div>
+
+        {/* 결과 테이블 섹션 */}
+        <div className="lg:col-span-2 overflow-hidden bg-white rounded-xl border border-blue-200 shadow-sm flex flex-col">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-center">
+              <thead>
+                <tr className="bg-blue-50/80 text-blue-900 border-b border-blue-100">
+                  <th className="py-3 px-4 font-bold whitespace-nowrap">목표 농도 ({config.unit})</th>
+                  <th className="py-3 px-4 font-bold whitespace-nowrap text-blue-700">{config.stock_name} (μL)</th>
+                  <th className="py-3 px-4 font-bold whitespace-nowrap text-gray-600">{config.solvent_name} (μL)</th>
+                  <th className="py-3 px-4 font-bold whitespace-nowrap text-gray-500">총 부피 (mL)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {isValid && tableData.length > 0 ? (
+                  tableData.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-blue-50/30 transition-colors group">
+                      <td className="py-3 px-4 font-semibold text-gray-900 bg-gray-50/30">{row.conc}</td>
+                      <td className="py-3 px-4 text-blue-700 font-bold bg-blue-50/10 group-hover:bg-blue-100/20 transition-colors">{row.stockVol}</td>
+                      <td className="py-3 px-4 text-gray-600">{row.solventVol}</td>
+                      <td className="py-3 px-4 text-gray-400 text-xs">{row.totalVol}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-12 text-gray-400 flex flex-col items-center justify-center space-y-2">
+                      <Calculator className="h-8 w-8 opacity-20" />
+                      <span>계산 결과가 여기에 표시됩니다.</span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Analysis() {
   const [selectedAnalysis, setSelectedAnalysis] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
-  // URL에서 선택된 분석 타입 확인
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const selected = params.get("selected");
@@ -587,8 +881,8 @@ export default function Analysis() {
                                 className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border ${
                                   typeof reagent === 'string' && reagent.startsWith('반응 혼합물')
                                     ? 'bg-red-50 border-red-200'
-                                    : typeof reagent === 'string' && reagent.includes('표준곡선')
-                                    ? 'bg-green-50 border-green-200'
+                                    : typeof reagent === 'string' && reagent.includes('Stock')
+                                    ? 'bg-blue-50 border-blue-200' // Stock 색상도 파란색으로 통일
                                     : 'bg-blue-50 border-blue-200'
                                 }`}
                               >
@@ -627,7 +921,15 @@ export default function Analysis() {
                         </div>
                       )}
                     </div>
-                    {/* 참고문헌 섹션 - 맨 아래 전체 너비 */}
+                    
+                    {/* 표준곡선 제조 테이블 섹션 (인터랙티브로 변경) */}
+                    {analysisProtocols[selectedAnalysis].standard_curve_config && (
+                      <div className="lg:col-span-2 mt-2">
+                        <StandardCurveGenerator config={analysisProtocols[selectedAnalysis].standard_curve_config} />
+                      </div>
+                    )}
+
+                    {/* 참고문헌 섹션 */}
                     {analysisProtocols[selectedAnalysis].references && analysisProtocols[selectedAnalysis].references.length > 0 && (
                       <div className="lg:col-span-2 mt-6 sm:mt-8 bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
                         <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
