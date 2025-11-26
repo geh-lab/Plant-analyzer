@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/card";
 import { 
   Leaf, Sun, Activity, Settings, AlertTriangle, Wrench, 
-  Info, Video, Timer, Droplet, Zap, Play, Ruler, MonitorPlay, Beaker, Plug, Gauge, Stethoscope, XCircle, ArrowRight, Scan, Usb, FileText, Edit3, HelpCircle, Database, CheckCircle2, FileSpreadsheet, Wind
+  Info, Video, Timer, Droplet, Zap, Play, Ruler, MonitorPlay, Beaker, Plug, Gauge, Stethoscope, XCircle, ArrowRight, Scan, Usb, FileText, Edit3, HelpCircle, Database, CheckCircle2, FileSpreadsheet, Wind, BookOpen, MessageSquare, ExternalLink
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -13,6 +13,16 @@ export default function Li6800() {
   const [activeProtocol, setActiveProtocol] = useState("spot_meas");
   const [hardwareTab, setHardwareTab] = useState("part1");
   const [troubleTab, setTroubleTab] = useState("calibration");
+
+  // ----------------------------------------------------------------
+  // 🔗 외부 링크 설정 (사용자 제공 링크 적용)
+  // ----------------------------------------------------------------
+  const EXTERNAL_LINKS = {
+    // 구글 드라이브 PDF 링크
+    manualPdf: "https://drive.google.com/file/d/1nrqk1GON1FsIoPysQtQOGgkiUXJOy0KG/view?usp=sharing",
+    // NotebookLM AI 채팅 링크
+    aiChat: "https://notebooklm.google.com/notebook/2cc4cefa-4bb6-405d-b83f-49d74ce5c188"
+  };
 
   // ----------------------------------------------------------------
   // 📹 사용자 유튜브 영상 ID 관리
@@ -280,7 +290,42 @@ export default function Li6800() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 py-10 font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 py-10 font-sans relative">
+      
+      {/* ---------------------------------------------------------- */}
+      {/* ✨ [NEW] 우측 하단 플로팅 버튼 (Floating Widget) */}
+      {/* ---------------------------------------------------------- */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 items-end">
+        
+        {/* 1. AI 질문하기 버튼 */}
+        <motion.a
+          href={EXTERNAL_LINKS.aiChat}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all font-bold group border border-white/20"
+        >
+          <MessageSquare className="w-5 h-5" />
+          <span className="hidden sm:inline">AI에게 질문하기</span>
+          <span className="sm:hidden">AI 질문</span>
+        </motion.a>
+
+        {/* 2. PDF 매뉴얼 버튼 */}
+        <motion.a
+          href={EXTERNAL_LINKS.manualPdf}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-5 py-3 rounded-full shadow-md hover:bg-gray-50 transition-all font-bold"
+        >
+          <BookOpen className="w-5 h-5 text-red-600" />
+          <span className="hidden sm:inline">공식 매뉴얼(PDF)</span>
+          <span className="sm:hidden">매뉴얼</span>
+        </motion.a>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
         
         {/* 헤더 */}
@@ -292,6 +337,19 @@ export default function Li6800() {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">
             LI-6800 마스터 가이드
           </h1>
+          
+          {/* ✨ [NEW] 헤더 AI 배너 */}
+          <div className="mt-4 mb-4 flex flex-wrap justify-center gap-3">
+              <a 
+                href={EXTERNAL_LINKS.aiChat} 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-bold hover:bg-purple-200 transition-colors border border-purple-200 cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4" /> 궁금한 점은 NotebookLM AI에게 물어보세요 &rarr;
+              </a>
+          </div>
+
           <p className="text-gray-600 mt-2 font-medium text-sm sm:text-base">
             기본 측정부터 문제 해결까지, 완벽한 데이터 측정을 위한 매뉴얼
           </p>
@@ -380,7 +438,6 @@ export default function Li6800() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {/* [수정] 텍스트 크기 text-2xl -> text-xl로 축소, 하단 보더 추가하여 '측정 시퀀스'와 통일 */}
                     <h3 className="text-xl font-bold text-gray-900 mb-8 flex items-center gap-3 border-b border-gray-100 pb-3">
                       <Wrench className="w-6 h-6 text-gray-500" /> {hardwareGuideData[hardwareTab].title} 상세 설명
                     </h3>
@@ -392,9 +449,7 @@ export default function Li6800() {
                                 {i + 1}
                             </span>
                             <div>
-                                {/* [수정] 제목 크기 text-lg -> text-base 로 축소 (프로토콜과 통일) */}
                                 <strong className="block text-gray-900 text-base mb-1.5">{step.title}</strong>
-                                {/* [수정] 설명 크기 text-base -> text-sm 로 축소 (프로토콜과 통일) */}
                                 <span className="text-sm text-gray-700 leading-relaxed font-medium">{step.desc}</span>
                             </div>
                             </li>
@@ -409,7 +464,6 @@ export default function Li6800() {
                                     </div>
                                     <strong className="text-xl text-yellow-800">Expert Tip</strong>
                                 </div>
-                                {/* [수정] Tip 본문 크기 text-lg -> text-sm 로 축소 */}
                                 <p className="leading-relaxed font-medium text-sm">
                                     {hardwareGuideData[hardwareTab].tip}
                                 </p>
@@ -596,23 +650,45 @@ export default function Li6800() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                  className="space-y-6"
                 >
-                  {troubleData[troubleTab].items.map((item, idx) => (
-                    <div key={idx} className={`h-full p-6 rounded-2xl border ${item.bg} flex items-start gap-5 shadow-sm hover:shadow-md transition-shadow`}>
-                      <div className="p-3 rounded-full bg-white shadow-sm shrink-0">
-                        {item.icon}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {troubleData[troubleTab].items.map((item, idx) => (
+                      <div key={idx} className={`h-full p-6 rounded-2xl border ${item.bg} flex items-start gap-5 shadow-sm hover:shadow-md transition-shadow`}>
+                        <div className="p-3 rounded-full bg-white shadow-sm shrink-0">
+                          {item.icon}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-base mb-3">{item.title}</h4>
+                          <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                            {item.desc}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        {/* [수정] 제목 크기 text-xl -> text-base 로 축소 (프로토콜과 통일) */}
-                        <h4 className="font-bold text-gray-900 text-base mb-3">{item.title}</h4>
-                        {/* [수정] 설명 크기 text-base -> text-sm 로 축소 (프로토콜과 통일) */}
-                        <p className="text-sm text-gray-700 leading-relaxed font-medium">
-                          {item.desc}
-                        </p>
-                      </div>
+                    ))}
+                  </div>
+
+                  {/* ✨ [NEW] 해결책을 못 찾았을 때 유도하는 AI 섹션 */}
+                  <div className="mt-8 p-8 bg-indigo-50 border border-indigo-100 rounded-2xl text-center flex flex-col items-center justify-center gap-4">
+                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full">
+                      <MessageSquare className="w-8 h-8" />
                     </div>
-                  ))}
+                    <div>
+                      <h3 className="text-lg font-bold text-indigo-900 mb-1">원하는 해결책을 찾지 못하셨나요?</h3>
+                      <p className="text-indigo-700 text-sm">
+                        LI-6800 공식 매뉴얼을 학습한 AI가 복잡한 에러 코드와 증상에 대해 답변해 드립니다.
+                      </p>
+                    </div>
+                    <a
+                      href={EXTERNAL_LINKS.aiChat}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg"
+                    >
+                      AI 채팅으로 정밀 진단하기 <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </div>
+
                 </motion.div>
               </AnimatePresence>
             </div>
