@@ -1,10 +1,8 @@
-
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { TestTube, FlaskConical, Home, Leaf, ActivitySquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPageUrl } from "@/utils";
-
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -119,8 +117,9 @@ export default function Layout({ children, currentPageName }) {
         <div className="bg-white/80 backdrop-blur-lg ios-shadow border-b border-gray-200/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
+              {/* 로고 클릭 시 메인 홈("/")으로 이동하도록 수정 */}
               <Link 
-                to={createPageUrl("Home")} 
+                to="/" 
                 className="flex items-center space-x-3 group"
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -133,41 +132,36 @@ export default function Layout({ children, currentPageName }) {
               
               <div className="flex items-center space-x-3">
                 {/* Navigation Buttons */}
-
-
                 <div className="hidden sm:flex items-center space-x-2">
 
-  {/* Home = MainHome */}
-  <Link
-    to="/"
-    className={`nav-button ${location.pathname === "/" ? "active" : ""}`}
-    title="홈"
-  >
-    <Home className="h-4 w-4" />
-  </Link>
+                  {/* Home = MainHome */}
+                  <Link
+                    to="/"
+                    className={`nav-button ${location.pathname === "/" ? "active" : ""}`}
+                    title="홈"
+                  >
+                    <Home className="h-4 w-4" />
+                  </Link>
 
-  {/* Instrumental = /Home */}
-  <Link
-    to={createPageUrl("Home")}
-    className={`nav-button ${location.pathname.toLowerCase().startsWith("/home") ? "active" : ""}`}
+                  {/* Instrumental = /Home */}
+                  <Link
+                    to={createPageUrl("Home")}
+                    className={`nav-button ${location.pathname.toLowerCase().startsWith("/home") ? "active" : ""}`}
+                    title="기기 분석"
+                  >
+                    <TestTube className="h-4 w-4" />
+                  </Link>
 
-    title="기기 분석"
-  >
-    <TestTube className="h-4 w-4" />
-  </Link>
+                  {/* Physiological = /Physiological */}
+                  <Link
+                    to={createPageUrl("Physiological")}
+                    className={`nav-button ${location.pathname.toLowerCase().startsWith("/physiological") ? "active" : ""}`}
+                    title="생리 계측"
+                  >
+                    <Leaf className="h-4 w-4" />
+                  </Link>
 
-  {/* Physiological = /Physiological */}
-  <Link
-    to={createPageUrl("Physiological")}
-    className={`nav-button ${location.pathname.toLowerCase().startsWith("/physiological") ? "active" : ""}`}
-
-    title="생리 계측"
-  >
-    <Leaf className="h-4 w-4" />
-  </Link>
-
-</div>
-
+                </div>
               </div>
             </div>
           </div>
