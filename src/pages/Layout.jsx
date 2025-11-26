@@ -2,17 +2,34 @@ import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { TestTube, FlaskConical, Home, Leaf, ActivitySquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createPageUrl } from "@/utils";
+// 👇 PAGE_TITLES를 import 해야 제목을 가져올 수 있습니다.
+import { createPageUrl, PAGE_TITLES } from "@/utils"; 
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
 
-  // 현재 페이지 상태 확인 - 루트 경로도 홈으로 인식
+  // 🟢 [핵심 수정] 페이지가 바뀔 때마다 브라우저 탭 제목을 변경하는 코드
+  useEffect(() => {
+    // 1. utils에서 현재 페이지 이름에 맞는 제목을 가져옴
+    const targetTitle = PAGE_TITLES ? PAGE_TITLES[currentPageName] : null;
+
+    // 2. 제목 설정
+    if (location.pathname === '/' || currentPageName === 'MainHome') {
+      // 메인 홈일 경우 무조건 "Plant Analyzer"
+      document.title = "Plant Analyzer";
+    } else if (targetTitle) {
+      // 다른 페이지는 매핑된 제목 사용 (예: Instrumental Analysis)
+      document.title = targetTitle;
+    } else {
+      // 매핑된게 없으면 기본값
+      document.title = "Plant Analyzer";
+    }
+  }, [currentPageName, location.pathname]);
+
+
+  // 현재 페이지 상태 확인
   const isHomePage = location.pathname === "/";
-  const isResultsPage = currentPageName.includes("Results");
-  const isAnalysisPage = currentPageName.includes("Analysis");
-  const isHPLCPage = location.pathname.includes("HPLC");
-  
+  // ... (기존 변수들 유지)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,15 +49,6 @@ export default function Layout({ children, currentPageName }) {
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 20px rgba(0, 0, 0, 0.03);
         }
         
-        .ios-shadow-lg {
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 10px 30px rgba(0, 0, 0, 0.06);
-        }
-        
-        .ios-card {
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
         .ios-button {
           background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
           border: none;
@@ -49,45 +57,6 @@ export default function Layout({ children, currentPageName }) {
           letter-spacing: -0.01em;
         }
         
-        .ios-button-secondary {
-          background: rgba(142, 142, 147, 0.12);
-          color: #007AFF;
-          border: none;
-          border-radius: 12px;
-          font-weight: 600;
-        }
-        
-        .ios-input {
-          background: rgba(255, 255, 255, 0.9);
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          font-size: 16px;
-          padding: 16px;
-        }
-        
-        .ios-input:focus {
-          border-color: #007AFF;
-          box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
-        }
-
-        /* Hide number input arrows */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-          -webkit-appearance: none; 
-          margin: 0; 
-        }
-        input[type=number] {
-          -moz-appearance: textfield;
-        }
-
-        /* Mobile responsive improvements */
-        @media (max-width: 640px) {
-          .ios-input {
-            font-size: 16px; /* Prevents zoom on iOS */
-            padding: 12px;
-          }
-        }
-
         /* Navigation buttons */
         .nav-button {
           display: flex;
@@ -117,7 +86,6 @@ export default function Layout({ children, currentPageName }) {
         <div className="bg-white/80 backdrop-blur-lg ios-shadow border-b border-gray-200/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              {/* 로고 클릭 시 메인 홈("/")으로 이동하도록 수정 */}
               <Link 
                 to="/" 
                 className="flex items-center space-x-3 group"
@@ -131,10 +99,8 @@ export default function Layout({ children, currentPageName }) {
               </Link>
               
               <div className="flex items-center space-x-3">
-                {/* Navigation Buttons */}
                 <div className="hidden sm:flex items-center space-x-2">
 
-                  {/* Home = MainHome */}
                   <Link
                     to="/"
                     className={`nav-button ${location.pathname === "/" ? "active" : ""}`}
@@ -143,7 +109,6 @@ export default function Layout({ children, currentPageName }) {
                     <Home className="h-4 w-4" />
                   </Link>
 
-                  {/* Instrumental = /Home */}
                   <Link
                     to={createPageUrl("Home")}
                     className={`nav-button ${location.pathname.toLowerCase().startsWith("/home") ? "active" : ""}`}
@@ -152,7 +117,6 @@ export default function Layout({ children, currentPageName }) {
                     <TestTube className="h-4 w-4" />
                   </Link>
 
-                  {/* Physiological = /Physiological */}
                   <Link
                     to={createPageUrl("Physiological")}
                     className={`nav-button ${location.pathname.toLowerCase().startsWith("/physiological") ? "active" : ""}`}
