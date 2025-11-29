@@ -422,7 +422,7 @@ const analysisProtocols = {
       "15,000 RPM, 4℃, 10 min centrifuge",
       "Centrifuge 후 상층액 1~1.5 mL 뽑고 박스에 넣어 deep freezer에 보관",
       "96-well에 시료 50 μL 또는 H₂O₂ 표준곡선 50 μL + 10 mM Potassium phosphate buffer 50 μL + 1 M KI 100 μL 혼합",
-      "1시간 암실에서 반응 후 390 nm에서 측정"
+      "암실에서 1시간 반응 후 390 nm에서 측정"
     ],
     reagents: [
       "0.1% TCA: 100 mL 증류수에 100 mg trichloroacetic acid 용해",
