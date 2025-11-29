@@ -18,7 +18,7 @@ const getWavelengthsForAnalysis = (analysisType) => {
     cat: ["240"],
     pod: ["470"],
     sod: ["560"],
-    h2o2: ["240"] // 과산화수소 프로토콜 수정: 390nm에서 240nm로 변경
+    h2o2: ["390"] // 과산화수소 프로토콜 수정: 390nm에서 240nm로 변경
   };
   return wavelengths[analysisType] || [];
 };
