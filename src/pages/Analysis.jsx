@@ -419,16 +419,16 @@ const analysisProtocols = {
     protocol: [
       "2 mL 튜브에 시료 20 mg + 0.1% TCA 2 mL 혼합 후 vortex",
       "액체질소 5분 → sonication 10분 (3회 반복) 후 vortex",
-      "15,000 RPM, 4℃, 10 min centrifuge 후 2 mL 튜브에 상층액 1~1.5 mL 추출",
-      "시료 & H₂O₂ Stock 50 μL + 10 mM Potassium phosphate buffer 50 μL + 1 M KI 100 μL",
-      "혼합 후 1시간 암실에서 반응",
-      "96-well에 200 μL 분주 후 390 nm에서 측정"
+      "15,000 RPM, 4℃, 10 min centrifuge",
+      "Centrifuge 후 상층액 1~1.5 mL 뽑고 박스에 넣어 deep freezer에 보관",
+      "96-well에 시료 50 μL 또는 H₂O₂ 표준곡선 50 μL + 10 mM Potassium phosphate buffer 50 μL + 1 M KI 100 μL 혼합",
+      "1시간 암실에서 반응 후 390 nm에서 측정"
     ],
     reagents: [
       "0.1% TCA: 100 mL 증류수에 100 mg trichloroacetic acid 용해",
       "10 mM Potassium phosphate buffer (pH 7.0): 100 mL 증류수에 136 mg KH₂PO₄ + 174 mg K₂HPO₄ 용해",
       "1 M KI: 100 mL 증류수에 16.6 g potassium iodide 용해",
-      "1 mM H₂O₂ Stock: 35% H₂O₂ 원액 5.1 μL + 0.1% TCA 49.995 mL"
+      "1 mM H₂O₂ Stock: 35% H₂O₂ 원액 5.1 μL + 0.1% TCA 49.995 mL(49,995 μL)"
     ],
     standard_curve_config: {
       title: "1 mM H₂O₂ 표준곡선 계산기",
