@@ -94,7 +94,6 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
         );
       case "total_phenol":
       case "total_flavonoid":
-      case "h2o2":
         return (
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row items-end gap-4">
@@ -110,6 +109,67 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
             </p>
           </div>
         );
+
+// 3. 과산화수소 (H2O2) - 공식 설명 부분 삭제됨
+      case "h2o2":
+        return (
+          <div className="space-y-4">
+            {/* 첫 번째 줄: 표준곡선 (a, b) */}
+            <div className="flex flex-col sm:flex-row items-end gap-4">
+              <div className="flex-1 w-full">
+                <ParamInput 
+                  label="기울기 (a)" 
+                  value={params.h2o2?.a || ""} 
+                  onChange={e => handleNestedParamChange('h2o2', 'a', e.target.value)} 
+                  placeholder="Slope" 
+                />
+              </div>
+              <div className="flex-1 w-full">
+                <ParamInput 
+                  label="Y절편 (b)" 
+                  value={params.h2o2?.b || ""} 
+                  onChange={e => handleNestedParamChange('h2o2', 'b', e.target.value)} 
+                  placeholder="Intercept" 
+                />
+              </div>
+            </div>
+
+            {/* 표준곡선 수식 표시 */}
+            <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center">
+               y = <HighlightedValue value={params.h2o2?.a} placeholder="a" />x + (<HighlightedValue value={params.h2o2?.b} placeholder="b" />)
+            </p>
+
+            <div className="w-full border-t border-gray-200 my-2"></div>
+
+            {/* 두 번째 줄: 프로토콜 상수 (부피, 시료량) */}
+            <div className="flex flex-col sm:flex-row items-end gap-4">
+              <div className="flex-1 w-full">
+                <ParamInput 
+                  label="추출 부피 (mL)" 
+                  value={params.h2o2?.vol || ""} 
+                  onChange={e => handleNestedParamChange('h2o2', 'vol', e.target.value)} 
+                  placeholder="기본: 2" 
+                />
+              </div>
+              <div className="flex-1 w-full">
+                <ParamInput 
+                  label="시료량 (g DW)" 
+                  value={params.h2o2?.dw || ""} 
+                  onChange={e => handleNestedParamChange('h2o2', 'dw', e.target.value)} 
+                  placeholder="기본: 0.02" 
+                />
+              </div>
+              <Button onClick={handleApply} className="ios-button rounded-xl h-12 w-full sm:w-auto flex items-center justify-center flex-shrink-0">
+                {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
+                {isApplied ? "적용됨" : "적용"}
+              </Button>
+            </div>
+          </div>
+        );
+
+
+
+        
       case "dpph_scavenging":
         return (
           <div className="space-y-4">
