@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TestTube, Beaker, FlaskConical, Microscope, Calculator, ArrowRight, TrendingUp, RefreshCw, Settings2 } from "lucide-react";
+import { TestTube, Beaker, FlaskConical, Microscope, Calculator, ArrowRight, TrendingUp, RefreshCw, Settings2, PenTool, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -450,7 +450,7 @@ const analysisProtocols = {
       "μmol/g DW = (농도(mM) × 2 mL) / 0.02 g (시료 20 mg 기준)", 
       "μmol/g FW = μmol/g DW × (0.02 g (시료 20 mg 기준) / 측정한 FW g)"
     ],
-    unit: "μmol/g DW",
+    unit: "μmol/g FW", // Unit is FW as per latest discussion
     icon: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,
     references: [
       {
@@ -465,7 +465,23 @@ const analysisProtocols = {
         citation: "Junglee, S., Urban, L., Sallanon, H., & Lopez-Lauri, F. (2014). Optimized assay for hydrogen peroxide determination in plant tissue using potassium iodide. American Journal of Analytical Chemistry, 5(11), 730-736.",
         doi: "10.4236/ajac.2014.511081"
       }
-    ]
+    ],
+    // [추가된 섹션] 논문 작성 가이드
+    writing_guide: {
+      title: "논문에 바로 쓸 수 있는 문장 예시 (English Template)",
+      content: [
+        {
+          type: "intro",
+          text: "아래 문장들을 Materials and Methods의 H₂O₂ determination 섹션 도입부에 사용하세요."
+        },
+        {
+          type: "option",
+          // label 제거됨
+          text: `"Hydrogen peroxide (H₂O₂) content was determined according to the method of Velikova et al. (2000), with minor modifications for microplate analysis as described by Junglee et al. (2014)."`,
+          note: "(해석: 과산화수소 함량은 Velikova 등의 방법을 따르되, Junglee 등이 기술한 대로 마이크로플레이트 분석을 위해 약간의 변형을 가하여 측정하였다.)"
+        }
+      ]
+    }
   }
 };
 
@@ -935,9 +951,7 @@ export default function Analysis() {
                     {analysisProtocols[selectedAnalysis].references && analysisProtocols[selectedAnalysis].references.length > 0 && (
                       <div className="lg:col-span-2 mt-6 sm:mt-8 bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
                         <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                          </svg>
+                          <BookOpen className="h-4 w-4" />
                           <span>참고문헌</span>
                         </h3>
                         <div className="space-y-4">
@@ -964,6 +978,44 @@ export default function Analysis() {
                         </div>
                       </div>
                     )}
+
+                    {/* [추가] 논문 작성 가이드 섹션 */}
+                    {analysisProtocols[selectedAnalysis].writing_guide && (
+                      <div className="lg:col-span-2 mt-6 sm:mt-8 bg-blue-50/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-blue-100">
+                        <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
+                          <PenTool className="h-4 w-4 text-blue-600" />
+                          <span>{analysisProtocols[selectedAnalysis].writing_guide.title}</span>
+                        </h3>
+                        <div className="space-y-4">
+                          {analysisProtocols[selectedAnalysis].writing_guide.content.map((item, index) => (
+                            <div key={index}>
+                              {item.type === 'intro' ? (
+                                <p className="text-gray-700 text-sm font-medium mb-2">
+                                  {item.text}
+                                </p>
+                              ) : (
+                                <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm">
+                                  {item.label && (
+                                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded mb-2">
+                                      {item.label}
+                                    </span>
+                                  )}
+                                  <p className="text-gray-800 text-sm font-medium mb-2 leading-relaxed">
+                                    {item.text}
+                                  </p>
+                                  {item.note && (
+                                    <p className="text-gray-500 text-xs">
+                                      {item.note}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </CardContent>
               </Card>
