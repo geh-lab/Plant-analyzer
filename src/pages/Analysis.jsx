@@ -446,7 +446,9 @@ const analysisProtocols = {
     ],
     formulas: [
       <span>H<sub>2</sub>O<sub>2</sub> standard curve 사용하여 함량 계산</span>,
-      "농도 = (흡광도 - b) / a"
+      "농도(mM) = (흡광도 - b) / a",
+      "μmol/g DW = (농도(mM) × 2 mL) / 0.02 g (시료 20 mg 기준)", 
+      "μmol/g FW = μmol/g DW × (0.02 g (시료 20 mg 기준) / 측정한 FW g)"
     ],
     unit: "μmol/g DW",
     icon: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,

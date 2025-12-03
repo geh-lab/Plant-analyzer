@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,7 +91,7 @@ export default function Results() {
       const savedParams = loadCalculationParams();
       setCalculationParams(savedParams);
     }
-  }, [location.search, analysisType]); // Added analysisType to dependencies for reload on type change
+  }, [location.search, analysisType]);
 
   const handleBackToAnalysis = () => {
     navigate(createPageUrl("Analysis"));
@@ -152,6 +151,7 @@ export default function Results() {
     loadSamples();
   };
 
+  // --- [핵심] 단일 샘플 계산 함수 ---
   const calculateSingleResult = (sample) => {
     const p = calculationParams;
     const values = sample.absorbance_values;
@@ -171,7 +171,7 @@ export default function Results() {
             const carotenoid = (1000 * a470 - 1.91 * chl_a_base - 95.15 * chl_b_base) / 225 * dilutionFactor;
             
             return { 
-                result: chl_a, // 기본 표시값은 엽록소 a
+                result: chl_a, 
                 unit: "μg/mL",
                 chl_a: chl_a,
                 chl_b: chl_b,
@@ -189,16 +189,33 @@ export default function Results() {
         case "total_phenol":
         case "total_flavonoid": {
             if (!p.std_a || !p.std_b) return { result: 0, unit: "N/A" };
-            const y = values[Object.keys(values)[0]] || 0; // Assumes a single absorbance value
+            const y = values[Object.keys(values)[0]] || 0; 
             const result = (y - parseFloat(p.std_b)) / parseFloat(p.std_a);
             const unitMap = { total_phenol: "mg GAE/g DW", total_flavonoid: "mg QE/g DW" };
             return { result, unit: unitMap[sample.analysis_type] };
         }
         case "h2o2": {
-            if (!p.std_a || !p.std_b) return { result: 0, unit: "N/A" };
-            const y = values[Object.keys(values)[0]] || 0;
-            const result = (y - parseFloat(p.std_b)) / parseFloat(p.std_a);
-            return { result, unit: "μmol/g DW" };
+            const { a, b, vol = 2, dw = 0.02 } = p.h2o2 || {};
+            if (!a || !b) return { result: 0, unit: "Check Params" };
+
+            const abs = values["390"] || 0; 
+            
+            // Step 1. mM 농도
+            const conc_mM = (abs - parseFloat(b)) / parseFloat(a);
+            
+            // Step 2. μmol/g DW
+            const result_dw = (conc_mM * parseFloat(vol)) / parseFloat(dw);
+
+            // Step 3. μmol/g FW (생체중 환산)
+            const measured_fw = sample.weight ? parseFloat(sample.weight) : parseFloat(dw);
+            const result_fw = result_dw * (parseFloat(dw) / measured_fw);
+            
+            return { 
+                result: Math.max(0, result_fw), // 차트 등 대표값은 FW 기준
+                unit: "μmol/g DW",
+                result_dw: Math.max(0, result_dw), // DW 기준 값 별도 저장
+                result_fw: Math.max(0, result_fw)  // FW 기준 값 별도 저장
+            };
         }
         case "glucosinolate":
             return { result: 1.40 + 118.86 * (values["425"] || 0), unit: "μmol/g DW" };
@@ -252,7 +269,7 @@ export default function Results() {
     const grouped = _.groupBy(allCalculatedSamples, 'treatment_name');
     const sortedGroups = Object.keys(grouped).sort();
     return sortedGroups.flatMap(groupName => 
-      _.sortBy(grouped[groupName], ['replicate', 'sample_name']) // Sort by replicate then sample_name
+      _.sortBy(grouped[groupName], ['replicate', 'sample_name']) 
     );
   }, [allCalculatedSamples]);
 
@@ -275,18 +292,15 @@ export default function Results() {
   const getTemplateHeaders = (type) => {
     const commonHeaders = ["Sample Name", "Description", "Treatment Name", "Replicate"];
     const typeSpecificAbsorbanceHeaders = {
-        chlorophyll_a_b: ["665.2", "652.4", "470"], // Added 470 for carotenoid in combined template
+        chlorophyll_a_b: ["665.2", "652.4", "470"], 
         carotenoid: ["470", "665.2", "652.4"],
-        total_phenol: ["Absorbance"], // For single absorbance inputs for standard curves
+        total_phenol: ["Absorbance"], 
         total_flavonoid: ["Absorbance"],
-        h2o2: ["Absorbance"],
+        h2o2: ["390", "Weight"], // Weight 열 추가
         glucosinolate: ["425"],
         dpph_scavenging: ["517"],
         anthocyanin: ["530", "600"],
         sod: ["560"],
-        // For 'cat' and 'pod', the 'delta_A' value is taken from `calculationParams`,
-        // not `sample.absorbance_values`, so no specific absorbance columns are needed
-        // in the sample input template according to the current calculation logic.
     };
 
     return [...commonHeaders, ...(typeSpecificAbsorbanceHeaders[type] || [])];
@@ -299,19 +313,15 @@ export default function Results() {
       }
 
       const headers = getTemplateHeaders(analysisType);
-      if (headers.length <= 4) { // Only common headers (Sample Name, Description, Treatment Name, Replicate)
-          alert("이 분석 항목에 대한 특정 흡광도 템플릿이 없습니다. '샘플 이름', '설명', '처리구', '반복' 열만 제공됩니다.");
-      }
-
+      
       let csvContent = headers.map(header => `"${header}"`).join(",") + "\n";
-      // Add a few example rows
       for (let i = 1; i <= 3; i++) {
           const exampleRow = headers.map(header => {
               if (header === "Sample Name") return `"Sample ${i}"`;
               if (header === "Description") return `"Description for Sample ${i}"`;
               if (header === "Treatment Name") return `"Control"`; 
-              if (header === "Replicate") return `""`; // Leave empty for user to fill
-              // For absorbance values, provide placeholder 0.000
+              if (header === "Replicate") return `""`; 
+              if (header === "Weight") return `"0.2"`; // 기본 예시 Weight
               return `"0.000"`;
           }).join(",");
           csvContent += exampleRow + "\n";
@@ -319,7 +329,7 @@ export default function Results() {
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
-      if (link.download !== undefined) { // feature detection
+      if (link.download !== undefined) { 
           const url = URL.createObjectURL(blob);
           link.setAttribute("href", url);
           link.setAttribute("download", `${analysisType}_template.csv`);
