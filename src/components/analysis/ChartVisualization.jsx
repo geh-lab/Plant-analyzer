@@ -31,8 +31,8 @@ const ChartComponent = ({ data, unit }) => {
   return (
     <div className="h-[500px] p-4 rounded-2xl bg-white/60">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsla(0, 0%, 68%, 1.00)" />
           <XAxis 
             dataKey="name" 
             stroke="#374151" 
@@ -41,11 +41,11 @@ const ChartComponent = ({ data, unit }) => {
             tick={{ fill: '#374151' }}
             angle={0}
             textAnchor="middle"
-            height={80}
+            height={20}
             interval={0}
           />
           <YAxis 
-            domain={[0, 'dataMax']}
+            domain={[0, dataMax => dataMax * 1.15]}
             stroke="#374151" 
             fontSize={16} 
             fontWeight="600" 
@@ -57,7 +57,7 @@ const ChartComponent = ({ data, unit }) => {
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
-            <ErrorBar dataKey="errorY" width={6} stroke="#374151" strokeWidth={2} />
+            <ErrorBar dataKey="errorY" width={6} stroke="#ffffffff" strokeWidth={2} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

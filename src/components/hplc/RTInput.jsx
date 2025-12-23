@@ -132,7 +132,8 @@ export default function RTInput({ analysisType, onRTStandardsChange, initialValu
         </div>
 
         {isApplied && Object.keys(initialValues).length > 0 && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="applied-summary mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+
             <h4 className="text-blue-800 font-semibold mb-3">적용된 RT</h4>
             <div className="grid grid-cols-3 gap-x-2 gap-y-2 text-xs text-blue-900 font-mono">
               {Object.entries(initialValues).map(([compound, rt]) => (

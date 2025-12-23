@@ -107,7 +107,8 @@ export default function CalculationInput({ analysisType, onCalculationParamsChan
 
           {/* 적용된 변수 스크롤 영역 */}
           {isApplied && Object.keys(initialValues).length > 0 && (
-            <div className="space-y-4 max-h-64 overflow-y-auto border border-blue-200 rounded-xl p-3 bg-blue-50/30">
+            <div className="applied-summary space-y-4 max-h-64 overflow-y-auto border border-blue-200 rounded-xl p-3 bg-blue-50/30">
+
               <h4 className="text-blue-800 font-semibold text-sm mb-2">적용된 변수</h4>
               <div className="mb-3 p-2 bg-blue-100 rounded-lg">
                 <p className="text-blue-800 text-xs font-semibold">시료무게: {params.sampleWeight || '미입력'}g</p>
@@ -196,7 +197,8 @@ export default function CalculationInput({ analysisType, onCalculationParamsChan
             µmol/g dry wt. = (<HighlightedValue value={params.standardArea} placeholder="샘플 Area"/> / <HighlightedValue value={params.standardArea} placeholder="표준 Area"/>) × 0.5 / <HighlightedValue value={params.molecularWeight} placeholder="MW"/> × 1000 / <HighlightedValue value={params.sampleWeight} placeholder="시료무게"/> × <HighlightedValue value={params.conversionFactor || "1"} placeholder="환산계수"/>
           </p>
           {isApplied && (
-            <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="applied-summary mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+
               <p className="text-blue-800 text-xs font-semibold">
                 적용된 변수: 표준Area={params.standardArea || '미입력'}, MW={params.molecularWeight || '미입력'}, 시료무게={params.sampleWeight || '미입력'}g, 환산계수={params.conversionFactor || '1'}
               </p>
