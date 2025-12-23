@@ -1,29 +1,39 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FlaskConical, Beaker, Microscope, Video, Calculator, AlertTriangle, Settings, Wrench } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { FlaskConical, Beaker, Microscope, Video, Calculator, AlertTriangle, Settings, Wrench, ArrowLeft, CheckCircle2 } from "lucide-react";
+
+// --- [Reusable Glass Components] ---
+const GlassCard = ({ children, className = "" }) => (
+  <div className={`rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-xl overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
+
+const GlassBadge = ({ children, className = "" }) => (
+  <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors ${className}`}>
+    {children}
+  </span>
+);
 
 export default function Kjeldahl() {
+  const navigate = useNavigate();
   const [selectedProtocol, setSelectedProtocol] = useState("");
 
   // --------------------------------------------------------------------------------
-  // 🖼️ 이미지 경로 헬퍼 함수
+  // 🖼️ 이미지 경로 헬퍼 함수 (로컬/배포 호환)
   // --------------------------------------------------------------------------------
+  // 설명: src/images 폴더 내의 파일을 동적으로 가져오며, 실패 시 public/images 경로를 반환합니다.
   const img = (file) => {
-    // [로컬 Vite 환경용 코드]
-    // 로컬에서 이미지가 보이지 않을 경우 아래 주석을 해제하고 return 문을 활성화하세요.
     try {
       return new URL(`../images/${file}`, import.meta.url).href;
     } catch (e) {
-      // [현재 미리보기 환경용 코드]
-      // import.meta가 지원되지 않는 환경에서는 정적 경로를 반환합니다.
       return `/images/${file}`;
     }
   };
 
   // ----------------------------------------------------------------
-  // 📊 통합 데이터 구조 (Protocol + Visual Guide + Settings)
+  // 📊 데이터 구조
   // ----------------------------------------------------------------
   const kjeldahlProtocols = {
     step1: {
@@ -51,7 +61,7 @@ export default function Kjeldahl() {
       visualSteps: [
         {
           title: "시료 및 장비 준비",
-          image: img("Step_1-1.png"),
+          image: img("Step_1-1.png"), 
           text: "건조된 시료 0.1g을 튜브에 넣습니다. 히트블록은 미리 예열합니다."
         },
         {
@@ -189,107 +199,143 @@ export default function Kjeldahl() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+    <div className="relative min-h-screen overflow-hidden bg-slate-900 text-gray-100 font-sans">
+      
+      {/* Background Layer */}
+      <div className="absolute inset-0 z-0 w-full h-full">
+         {/* [수정됨] 헬퍼 함수를 사용하여 배경 이미지 호출 */}
+         {/* 파일명이 없다면 'kjeldahl_bg.jpg' 등을 images 폴더에 넣어주세요 */}
+         <img 
+            src={img("kjeldahl_background.jpg")}
+            alt="Lab Background"
+            className="w-full h-full object-cover opacity-20"
+
+         />
+ 
+      </div>
+
+      {/* Main Content Container 
+          - pt-32: 상단 고정 헤더와 겹치지 않게 여백 추가
+      */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-12 space-y-8">
         
-        {/* 1. 헤더 및 타이틀 */}
+        {/* Back Navigation */}
+        <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={() => navigate('/home')} 
+            className="flex items-center text-gray-400 hover:text-white transition-colors group"
+        >
+            <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 mr-3">
+                 <ArrowLeft className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-medium">돌아가기</span>
+        </motion.button>
+        
+        {/* Title Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 flex items-center justify-center gap-3 drop-shadow-lg">
              Kjeldahl 질소 분석
           </h1>
-          <p className="text-gray-600 text-sm sm:text-base">
+          <p className="text-gray-300 text-sm sm:text-base">
             시약 준비부터 적정까지, 단계별 실험 절차 및 시각적 가이드
           </p>
         </motion.div>
 
-        {/* 2. 공통 시약 준비 카드 */}
-        <Card className="bg-white/90 backdrop-blur-lg border border-gray-100 shadow-lg rounded-2xl overflow-hidden">
-          <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-4 sm:p-6 border-b border-gray-100">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-xl sm:rounded-2xl flex items-center justify-center">
-              <Beaker className="h-5 w-5 text-blue-700" />
+        {/* Common Reagents Card */}
+        <GlassCard>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 border-b border-white/10 bg-white/5">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/30">
+              <Beaker className="h-6 w-6 text-blue-300" />
             </div>
             <div className="text-left">
-              <CardTitle className="text-gray-900 text-lg sm:text-xl font-bold leading-tight">
+              <h2 className="text-xl font-bold text-white leading-tight">
                 필수 시약 및 안전 수칙
-              </CardTitle>
-              <p className="text-gray-600 text-sm sm:text-base mt-1 leading-relaxed">
+              </h2>
+              <p className="text-gray-400 text-sm mt-1">
                 Reagents Preparation & Safety
               </p>
             </div>
-          </CardHeader>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 px-4 sm:px-6 py-4 sm:py-6">
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
             <div className="space-y-6">
-              <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
-                <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-                  <Calculator className="h-4 w-4" />
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-white font-semibold mb-4 flex items-center space-x-2">
+                  <Calculator className="h-4 w-4 text-blue-300" />
                   <span>시약 제조 레시피</span>
                 </h3>
-                <ul className="space-y-3 list-disc pl-4 text-sm text-gray-700 leading-relaxed">
+                <ul className="space-y-4 list-disc pl-4 text-sm text-gray-300 leading-relaxed marker:text-blue-500">
                   <li>
-                    <strong>농황산+살리실산:</strong> 농황산 200mL + 살리실산 10g. (기계 교반 금지, 손으로 천천히 흔들어 1~2시간 용해)
+                    <strong className="text-white">농황산+살리실산:</strong> 농황산 200mL + 살리실산 10g. (기계 교반 금지, 손으로 천천히 흔들어 1~2시간 용해)
                   </li>
                   <li>
-                    <strong>45% NaOH:</strong> 증류수에 NaOH 450g 용해 후 1L Mass up. (발열 심함, 후드 내 제조, 조금씩 투입)
+                    <strong className="text-white">45% NaOH:</strong> 증류수에 NaOH 450g 용해 후 1L Mass up. (발열 심함, 후드 내 제조, 조금씩 투입)
                   </li>
                   <li>
-                    <strong>2% 붕산용액:</strong> 붕산 20g + 증류수 + 혼합지시약 5mL → 1L Mass up.
+                    <strong className="text-white">2% 붕산용액:</strong> 붕산 20g + 증류수 + 혼합지시약 5mL → 1L Mass up.
                   </li>
                   <li>
-                    <strong>혼합지시약:</strong> Bromocresol green 0.5g + Methyl red 0.1g in 95% EtOH (100mL).
+                    <strong className="text-white">혼합지시약:</strong> Bromocresol green 0.5g + Methyl red 0.1g in 95% EtOH (100mL).
                   </li>
                 </ul>
               </div>
             </div>
             <div className="space-y-4">
-              <div className="bg-white/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-0">
-                <h3 className="text-gray-900 font-semibold mb-4 flex items-center space-x-2 text-sm sm:text-base">
-                  <AlertTriangle className="h-4 w-4" />
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-white font-semibold mb-4 flex items-center space-x-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-400" />
                   <span>안전 주의사항</span>
                 </h3>
-                <div className="space-y-2">
-                  <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-gray-800">
-                    <strong>후드 사용:</strong> 황산 증기 및 NaOH 가스 발생 시 절대 흡입 금지.
+                <div className="space-y-3">
+                  <div className="p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-sm text-yellow-100 leading-relaxed">
+                    <strong className="block text-yellow-300 mb-1">후드 사용</strong>
+                     황산 증기 및 NaOH 가스 발생 시 절대 흡입 금지.
                   </div>
-                  <div className="p-3 bg-red-50 rounded-lg border border-red-200 text-sm text-red-800">
-                    <strong>폭발/화상 주의:</strong> 물에 산/알칼리를 넣어야 함 (반대 금지). 반응열 주의.
+                  <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-red-100 leading-relaxed">
+                    <strong className="block text-red-300 mb-1">폭발/화상 주의</strong>
+                     물에 산/알칼리를 넣어야 함 (반대 금지). 반응열 주의.
                   </div>
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-800">
-                    <strong>보관:</strong> 혼합지시약은 냉장/차광 보관, 붕산 용액은 사용 직전 제조 권장.
+                  <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 text-sm text-blue-100 leading-relaxed">
+                    <strong className="block text-blue-300 mb-1">보관</strong>
+                     혼합지시약은 냉장/차광 보관, 붕산 용액은 사용 직전 제조 권장.
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </Card>
+        </GlassCard>
 
         {/* 3. 단계 선택 그리드 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {Object.entries(kjeldahlProtocols).map(([key, protocol]) => (
             <button
               key={key}
               onClick={() => setSelectedProtocol(selectedProtocol === key ? "" : key)}
-              className={`p-4 rounded-2xl border transition-all duration-300 text-left relative overflow-hidden ${
+              className={`p-5 rounded-2xl border transition-all duration-300 text-left relative overflow-hidden group ${
                 selectedProtocol === key
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-xl scale-[1.02]'
-                  : 'bg-white/80 text-gray-700 border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+                  ? 'bg-blue-600/20 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
               }`}
             >
               <div className="flex items-center space-x-3 mb-2 relative z-10">
-                <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${selectedProtocol === key ? 'bg-white/20' : 'bg-blue-100'}`}>
+                <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${selectedProtocol === key ? 'bg-blue-500/20 text-blue-300' : 'bg-white/10 text-gray-400 group-hover:text-white'}`}>
                   {React.cloneElement(protocol.icon, { 
-                    className: `h-6 w-6 ${selectedProtocol === key ? "text-white" : "text-blue-600"}` 
+                    className: `h-5 w-5` 
                   })}
                 </div>
-                <span className="font-bold text-base sm:text-lg leading-tight">{protocol.title}</span>
+                <span className={`font-bold text-lg leading-tight ${selectedProtocol === key ? 'text-white' : 'text-gray-200 group-hover:text-white'}`}>{protocol.title}</span>
               </div>
-              <p className={`text-xs sm:text-sm relative z-10 ${selectedProtocol === key ? 'text-blue-100' : 'opacity-80'}`}>
+              <p className={`text-xs ml-14 ${selectedProtocol === key ? 'text-blue-200' : 'text-gray-500 group-hover:text-gray-400'}`}>
                 {protocol.subtitle}
               </p>
+              {selectedProtocol === key && (
+                 <div className="absolute inset-0 bg-blue-500/5 animate-pulse z-0"></div>
+              )}
             </button>
           ))}
         </div>
@@ -305,57 +351,59 @@ export default function Kjeldahl() {
               exit={{ opacity: 0, y: -20, height: 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              {/* 메인 카드 */}
-              <Card className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border-0 overflow-hidden">
-                <CardHeader className="p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-                       {React.cloneElement(kjeldahlProtocols[selectedProtocol].icon, { className: "h-6 w-6 text-blue-600" })}
+              <GlassCard>
+                <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/30">
+                       {React.cloneElement(kjeldahlProtocols[selectedProtocol].icon, { className: "h-6 w-6 text-blue-300" })}
                     </div>
                     <div>
-                      <CardTitle className="text-xl font-bold text-gray-900">
+                      <h2 className="text-xl font-bold text-white">
                         {kjeldahlProtocols[selectedProtocol].title}
-                      </CardTitle>
-                      <div className="flex gap-2 mt-1">
+                      </h2>
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {kjeldahlProtocols[selectedProtocol].tags.map(tag => (
-                          <Badge key={tag} variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                          <GlassBadge key={tag} className="bg-white/10 text-gray-300 border-white/10">
                             {tag}
-                          </Badge>
+                          </GlassBadge>
                         ))}
                       </div>
                     </div>
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="p-6 space-y-10">
+                <div className="p-6 lg:p-10 space-y-10">
                   
                   {/* 텍스트 프로토콜 & 설정 */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                        <Wrench className="h-4 w-4 text-gray-500" /> 실험 절차 (Protocol)
-                      </h3>
-                      <ol className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                        {kjeldahlProtocols[selectedProtocol].protocol.map((step, index) => (
-                          <li key={index} className="flex items-start space-x-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold">
-                              {index + 1}
-                            </span>
-                            <span className="text-sm text-gray-700 leading-relaxed">{step}</span>
-                          </li>
-                        ))}
-                      </ol>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="space-y-6">
+                      <div className="bg-white/5 rounded-xl p-6 border border-white/10 h-full">
+                        <h3 className="font-bold text-white flex items-center gap-2 mb-6 text-lg border-b border-white/10 pb-3">
+                            <Wrench className="h-5 w-5 text-gray-400" /> 실험 절차 (Protocol)
+                        </h3>
+                        <ol className="space-y-6 ml-2">
+                            {kjeldahlProtocols[selectedProtocol].protocol.map((step, index) => (
+                            <li key={index} className="relative pl-8">
+                                <span className="absolute left-0 top-0.5 flex items-center justify-center w-5 h-5 bg-blue-500/20 text-blue-300 rounded-full text-xs font-bold border border-blue-500/30">
+                                {index + 1}
+                                </span>
+                                <span className="text-sm text-gray-300 leading-relaxed block">{step}</span>
+                            </li>
+                            ))}
+                        </ol>
+                      </div>
                     </div>
                     
                     <div className="space-y-6">
                        {kjeldahlProtocols[selectedProtocol].configurations && (
-                          <div>
-                            <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
-                              <Settings className="h-4 w-4 text-gray-500" /> 설정값 (Configuration)
+                          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                            <h3 className="font-bold text-white flex items-center gap-2 mb-4 text-lg">
+                              <Settings className="h-5 w-5 text-gray-400" /> 설정값 (Configuration)
                             </h3>
-                            <div className="grid gap-2">
+                            <div className="grid gap-3">
                               {kjeldahlProtocols[selectedProtocol].configurations.map((config, i) => (
-                                <div key={i} className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-900 font-medium">
+                                <div key={i} className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm text-blue-200 font-medium flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
                                   {config}
                                 </div>
                               ))}
@@ -363,14 +411,14 @@ export default function Kjeldahl() {
                           </div>
                        )}
                        {kjeldahlProtocols[selectedProtocol].notes && (
-                          <div>
-                            <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-3">
-                              <AlertTriangle className="h-4 w-4 text-gray-500" /> 주의사항
+                          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                            <h3 className="font-bold text-white flex items-center gap-2 mb-4 text-lg">
+                              <AlertTriangle className="h-5 w-5 text-yellow-400" /> 주의사항
                             </h3>
-                            <div className="grid gap-2">
+                            <div className="grid gap-3">
                               {kjeldahlProtocols[selectedProtocol].notes.map((note, i) => (
-                                <div key={i} className="p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-sm text-yellow-900">
-                                  <strong className="mr-1">Check:</strong> {note}
+                                <div key={i} className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-sm text-yellow-100 leading-relaxed">
+                                  <strong className="text-yellow-300 mr-1">Check:</strong> {note}
                                 </div>
                               ))}
                             </div>
@@ -379,33 +427,34 @@ export default function Kjeldahl() {
                     </div>
                   </div>
 
-                  {/* Visual Guide 섹션 (이미지 그리드 - Step 2는 2x2, 나머지는 2x3) */}
+                  {/* Visual Guide 섹션 */}
                   {kjeldahlProtocols[selectedProtocol].visualSteps.length > 0 && (
-                    <div>
-                       <div className="flex items-center gap-4 my-6">
-                          <div className="h-px bg-gray-200 flex-1"></div>
-                          <span className="text-gray-400 text-sm font-medium uppercase tracking-wider">Visual Guide</span>
-                          <div className="h-px bg-gray-200 flex-1"></div>
+                    <div className="pt-6 border-t border-white/10">
+                       <div className="flex items-center gap-4 mb-8">
+                          <span className="text-gray-400 text-sm font-bold uppercase tracking-widest border border-white/10 px-3 py-1 rounded-full bg-white/5">Visual Guide</span>
+                          <div className="h-px bg-white/10 flex-1"></div>
                        </div>
 
                        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${
                           selectedProtocol === 'step2' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'
                        }`}>
                           {kjeldahlProtocols[selectedProtocol].visualSteps.map((item, idx) => (
-                            <div key={idx} className="group rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all">
-                              <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
+                            <div key={idx} className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 shadow-lg hover:border-white/20 transition-all">
+                              <div className="aspect-[4/3] bg-black/50 overflow-hidden relative border-b border-white/5">
+                                {/* [이미지 표시] helper 함수 사용 */}
                                 <img 
                                   src={item.image} 
                                   alt={item.title} 
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                                   onError={(e) => { 
-                                    e.target.src = "https://placehold.co/600x400?text=No+Image"; 
+                                    e.target.style.display = 'none'; // 이미지가 없으면 숨김
                                   }}
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
                               </div>
-                              <div className="p-4">
-                                <h4 className="font-bold text-gray-900 mb-2 text-sm">{item.title}</h4>
-                                <p className="text-xs text-gray-600 leading-relaxed">{item.text}</p>
+                              <div className="p-5">
+                                <h4 className="font-bold text-white mb-2 text-sm">{item.title}</h4>
+                                <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
                               </div>
                             </div>
                           ))}
@@ -415,10 +464,10 @@ export default function Kjeldahl() {
 
                   {/* 참고 영상 (YouTube) */}
                   {kjeldahlProtocols[selectedProtocol].videoId && (
-                    <div className="mt-8 bg-gray-900 rounded-2xl p-1 overflow-hidden shadow-xl">
-                      <div className="bg-gray-800 p-4 flex items-center text-white gap-2">
+                    <div className="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                      <div className="bg-white/5 p-4 flex items-center text-white gap-2 border-b border-white/10">
                         <Video className="h-5 w-5 text-blue-400" />
-                        <span className="font-bold">실험 가이드 영상 (Video Tutorial)</span>
+                        <span className="font-bold text-sm">실험 가이드 영상 (Video Tutorial)</span>
                       </div>
                       <div className="aspect-video bg-black">
                         <iframe
@@ -432,8 +481,8 @@ export default function Kjeldahl() {
                     </div>
                   )}
 
-                </CardContent>
-              </Card>
+                </div>
+              </GlassCard>
             </motion.div>
           )}
         </AnimatePresence>
