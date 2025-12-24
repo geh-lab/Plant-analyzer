@@ -205,7 +205,11 @@ const analysisProtocols = {
       "96-well에 200 μL 분주",
       "표준곡선과 동시에 765 nm에서 흡광도 측정"
     ],
-    reagents: ["7.5% Na₂CO₃", "Folin-Ciocalteu reagent", "Stock 용액"],
+    reagents: [
+      "7.5% Na₂CO₃: 100 mL 증류수에 7.5 g Sodium Carbonate 용해",
+      "Folin-Ciocalteu reagent: 상업적으로 구입 (Sigma-Aldrich 등)",
+      "Stock 용액: Gallic acid 10 mg + 90% MeOH 10 mL = 1 mg/mL"
+    ],
     standard_curve_config: {
       title: "Gallic Acid 표준곡선 계산기",
       stock_name: "1 mg/mL Stock",
@@ -215,7 +219,9 @@ const analysisProtocols = {
       default_total_vol: 1.0,
       default_concs: [0, 20, 40, 60, 80, 100]
     },
-    storage_conditions: ["7.5% Na₂CO₃: 냉장 보관"],
+    storage_conditions: [
+      "7.5% Na₂CO₃: 냉장 보관 (제조 후)"
+    ],
     formulas: ["농도 = (흡광도 - b) / a"],
     unit: "mg GAE/g DW",
     icon: <Beaker className="h-4 w-4 sm:h-5 sm:w-5" />,
@@ -234,7 +240,12 @@ const analysisProtocols = {
       "상온에서 40분간 반응",
       "96-well에 200 μL 분주 후 표준곡선과 동시에 415 nm에서 흡광도 측정"
     ],
-    reagents: ["95% EtOH", "10% AlCl₃", "1 M Potassium acetate", "Stock 용액"],
+    reagents: [
+      "95% EtOH: 95 mL 에탄올 + 5 mL 증류수",
+      "10% AlCl₃: 100 mL 증류수에 10 g Aluminum Chloride 용해",
+      "1 M Potassium acetate: 100 mL 증류수에 9.82 g CH₃COOK 용해",
+      "Stock 용액: Quercetin 10 mg + 90% MeOH 10 mL = 1 mg/mL"
+    ],
     standard_curve_config: {
       title: "Quercetin 표준곡선 계산기",
       stock_name: "1 mg/mL Stock",
@@ -262,7 +273,9 @@ const analysisProtocols = {
       "1시간 동안 상온에서 반응",
       "96-well에 200 μL 분주 후 425 nm에서 흡광도 측정"
     ],
-    reagents: ["2 mM Sodium tetrachloropalladate"],
+    reagents: [
+      "2 mM Sodium tetrachloropalladate: 100 mL 증류수에 36.5 mg Na₂PdCl₄ 용해"
+    ],
     formulas: [<span key="g1">Total glucosinolate (μmol/g) = 1.40 + 118.86 × A<sub>425</sub></span>],
     unit: "μmol/g DW",
     icon: <Microscope className="h-4 w-4 sm:h-5 sm:w-5" />,
@@ -282,8 +295,13 @@ const analysisProtocols = {
       "Parafilm으로 밀봉 후 암조건에서 1시간 동안 반응",
       "96-well에 200 μL 분주 후 517 nm에서 흡광도 측정"
     ],
-    reagents: ["90% MeOH", "DPPH 용액"],
-    storage_conditions: ["DPPH: 냉장보관 (4℃)"],
+    reagents: [
+      "90% MeOH: 90 mL 메탄올 + 10 mL 증류수",
+      "DPPH 용액: 50 mL 90% MeOH에 200 mg DPPH (최종농도 4 mg/mL) 용해 후 호일로 포장"
+    ],
+    storage_conditions: [
+      "DPPH: 냉장보관 (4℃), 갈색병 또는 호일 포장 권장"
+    ],
     formulas: ["DPPH Inhibition (%) = ((Control - Sample) / Control) × 100%"],
     unit: "% inhibition",
     icon: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,
@@ -300,7 +318,10 @@ const analysisProtocols = {
       "2 mL 튜브에 상층액 1~1.5 mL 추출",
       "96-well에 200 μL 분주 후 530, 600 nm에서 흡광도 측정"
     ],
-    reagents: ["1% HCl-MeOH", "1 M HCl"],
+    reagents: [
+      "1% HCl-MeOH: 99 mL 메탄올에 1 mL 진한 염산(37%, 약 12 M)을 천천히 가하여 혼합",
+      "1 M HCl: 100 mL 증류수에 진한 염산(37%, 12 M) 약 8.3 mL를 천천히 첨가하여 혼합"
+    ],
     formulas: [
       <span key="a2">Anthocyanin (mg/g) = (A<sub>530</sub> - A<sub>600</sub>) × V × n × Mw / (ε × m)</span>,
       "V = 추출부피(mL), n = 희석배수, Mw = 449.2, ε = 26900, m = 시료무게(g)"
@@ -321,8 +342,15 @@ const analysisProtocols = {
       <span key="cat1">반응 혼합물 + 상층액 3 μL 혼합</span>,
       "96-well에 200 μL 분주 후 240 nm에서 10초마다 10분간 흡광도 측정"
     ],
-    reagents: ["50 mM PBS", "3% H₂O₂", "반응 혼합물"],
-    storage_conditions: ["H₂O₂: 냉장보관", "PBS 완충액: 냉장보관"],
+    reagents: [
+      "50 mM PBS (pH 7.0): 100 mL 증류수에 0.68 g KH₂PO₄ + 0.87 g K₂HPO₄ 용해",
+      "3% H₂O₂: 30% H₂O₂ 1 mL + 증류수 9 mL",
+      "반응 혼합물: 3% H₂O₂ 3.4 μL + 50 mM PBS 193.6 μL"
+    ],
+    storage_conditions: [
+      "H₂O₂: 냉장보관 (4℃), 갈색병 또는 호일 보관 권장, 공기 노출 최소화",
+      "PBS 완충액: 냉장보관 (4℃) (제조 후) - 오염 주의"
+    ],
     formulas: [
       <span key="cat2">CAT activity (μmol/min/mL) = (ΔA<sub>240</sub>/min) × total volume × 1000 / (43.6 × enzyme volume)</span>,
       "CAT activity (μmol/min/mg DW) = unit/mL / enzyme (mg/mL)"
@@ -343,8 +371,18 @@ const analysisProtocols = {
       <span key="pod1">반응 혼합물 + 상층액 20 μL 혼합</span>,
       "Blank는 상층액 제외한 반응 혼합물. 96-well에 200 μL 분주 후 470 nm에서 10초마다 흡광도 측정"
     ],
-    reagents: ["50 mM PBS", "40 mM Phosphate buffer", "20 mM Guaiacol", "3% H₂O₂", "반응 혼합물"],
-    storage_conditions: ["H₂O₂: 냉장보관", "Guaiacol: 실온/냉장", "PBS 완충액: 냉장보관"],
+    reagents: [
+      "50 mM PBS (pH 7.0): 100 mL 증류수에 0.68 g KH₂PO₄ + 0.87 g K₂HPO₄ 용해",
+      "40 mM Phosphate buffer: 100 mL 증류수에 0.54 g KH₂PO₄ + 0.70 g K₂HPO₄ 용해",
+      "20 mM Guaiacol: 100 mL 증류수에 248 mg guaiacol (20 mM) 용해",
+      "3% H₂O₂: 30% H₂O₂ 1 mL + 증류수 9 mL",
+      "반응 혼합물: 40 mM phosphate buffer 66.6 μL + 20 mM guaiacol 80 μL + 3% H₂O₂ 33.3 μL"
+    ],
+    storage_conditions: [
+      "H₂O₂: 냉장보관 (4℃), 갈색병 또는 호일 보관 권장, 공기 노출 최소화",
+      "Guaiacol: 실온 보관 가능 (장기 보관 시 냉장), 휘발성 강하므로 밀폐",
+      "PBS 완충액(pH 7.0): 냉장보관 (4℃) (제조 후) - 오염 주의"
+    ],
     formulas: [
       <span key="pod2">POD activity (μmol/min/mL) = (ΔA<sub>470</sub>/min) × total volume × 1000 / (26.6 × enzyme volume)</span>,
       "POD activity (μmol/min/mg DW) = unit/mL / enzyme (mg/mL)"
@@ -366,8 +404,20 @@ const analysisProtocols = {
       <span key="sod1">PPFD 50 μmol m<sup>-2</sup>s<sup>-1</sup>의 LED 광에 15분간 노출시킨 후 빛을 차단</span>,
       "96-well에 200 μL 분주 후 560 nm에서 흡광도 측정"
     ],
-    reagents: ["50 mM PBS", "0.1 M Methionine", "2.5 mM NBT", "10 mM EDTA", "0.5 mM Riboflavin", "반응 혼합물"],
-    storage_conditions: ["Riboflavin", "NBT", "Methionine", "EDTA, PBS"],
+    reagents: [
+      "50 mM PBS (pH 7.0): 100 mL 증류수에 0.68 g KH₂PO₄ + 0.87 g K₂HPO₄ 용해",
+      "0.1 M Methionine: 100 mL 증류수에 1.49 g methionine 용해",
+      "2.5 mM NBT: 100 mL 증류수에 205 mg nitro blue tetrazolium 용해",
+      "10 mM EDTA: 100 mL 증류수에 372 mg EDTA 용해",
+      "0.5 mM Riboflavin: 100 mL 증류수에 18.8 mg riboflavin 용해",
+      "반응 혼합물: 50mM pH 7.0 Sodium phosphate (93.5 μL) + 0.1M methionine (52 μL), 2.5 mM NBT (24.5 μL) + 10mM EDTA (2μL), 0.5mM riboflavin (8μL)"
+    ],
+    storage_conditions: [
+      "Riboflavin: 냉장보관 (4℃), 갈색병 또는 호일 보관 권장, 광분해 민감, 즉시 사용 권장",
+      "NBT: 냉장보관 (4℃), 갈색병 또는 호일 보관 권장, 암조건 유지",
+      "Methionine: 냉장보관 (4℃), 갈색병 또는 호일 보관 권장",
+      "EDTA, PBS 완충액(pH 7.0): 냉장보관 (4℃) - 오염 주의"
+    ],
     formulas: [
       "SOD inhibition (%) = ((Control - Sample) / Control) × 100%",
       "SOD activity (unit/mL) = (inhibition × total volume) / (50 × enzyme volume)",
@@ -389,7 +439,12 @@ const analysisProtocols = {
       "96-well에 시료 50 μL 또는 H₂O₂ 표준곡선 50 μL + 10 mM Potassium phosphate buffer 50 μL + 1 M KI 100 μL 혼합",
       "암실에서 1시간 반응 후 390 nm에서 측정"
     ],
-    reagents: ["0.1% TCA", "10 mM Potassium phosphate buffer", "1 M KI", "1 mM H₂O₂ Stock"],
+    reagents: [
+      "0.1% TCA: 100 mL 증류수에 100 mg trichloroacetic acid 용해",
+      "10 mM Potassium phosphate buffer (pH 7.0): 100 mL 증류수에 136 mg KH₂PO₄ + 174 mg K₂HPO₄ 용해",
+      "1 M KI: 100 mL 증류수에 16.6 g potassium iodide 용해",
+      "1 mM H₂O₂ Stock: 35% H₂O₂ 원액 5.1 μL + 0.1% TCA 49.995 mL(49,995 μL)"
+    ],
     standard_curve_config: {
       title: "1 mM H₂O₂ 표준곡선 계산기",
       stock_name: "1 mM Stock",
@@ -399,7 +454,11 @@ const analysisProtocols = {
       default_total_vol: 2.0,
       default_concs: [0, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80, 1.00]
     },
-    storage_conditions: ["H₂O₂", "KI", "TCA, PBS"],
+    storage_conditions: [
+      "H₂O₂: 갈색병 또는 호일 보관 권장, 공기 노출 최소화",
+      "KI: 냉장보관 (4℃)",
+      "TCA, PBS 등 완충액: 냉장보관 (4℃) (제조 후) - 오염 주의"
+    ],
     formulas: [
       <span key="h1">H<sub>2</sub>O<sub>2</sub> standard curve 사용하여 함량 계산</span>,
       "농도(mM) = (흡광도 - b) / a",

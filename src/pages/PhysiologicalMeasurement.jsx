@@ -40,7 +40,7 @@ export default function Physiological() {
           loop
           muted
           playsInline
-          className="object-cover w-full h-full opacity-60"
+          className="object-cover w-full h-full opacity-80"
           src={backgroundVideo} // [수정] import한 변수 사용
         />
         

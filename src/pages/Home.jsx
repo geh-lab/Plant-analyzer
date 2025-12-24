@@ -59,7 +59,7 @@ export default function Home() {
           playsInline
           onEnded={handleVideoEnded} // 영상 끝나면 다음으로
           
-          className="object-cover w-full h-full opacity-60 transition-opacity duration-300"
+          className="object-cover w-full h-full opacity-80"
         />
         {/* 영상 위 어두운 오버레이 */}
         <div className="absolute inset-0 bg-black/40" /> 

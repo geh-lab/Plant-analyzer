@@ -44,7 +44,7 @@ export default function MainHome() {
           // 영상이 끝나면(handleVideoEnded) 다음 영상으로 넘어감
           onEnded={handleVideoEnded} 
           
-          className="object-cover w-full h-full opacity-60 transition-opacity duration-300" 
+          className="object-cover w-full h-full opacity-80"
         />
         {/* 영상 위 어두운 오버레이 */}
         <div className="absolute inset-0 bg-black/40" />
