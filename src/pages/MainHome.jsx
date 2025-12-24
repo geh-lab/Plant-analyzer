@@ -1,56 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Beaker, Activity, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import LiquidGlass from "@/components/LiquidGlass.jsx";
 
-// 1. 파일명에 맞춰서 영상을 import 합니다.
-// (경로는 파일이 저장된 위치에 맞춰주세요. 예: @/videos/ 또는 @/assets/videos/)
-import videoPart1 from "@/videos/main_background_1.mp4";
-import videoPart2 from "@/videos/main_background_2.mp4";
-import videoPart3 from "@/videos/main_background_3.mp4";
-
-// 2. 영상을 순서대로 배열에 담습니다.
-const VIDEO_PLAYLIST = [videoPart1, videoPart2, videoPart3];
+// 비디오 파일 import
+import backgroundVideo from "@/videos/main_background.mp4"; 
 
 export default function MainHome() {
   const navigate = useNavigate();
-  
-  // 현재 재생 중인 영상의 번호 (0, 1, 2)
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // 영상이 끝나면 다음 번호로 넘기는 함수
-  const handleVideoEnded = () => {
-    setCurrentIndex((prevIndex) => {
-      // 다음 인덱스가 배열 길이(3)가 되면 다시 0으로 돌아감 (무한 루프)
-      return (prevIndex + 1) % VIDEO_PLAYLIST.length;
-    });
-  };
 
   return (
+    // bg-slate-900은 비디오 로딩 전 깜빡임 방지용
     <div className="relative min-h-screen overflow-hidden bg-slate-900">
       
       {/* 1. Background Video Layer */}
       <div className="absolute inset-0 z-0 w-full h-full">
         <video
-          // key값이 바뀌면 리액트가 "새로운 영상"으로 인식해 바로 다시 로드합니다.
-          key={currentIndex}
-          
-          src={VIDEO_PLAYLIST[currentIndex]}
-          
           autoPlay
+          loop
           muted
           playsInline
-          // 영상이 끝나면(handleVideoEnded) 다음 영상으로 넘어감
-          onEnded={handleVideoEnded} 
-          
-          className="object-cover w-full h-full opacity-80"
+          className="object-cover w-full h-full opacity-60"
+          src={backgroundVideo} 
         />
-        {/* 영상 위 어두운 오버레이 */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* 어두운 오버레이 */}
+        
       </div>
 
-      {/* 2. Main Content Layer (기존 내용 유지) */}
+      {/* 2. Main Content Layer */}
+      {/* py-24 등으로 상단 패딩을 주어 헤더에 가리지 않게 함 */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-24 flex flex-col items-center justify-center min-h-screen">
         
         {/* Title Section */}
@@ -60,6 +39,8 @@ export default function MainHome() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
+          {/* System Operational 삭제됨 */}
+          
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight mb-6 drop-shadow-2xl">
             Plant Analyzer
           </h1>
@@ -68,7 +49,7 @@ export default function MainHome() {
           </p>
         </motion.div>
 
-        {/* 3. Grid Cards */}
+        {/* 3. Grid with Liquid Glass Components */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
 
           {/* Instrumental Analysis Card */}

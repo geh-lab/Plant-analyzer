@@ -1,18 +1,12 @@
-import React, { useState } from 'react'; // [수정] useState 추가 필수
+import React from 'react';
 import { motion } from 'framer-motion';
 import { TestTube, FlaskConical, Beaker, Play, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; 
-import LiquidGlass from "@/components/LiquidGlass.jsx";    
+import { useNavigate } from 'react-router-dom'; // [수정] 리액트 이동 훅 추가
+import { createPageUrl } from '@/utils';        // [수정] 경로 @/utils 로 통일
+import LiquidGlass from "@/components/LiquidGlass.jsx";    // [수정] MainHome과 경로 통일
 
-// [수정] 4개의 분할된 비디오 파일 import
-// (이미지 파일명: IA_background_1.mp4 ~ 4.mp4)
-import videoPart1 from "@/videos/IA_background_1.mp4"; 
-import videoPart2 from "@/videos/IA_background_2.mp4"; 
-import videoPart3 from "@/videos/IA_background_3.mp4"; 
-import videoPart4 from "@/videos/IA_background_4.mp4"; 
-
-// 재생 목록 배열 생성
-const VIDEO_PLAYLIST = [videoPart1, videoPart2, videoPart3, videoPart4];
+// [추가] 비디오 파일 import (경로가 맞는지 확인해주세요)
+import backgroundVideo from "@/videos/IA_background.mp4"; 
 
 const CardContent = ({ icon, title, description }) => (
   <div className="flex flex-col h-full text-left">
@@ -34,35 +28,22 @@ const CardContent = ({ icon, title, description }) => (
 );
 
 export default function Home() {
-  const navigate = useNavigate();
-
-  // [추가] 현재 재생 중인 영상 번호 (0 ~ 3)
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // [추가] 영상 종료 시 다음 영상으로 넘어가는 핸들러
-  const handleVideoEnded = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % VIDEO_PLAYLIST.length);
-  };
+  const navigate = useNavigate(); // [수정] 이동 함수 생성
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-900">
         
-      {/* Background Video Layer */}
+      {/* Background Video (public 폴더 경로 사용 권장) */}
       <div className="absolute inset-0 z-0 w-full h-full">
         <video
-          // key값이 바뀌면 React가 새 영상으로 인식하여 즉시 로드함
-          key={currentIndex}
-          src={VIDEO_PLAYLIST[currentIndex]}
-          
           autoPlay
+          loop
           muted
           playsInline
-          onEnded={handleVideoEnded} // 영상 끝나면 다음으로
-          
-          className="object-cover w-full h-full opacity-80"
+          className="object-cover w-full h-full opacity-60"
+          src={backgroundVideo} // [수정] import한 변수 사용
         />
-        {/* 영상 위 어두운 오버레이 */}
-        <div className="absolute inset-0 bg-black/40" /> 
+        
       </div>
 
       {/* Main Content */}
@@ -72,7 +53,7 @@ export default function Home() {
         <motion.button
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/')} // [수정] 메인으로 돌아가기
             className="mb-12 flex items-center text-gray-400 hover:text-white transition-colors group"
         >
             <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 mr-3">
@@ -103,7 +84,7 @@ export default function Home() {
           
           {/* 1. 흡광도 카드 */}
           <div 
-            onClick={() => navigate('/analysis')} 
+            onClick={() => navigate('/analysis')} // [수정] 클릭 시 이동
             className="h-full cursor-pointer group"
           >
             <LiquidGlass
@@ -125,7 +106,7 @@ export default function Home() {
           
           {/* 2. HPLC 카드 */}
           <div 
-            onClick={() => navigate('/hplc')} 
+            onClick={() => navigate('/hplc')} // [수정] 클릭 시 이동
             className="h-full cursor-pointer group"
           >
             <LiquidGlass
@@ -147,7 +128,7 @@ export default function Home() {
 
           {/* 3. Kjeldahl 카드 */}
           <div 
-            onClick={() => navigate('/kjeldahl')} 
+            onClick={() => navigate('/kjeldahl')} // [수정] 클릭 시 이동
             className="h-full cursor-pointer group"
           >
             <LiquidGlass
@@ -171,4 +152,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+} 
