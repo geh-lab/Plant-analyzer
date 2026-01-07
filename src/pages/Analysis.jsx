@@ -467,7 +467,17 @@ const analysisProtocols = {
     ],
     unit: "μmol/g FW",
     icon: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,
-    references: [{ citation: "Alexieva, V. et al. (2001).", doi: "10.1046/j.1365-3040.2001.00778.x" }],
+    references: [
+  {
+    citation: "Alexieva, V. et al. (2001).",
+    doi: "10.1046/j.1365-3040.2001.00778.x"
+  },
+  {
+    citation: "Junglee, S. et al. (2014).",
+    doi: "10.4236/ajac.2014.511081"
+  }
+],
+
     writing_guide: {
       title: "논문 작성 가이드 (Methods)",
       content: [
