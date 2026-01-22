@@ -110,64 +110,43 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
           </div>
         );
 
-// 3. 과산화수소 (H2O2) - 공식 설명 부분 삭제됨
-      case "h2o2":
+case "h2o2":
         return (
-          <div className="space-y-4">
-            {/* 첫 번째 줄: 표준곡선 (a, b) */}
-            <div className="flex flex-col sm:flex-row items-end gap-4">
-              <div className="flex-1 w-full">
+          <div className="flex flex-col space-y-4">
+            {/* 1. 입력 Row: 기울기, 절편, 그리고 적용 버튼 */}
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="flex-1 min-w-[150px]">
                 <ParamInput 
                   label="기울기 (a)" 
                   value={params.h2o2?.a || ""} 
                   onChange={e => handleNestedParamChange('h2o2', 'a', e.target.value)} 
-                  placeholder="Slope" 
+                  placeholder="Standard curve's slope" 
                 />
               </div>
-              <div className="flex-1 w-full">
+              <div className="flex-1 min-w-[150px]">
                 <ParamInput 
                   label="Y절편 (b)" 
                   value={params.h2o2?.b || ""} 
                   onChange={e => handleNestedParamChange('h2o2', 'b', e.target.value)} 
-                  placeholder="Intercept" 
+                  placeholder="Standard curve's y-intercept" 
                 />
+              </div>
+              
+              {/* 버튼 위치: 입력창 바로 오른쪽 */}
+              <div className="flex-shrink-0">
+                <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
+                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
+                  {isApplied ? "적용됨" : "적용"}
+                </Button>
               </div>
             </div>
 
-            {/* 표준곡선 수식 표시 */}
-            <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center">
-               y = <HighlightedValue value={params.h2o2?.a} placeholder="a" />x + (<HighlightedValue value={params.h2o2?.b} placeholder="b" />)
-            </p>
-
-            <div className="w-full border-t border-gray-200 my-2"></div>
-
-            {/* 두 번째 줄: 프로토콜 상수 (부피, 시료량) */}
-            <div className="flex flex-col sm:flex-row items-end gap-4">
-              <div className="flex-1 w-full">
-                <ParamInput 
-                  label="추출 부피 (mL)" 
-                  value={params.h2o2?.vol || ""} 
-                  onChange={e => handleNestedParamChange('h2o2', 'vol', e.target.value)} 
-                  placeholder="기본: 2" 
-                />
-              </div>
-              <div className="flex-1 w-full">
-                <ParamInput 
-                  label="시료량 (g DW)" 
-                  value={params.h2o2?.dw || ""} 
-                  onChange={e => handleNestedParamChange('h2o2', 'dw', e.target.value)} 
-                  placeholder="기본: 0.02" 
-                />
-              </div>
-              <Button onClick={handleApply} className="ios-button rounded-xl h-12 w-full sm:w-auto flex items-center justify-center flex-shrink-0">
-                {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                {isApplied ? "적용됨" : "적용"}
-              </Button>
+            {/* 2. 표준곡선 수식 표시 (깔끔하게 하단 배치) */}
+            <div className="text-white font-mono p-4 bg-white/10 rounded-lg text-center text-sm">
+               Standard Curve: y = <HighlightedValue value={params.h2o2?.a} placeholder="a" />x + (<HighlightedValue value={params.h2o2?.b} placeholder="b" />)
             </div>
           </div>
         );
-
-
 
         
       case "dpph_scavenging":
@@ -185,7 +164,7 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
             </p>
           </div>
         );
-      case "anthocyanin":
+case "anthocyanin":
         return (
            <div className="flex flex-col space-y-4">
             <div className="flex flex-wrap gap-4">
@@ -205,66 +184,75 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
                 <ParamInput label="시료 무게 (m, g)" value={params.anthocyanin?.m || ""} onChange={e => handleNestedParamChange('anthocyanin', 'm', e.target.value)} placeholder="Default: 0.02" />
               </div>
               <div className="flex-shrink-0">
-                <Button onClick={handleApply} className="ios-button rounded-xl h-12 mt-6 flex items-center justify-center px-6">
-                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                  {isApplied ? "적용됨" : "적용"}
-                </Button>
-              </div>
+                 <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
+                   {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
+                   {isApplied ? "적용됨" : "적용"}
+                 </Button>
+               </div>
             </div>
             <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-              Anthocyanin = (A530 - A600) × <HighlightedValue value={params.anthocyanin?.V} placeholder="V" /> × <HighlightedValue value={params.anthocyanin?.n} placeholder="n" /> × <HighlightedValue value={params.anthocyanin?.Mw} placeholder="Mw" /> / (<HighlightedValue value={params.anthocyanin?.epsilon} placeholder="ε" /> × <HighlightedValue value={params.anthocyanin?.m} placeholder="m" />)
+                Anthocyanin = (A530 - A600) × <HighlightedValue value={params.anthocyanin?.V} placeholder="V"/> × <HighlightedValue value={params.anthocyanin?.n} placeholder="n"/> × <HighlightedValue value={params.anthocyanin?.Mw} placeholder="Mw"/> / (<HighlightedValue value={params.anthocyanin?.epsilon} placeholder="ε"/> × <HighlightedValue value={params.anthocyanin?.m} placeholder="m"/>)
             </p>
            </div>
         );
-       case "pod":
-       case "cat":
-       case "sod":
-         const enzyme = analysisType;
+
+case "sod":
+         const enzyme = "sod"; 
          
-         if (enzyme === 'sod') {
-             return (
-                 <div className="flex flex-col space-y-4">
-                   <div className="flex flex-wrap items-end gap-4">
-                     <div className="flex-1 min-w-[150px]">
-                       <ParamInput label="Control Absorbance" value={params.sod?.control_abs || ""} onChange={e => handleNestedParamChange('sod', 'control_abs', e.target.value)} placeholder="Absorbance of control" />
-                     </div>
-                     <div className="flex-1 min-w-[120px]">
-                       <ParamInput label="Total Volume (μL)" value={params.sod?.total_vol || ""} onChange={e => handleNestedParamChange('sod', 'total_vol', e.target.value)} placeholder="e.g., 200" />
-                     </div>
-                     <div className="flex-1 min-w-[120px]">
-                       <ParamInput label="Enzyme Volume (μL)" value={params.sod?.enzyme_vol || ""} onChange={e => handleNestedParamChange('sod', 'enzyme_vol', e.target.value)} placeholder="e.g., 20" />
-                     </div>
-                     <div className="flex-1 min-w-[150px]">
-                       <ParamInput label="Enzyme Conc. (mg/mL)" value={params.sod?.enzyme_conc || ""} onChange={e => handleNestedParamChange('sod', 'enzyme_conc', e.target.value)} placeholder="Enzyme concentration" />
-                     </div>
-                     <div className="flex-shrink-0">
-                       <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                          {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                          {isApplied ? "적용됨" : "적용"}
-                       </Button>
-                     </div>
-                   </div>
-                    <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                       SOD activity = (inhibition% × <HighlightedValue value={params.sod?.total_vol} placeholder="total_vol"/>) / (50 × <HighlightedValue value={params.sod?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params.sod?.enzyme_conc} placeholder="enzyme_conc"/>
-                    </p>
-                </div>
-            )
-         }
-         // CAT and POD layout
          return (
+             <div className="flex flex-col space-y-4">
+               {/* 1. 상단 입력창들 (기존 유지) */}
+               <div className="flex flex-wrap items-end gap-4">
+                 <div className="flex-1 min-w-[150px]">
+                   <ParamInput label="Control Abs (560nm)" value={params.sod?.control_abs || ""} onChange={e => handleNestedParamChange('sod', 'control_abs', e.target.value)} placeholder="e.g., 0.800" />
+                 </div>
+                 <div className="flex-1 min-w-[120px]">
+                   <ParamInput label="Total Volume (μL)" value={params.sod?.total_vol || ""} onChange={e => handleNestedParamChange('sod', 'total_vol', e.target.value)} placeholder="e.g., 200" />
+                 </div>
+                 <div className="flex-1 min-w-[120px]">
+                   <ParamInput label="Enzyme Volume (μL)" value={params.sod?.enzyme_vol || ""} onChange={e => handleNestedParamChange('sod', 'enzyme_vol', e.target.value)} placeholder="e.g., 20" />
+                 </div>
+                 <div className="flex-1 min-w-[150px]">
+                   <ParamInput label="Enzyme Conc. (mg/mL)" value={params.sod?.enzyme_conc || ""} onChange={e => handleNestedParamChange('sod', 'enzyme_conc', e.target.value)} placeholder="e.g., 10" />
+                 </div>
+                 <div className="flex-shrink-0">
+                   <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
+                      {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
+                      {isApplied ? "적용됨" : "적용"}
+                   </Button>
+                 </div>
+               </div>
+
+                {/* 2. 공식 표시 부분 (수정됨: 박스 2개로 분리) */}
+                <div className="space-y-2"> {/* 박스 사이 간격 조절 */}
+                   
+                   {/* 박스 1: Inhibition 공식 */}
+                   <div className="text-white font-mono p-4 bg-white/10 rounded-lg text-sm leading-relaxed text-center">
+                     <>SOD inhibition (%)</> = ((<HighlightedValue value={params.sod?.control_abs} placeholder="Control"/> - <>Sample</>) / <HighlightedValue value={params.sod?.control_abs} placeholder="Control"/>) × 100
+                   </div>
+
+                   {/* 박스 2: Activity 공식 */}
+                   <div className="text-white font-mono p-4 bg-white/10 rounded-lg text-sm leading-relaxed text-center">
+                     <>SOD activity</> = (SOD inhibition (%) × <HighlightedValue value={params.sod?.total_vol} placeholder="total_vol"/>) / (50 × <HighlightedValue value={params.sod?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params.sod?.enzyme_conc} placeholder="enzyme_conc"/>
+                   </div>
+                   
+                </div>
+            </div>
+        );
+// 2. CAT (Catalase) 분리
+      case "cat":
+        return (
            <div className="flex flex-col space-y-4">
              <div className="flex flex-wrap items-end gap-4">
-               <div className="flex-1 min-w-[150px]">
-                 <ParamInput label="ΔA/min" value={params[enzyme]?.delta_A || ""} onChange={e => handleNestedParamChange(enzyme, 'delta_A', e.target.value)} placeholder="Change in absorbance per minute" />
-               </div>
                <div className="flex-1 min-w-[120px]">
-                 <ParamInput label="Total Volume (μL)" value={params[enzyme]?.total_vol || ""} onChange={e => handleNestedParamChange(enzyme, 'total_vol', e.target.value)} placeholder="e.g., 200" />
+                 <ParamInput label="Total Volume (μL)" value={params.cat?.total_vol || ""} onChange={e => handleNestedParamChange('cat', 'total_vol', e.target.value)} placeholder="e.g., 200" />
                </div>
+               {/* CAT는 3uL 권장 */}
                <div className="flex-1 min-w-[120px]">
-                 <ParamInput label="Enzyme Volume (μL)" value={params[enzyme]?.enzyme_vol || ""} onChange={e => handleNestedParamChange(enzyme, 'enzyme_vol', e.target.value)} placeholder="e.g., 20" />
+                 <ParamInput label="Enzyme Volume (μL)" value={params.cat?.enzyme_vol || ""} onChange={e => handleNestedParamChange('cat', 'enzyme_vol', e.target.value)} placeholder="e.g., 3" />
                </div>
                <div className="flex-1 min-w-[150px]">
-                 <ParamInput label="Enzyme Conc. (mg/mL)" value={params[enzyme]?.enzyme_conc || ""} onChange={e => handleNestedParamChange(enzyme, 'enzyme_conc', e.target.value)} placeholder="Enzyme concentration" />
+                 <ParamInput label="Enzyme Conc. (mg/mL)" value={params.cat?.enzyme_conc || ""} onChange={e => handleNestedParamChange('cat', 'enzyme_conc', e.target.value)} placeholder="e.g., 10" />
                </div>
                <div className="flex-shrink-0">
                  <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
@@ -274,10 +262,39 @@ export default function CalculationParams({ analysisType, onParamsChange, initia
                </div>
              </div>
              <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-               {enzyme.toUpperCase()} activity = (<HighlightedValue value={params[enzyme]?.delta_A} placeholder="ΔA"/> × <HighlightedValue value={params[enzyme]?.total_vol} placeholder="total_vol"/> × 1000) / ({enzyme === 'cat' ? '43.6' : '26.6'} × <HighlightedValue value={params[enzyme]?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params[enzyme]?.enzyme_conc} placeholder="enzyme_conc"/>
+               CAT activity = (<span className="text-blue-600 font-bold">Measured ΔA (240 nm)</span> × <HighlightedValue value={params.cat?.total_vol} placeholder="total_vol"/> × 1000) / (43.6 × <HighlightedValue value={params.cat?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params.cat?.enzyme_conc} placeholder="enzyme_conc"/>
              </p>
            </div>
          );
+
+      // 3. POD (Peroxidase) 분리
+      case "pod":
+        return (
+           <div className="flex flex-col space-y-4">
+             <div className="flex flex-wrap items-end gap-4">
+               <div className="flex-1 min-w-[120px]">
+                 <ParamInput label="Total Volume (μL)" value={params.pod?.total_vol || ""} onChange={e => handleNestedParamChange('pod', 'total_vol', e.target.value)} placeholder="e.g., 200" />
+               </div>
+               {/* POD는 20uL 권장 (프로토콜 기준) */}
+               <div className="flex-1 min-w-[120px]">
+                 <ParamInput label="Enzyme Volume (μL)" value={params.pod?.enzyme_vol || ""} onChange={e => handleNestedParamChange('pod', 'enzyme_vol', e.target.value)} placeholder="e.g., 20" />
+               </div>
+               <div className="flex-1 min-w-[150px]">
+                 <ParamInput label="Enzyme Conc. (mg/mL)" value={params.pod?.enzyme_conc || ""} onChange={e => handleNestedParamChange('pod', 'enzyme_conc', e.target.value)} placeholder="e.g., 10" />
+               </div>
+               <div className="flex-shrink-0">
+                 <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
+                   {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
+                   {isApplied ? "적용됨" : "적용"}
+                 </Button>
+               </div>
+             </div>
+             <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
+               POD activity = (<span className="text-blue-600 font-bold">Measured ΔA (470 nm)</span> × <HighlightedValue value={params.pod?.total_vol} placeholder="total_vol"/> × 1000) / (26.6 × <HighlightedValue value={params.pod?.enzyme_vol} placeholder="enzyme_vol"/>) / <HighlightedValue value={params.pod?.enzyme_conc} placeholder="enzyme_conc"/>
+             </p>
+           </div>
+         );
+
       default:
         return null;
     }
