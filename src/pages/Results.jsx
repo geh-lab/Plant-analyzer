@@ -465,26 +465,51 @@ export default function Results() {
     const values = sample.absorbance_values;
     if (!values) return { result: 0, unit: "N/A" };
 
-    switch (sample.analysis_type) {
+switch (sample.analysis_type) {
       case "chlorophyll_a_b": {
         const a665 = values["665.2"] || 0; const a652 = values["652.4"] || 0; const a470 = values["470"] || 0;
         const dF = parseFloat(p?.dilutionFactor) || 1;
-        const ca = (16.82 * a665 - 9.28 * a652) * dF;
-        const cb = (36.92 * a652 - 16.54 * a665) * dF;
-        const car = (1000 * a470 - 1.91 * (ca / dF) - 95.15 * (cb / dF)) / 225 * dF;
-        return { result: ca, unit: "μg/mL", chl_a: ca, chl_b: cb, carotenoid: car };
+
+        // [Step 1] 먼저 액체 농도(μg/mL)를 계산합니다. (공식 깨짐 방지)
+        // raw_ 변수는 화면에 보여주진 않지만 계산을 위해 필요한 중간 값입니다.
+        const raw_ca = (16.82 * a665 - 9.28 * a652) * dF;
+        const raw_cb = (36.92 * a652 - 16.54 * a665) * dF;
+        
+        // Carotenoid 공식에는 희석 전 농도(raw값)가 들어가야 정확합니다.
+        const raw_car = (1000 * a470 - 1.91 * (raw_ca / dF) - 95.15 * (raw_cb / dF)) / 225 * dF;
+
+        // [Step 2] 최종 결과(mg/g)로 변환합니다. (나누기 10)
+        const ca = raw_ca / 10;
+        const cb = raw_cb / 10;
+        const car = raw_car / 10;
+
+        // unit을 "mg/g"으로 변경했습니다.
+        return { result: ca, unit: "mg/g", chl_a: ca, chl_b: cb, carotenoid: car };
       }
+
       case "carotenoid": {
         const a470 = values["470"] || 0; const a665 = values["665.2"] || 0; const a652 = values["652.4"] || 0;
-        const ca = 16.82 * a665 - 9.28 * a652; const cb = 36.92 * a652 - 16.54 * a665;
-        return { result: (1000 * a470 - 1.91 * ca - 95.15 * cb) / 225, unit: "μg/mL" };
+        
+        // 여기도 마찬가지로 계산 후 마지막에 10을 나눕니다.
+        const raw_ca = 16.82 * a665 - 9.28 * a652; 
+        const raw_cb = 36.92 * a652 - 16.54 * a665;
+        const raw_car = (1000 * a470 - 1.91 * raw_ca - 95.15 * raw_cb) / 225;
+
+        return { result: raw_car / 10, unit: "mg/g" };
       }
       case "total_phenol":
       case "total_flavonoid": {
+        // 기울기(a)나 절편(b)이 없으면 계산 불가 처리
         if (!p.std_a || !p.std_b) return { result: 0, unit: "N/A" };
+        
+        // 흡광도 값 가져오기
         const y = values[Object.keys(values)[0]] || 0;
+        
+        // [수정] 액체농도(μg/mL)를 구한 뒤 10으로 나누어 최종 함량(mg/g)으로 변환
+        const result_val = ((y - parseFloat(p.std_b)) / parseFloat(p.std_a)) / 10;
+
         return {
-          result: (y - parseFloat(p.std_b)) / parseFloat(p.std_a),
+          result: result_val,
           unit: sample.analysis_type === "total_phenol" ? "mg GAE/g DW" : "mg QE/g DW"
         };
       }
@@ -496,7 +521,7 @@ export default function Results() {
         const r_dw = (mM * parseFloat(vol)) / parseFloat(dw);
         const fw = sample.weight ? parseFloat(sample.weight) : parseFloat(dw);
         const r_fw = r_dw * (parseFloat(dw) / fw);
-        return { result: Math.max(0, r_fw), unit: "μmol/g FW", result_dw: Math.max(0, r_dw), result_fw: Math.max(0, r_fw) };
+        return { result: Math.max(0, r_fw), unit: "μmol/g DW", result_dw: Math.max(0, r_dw), result_fw: Math.max(0, r_fw) };
       }
       case "glucosinolate":
         return { result: 1.40 + 118.86 * (values["425"] || 0), unit: "μmol/g DW" };
@@ -511,24 +536,87 @@ export default function Results() {
           unit: "mg/g DW"
         };
       }
-      case "cat": {
-        const { delta_A, total_vol, enzyme_vol, enzyme_conc } = p.cat || {};
+case "cat": {
+        // [1] 측정값(변수): 샘플마다 다른 값 (ΔA/min)
+        // 사용자가 "240" 컬럼이나 "dA_min" 컬럼에 입력한 값을 찾습니다.
+        const delta_A = parseFloat(values["240"] || values["dA_min"] || 0);
+
+        // [2] 설정값(상수): UI에서 설정한 파라미터 가져오기
+        // ★ 수정됨: UI 코드(Analysis.js)와 변수명을 맞췄습니다. (volume -> vol)
+        const total_vol = parseFloat(p?.total_vol) || 200;    
+        const enzyme_vol = parseFloat(p?.enzyme_vol) || 3;    
+        const enzyme_conc = parseFloat(p?.enzyme_conc) || 10; 
+
+        // ΔA 값이 없으면 0 반환
         if (!delta_A) return { result: 0, unit: "μmol/min/mg DW" };
-        const act = (parseFloat(delta_A) * parseFloat(total_vol) * 1000) / (43.6 * parseFloat(enzyme_vol));
-        return { result: act / parseFloat(enzyme_conc), unit: "μmol/min/mg DW" };
+
+        // [3] 계산 수행
+        // 공식: (ΔA * Total_Vol * 1000) / (43.6 * Enzyme_Vol)
+        const vol_activity = (delta_A * total_vol * 1000) / (43.6 * enzyme_vol);
+        
+        // 최종: Unit/mL / (mg/mL) = Unit/mg DW
+        const specific_activity = vol_activity / enzyme_conc;
+
+        return { 
+            result: specific_activity, 
+            unit: "μmol/min/mg DW" 
+        };
       }
-      case "pod": {
-        const { delta_A, total_vol, enzyme_vol, enzyme_conc } = p.pod || {};
+case "pod": {
+        // [1] 측정값(변수): 샘플마다 다른 값
+        // UI 데이터 입력창의 라벨이 "470 nm"이므로 values["470"]을 가져옵니다.
+        const delta_A = parseFloat(values["470"] || values["dA_min"] || 0);
+
+        // [2] 설정값(상수): 공통 설정
+        // 값이 없으면 기본값 (200, 20, 10) 적용
+        const total_vol = parseFloat(p.pod?.total_vol) || 200;
+        const enzyme_vol = parseFloat(p.pod?.enzyme_vol) || 20; // POD는 20uL
+        const enzyme_conc = parseFloat(p.pod?.enzyme_conc) || 10; 
+
         if (!delta_A) return { result: 0, unit: "μmol/min/mg DW" };
-        const act = (parseFloat(delta_A) * parseFloat(total_vol) * 1000) / (26.6 * parseFloat(enzyme_vol));
-        return { result: act / parseFloat(enzyme_conc), unit: "μmol/min/mg DW" };
+
+        // [3] 계산 수행 (계수 26.6)
+        // 공식: (ΔA * Total_Vol * 1000) / (26.6 * Enzyme_Vol)
+        const act = (delta_A * total_vol * 1000) / (26.6 * enzyme_vol);
+        
+        // 최종: Unit/mL / (mg/mL) = Unit/mg DW
+        return { 
+            result: act / enzyme_conc, 
+            unit: "μmol/min/mg DW" 
+        };
       }
-      case "sod": {
-        const { control_abs, enzyme_vol, enzyme_conc, total_vol } = p.sod || {};
-        if (!control_abs) return { result: 0, unit: "unit/mg DW" };
-        const inhib = ((parseFloat(control_abs) - (values["560"] || 0)) / parseFloat(control_abs)) * 100;
-        const act = (inhib * parseFloat(total_vol)) / (50 * parseFloat(enzyme_vol));
-        return { result: act / parseFloat(enzyme_conc), unit: "unit/mg DW" };
+case "sod": {
+        // [1] 측정값: 샘플의 흡광도 (560 nm)
+        const sample_abs = parseFloat(values["560"] || values["abs"] || 0);
+
+        // [2] 설정값: Control 흡광도 및 부피 설정
+        const control_abs = parseFloat(p.sod?.control_abs) || 0; // ★ 가장 중요!
+        const total_vol = parseFloat(p.sod?.total_vol) || 200;
+        const enzyme_vol = parseFloat(p.sod?.enzyme_vol) || 20;
+        const enzyme_conc = parseFloat(p.sod?.enzyme_conc) || 10;
+
+        // Control 값이 없거나 0이면 계산 불가 (분모가 0이 됨)
+        if (!control_abs || control_abs <= 0) return { result: 0, unit: "Unit/mg DW (Check Control)" };
+
+        // [3] Inhibition (%) 계산
+        // 공식: (Control - Sample) / Control * 100
+        let inhibition = ((control_abs - sample_abs) / control_abs) * 100;
+        
+        // (혹시 샘플 흡광도가 더 높아서 음수가 나오면 0으로 보정)
+        if (inhibition < 0) inhibition = 0;
+
+        // [4] Unit/mL 계산 (제공해주신 공식 따름)
+        // 공식: (inhibition% * total_vol) / (50 * enzyme_vol)
+        // (참고: 50% 저해를 1 Unit으로 정의하는 식입니다)
+        const unit_per_ml = (inhibition * total_vol) / (50 * enzyme_vol);
+
+        // [5] 최종 결과: Unit/mg DW
+        const result_val = unit_per_ml / enzyme_conc;
+
+        return { 
+            result: result_val, 
+            unit: "Unit/mg DW" 
+        };
       }
       default:
         return { result: 0, unit: "N/A" };

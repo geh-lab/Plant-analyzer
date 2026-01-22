@@ -182,11 +182,11 @@ const analysisProtocols = {
     ],
     reagents: ["90% MeOH: 90 mL 메탄올 + 10 mL 증류수"],
     formulas: [
-      <span key="c1">Chl a (μg/mL) = 16.82 × A<sub>665.2</sub> - 9.28 × A<sub>652.4</sub></span>,
-      <span key="c2">Chl b (μg/mL) = 36.92 × A<sub>652.4</sub> - 16.54 × A<sub>665.2</sub></span>,
-      <span key="c3">Carotenoid (μg/mL) = (1000 × A<sub>470</sub> - 1.91 × Chl a - 95.15 × Chl b) / 225</span>
+      <span key="c1">Chl a (mg/g) = (16.82 × A<sub>665.2</sub> - 9.28 × A<sub>652.4</sub>) / 10</span>,
+      <span key="c2">Chl b (mg/g) = (36.92 × A<sub>652.4</sub> - 16.54 × A<sub>665.2</sub>) / 10</span>,
+      <span key="c3">Carotenoid (mg/g) = (1000 × A<sub>470</sub> - 1.91 × Chl a - 95.15 × Chl b) / 2250</span>
     ],
-    unit: "μg/mL",
+    unit: "mg/g DW", // ✅ 단위 수정 완료
     icon: <TestTube className="h-4 w-4 sm:h-5 sm:w-5" />,
     references: [{ citation: "Lichtenthaler, H.K.; Buschmann, C. (2001).", doi: "10.1002/0471142913.faf0403s01" }]
   },
@@ -222,7 +222,7 @@ const analysisProtocols = {
     storage_conditions: [
       "7.5% Na₂CO₃: 냉장 보관 (제조 후)"
     ],
-    formulas: ["농도 = (흡광도 - b) / a"],
+    formulas: ["함량 (mg/g) = ((흡광도 - b) / a) / 10"],
     unit: "mg GAE/g DW",
     icon: <Beaker className="h-4 w-4 sm:h-5 sm:w-5" />,
     references: [{ citation: "Severo, J. et al. (2011).", doi: "10.1016/j.foodchem.2010.11.107" }]
@@ -255,7 +255,7 @@ const analysisProtocols = {
       default_total_vol: 1.0,
       default_concs: [0, 10, 20, 40, 60, 80, 100]
     },
-    formulas: ["농도 = (흡광도 - b) / a"],
+    formulas: ["함량 (mg/g) = ((흡광도 - b) / a) / 10"],
     unit: "mg QE/g DW",
     icon: <FlaskConical className="h-4 w-4 sm:h-5 sm:w-5" />,
     references: [{ citation: "Chang, C.-C. et al. (2002).", doi: "10.38212/2224-6614.2748" }]
@@ -393,7 +393,7 @@ const analysisProtocols = {
   },
   sod: {
     title: "슈퍼옥사이드 디스뮤타아제",
-    subtitle: "SOD Activity",
+    subtitle: "Superoxide Dismutase (SOD) Activity",
     wavelengths: ["560"],
     protocol: [
       "2 mL 튜브에 시료 20 mg + 50 mM PBS (pH 7.0) 2 mL 순서대로 혼합 후 vortex",
@@ -467,17 +467,7 @@ const analysisProtocols = {
     ],
     unit: "μmol/g FW",
     icon: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,
-    references: [
-  {
-    citation: "Alexieva, V. et al. (2001).",
-    doi: "10.1046/j.1365-3040.2001.00778.x"
-  },
-  {
-    citation: "Junglee, S. et al. (2014).",
-    doi: "10.4236/ajac.2014.511081"
-  }
-],
-
+    references: [{ citation: "Alexieva, V. et al. (2001).", doi: "10.1046/j.1365-3040.2001.00778.x" }],
     writing_guide: {
       title: "논문 작성 가이드 (Methods)",
       content: [
