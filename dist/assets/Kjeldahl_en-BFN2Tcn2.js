@@ -1,0 +1,1 @@
+import{j as r}from"./index-k9WL9yPX.js";import t from"./Kjeldahl-D0IpobNx.js";import"./GuideVideo-jPvdG_R5.js";import"./InstrumentFrame-DcLcEowW.js";import"./instrumentData-DfgVWpS6.js";function p(){return r.jsx(t,{lang:"en"})}export{p as default};
