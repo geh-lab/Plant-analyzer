@@ -1,0 +1,44 @@
+/* Shared surfaces for the light-authored instrument, assay and results workspaces. */
+:root[data-theme=dark] body {background:var(--ui-bg);color:var(--ui-ink)}
+:root[data-theme=dark] :is(.studio-header,.studio-palette,.studio-select-popup,.ra-panel,.ra-dialog,.inst-panel,.inst-form,.inst-figure-card,.assay-instrument,.assay-detail,.assay-shelf) {
+  background-color:var(--ui-panel);border-color:var(--ui-line);color:var(--ui-ink)
+}
+:root[data-theme=dark] :is(.studio-footer,.studio-nav,.studio-palette [data-command-input-wrapper],.studio-select-scroll) {background:var(--ui-well);border-color:var(--ui-line);color:var(--ui-muted)}
+:root[data-theme=dark] :is(.studio-brand,.studio-footer strong,.inst-page .inst-panel h2,.inst-panel h3,.inst-form h3,.inst-details summary,.assay-form label,.inst-field,.assay-controls label,.ra-form label,.ra-label) {color:var(--ui-ink)}
+:root[data-theme=dark] :is(.brand-product,.studio-utilities,.studio-nav a,.studio-footer a,.route-loading,.studio-select-group,.studio-select-chevron,.inst-muted,.inst-method-sources li p,.inst-details,.inst-photos figcaption,.inst-page .inst-side > h2,.inst-caption,.assay-crumb,.assay-head p,.assay-kicker,.assay-instrument p,.assay-steps li,.assay-appendix li,.assay-references li > p,.assay-detail-section > p,.assay-form p,.heatmap-figure figcaption,.heatmap-empty) {color:var(--ui-muted)}
+:root[data-theme=dark] :is(.studio-nav a.is-current,.studio-select-option[data-state=checked],.studio-select-option[data-highlighted],.inst-tabs button[aria-pressed=true],.inst-page .inst-side button[aria-pressed=true],.ra-chart-choices button[aria-pressed=true],.ra-switch button[aria-pressed=true]) {background:var(--ui-hover);border-color:#71957e;color:var(--ui-ink)}
+:root[data-theme=dark] :is(.brand-divider,.utility-divider) {background:var(--ui-line)}
+:root[data-theme=dark] :is(.studio-select-option,.studio-select-option .studio-select-check,.ra-switch button,.inst-table table,.dilution-composition dt,.assay-plan-table,.inst-side button) {color:var(--ui-ink)}
+:root[data-theme=dark] :is(.studio-select-trigger,.studio-select-trigger[data-state=open],.assay-controls input,.assay-form input:not([type=file]),.ra-form input,.ra-label select,.inst-field input,.inst-field textarea,.inst-field select,.inst-form textarea,.inst-outline,.inst-page .inst-tabs button:not([aria-pressed=true]),.ra-action:not(.ra-primary),.ra-icon,.ra-chart-choices button:not([aria-pressed=true])) {background:var(--ui-panel);color:var(--ui-ink);border-color:var(--ui-line)}
+:root[data-theme=dark] :is(.studio-nav a:not(.is-current):hover,.display-trigger:hover,.language-switch:hover,.nav-search:hover,.inst-outline:hover,.ra-action:not(.ra-primary):hover,.ra-icon:hover,.studio-select-trigger:not(:disabled):hover) {background:var(--ui-hover);color:var(--ui-ink)}
+:root[data-theme=dark] :is(.inst-page,.assay-page) {background-color:var(--ui-bg);color:var(--ui-ink)}
+:root[data-theme=dark] :is(.inst-note,.inst-readout,.inst-chips span,.inst-table th,.inst-page .inst-side,.ra-switch,.ra-preview-note,.ra-scroll thead th,.ra-scroll tbody tr:has(input:checked),.assay-equations,.assay-plan-table thead th,.assay-form-drop,.dilution-composition,.dilution-table [data-current],.dilution-table th button[aria-pressed=true]) {background:var(--ui-well);color:var(--ui-ink);border-color:var(--ui-line)}
+:root[data-theme=dark] :is(.inst-page .inst-side button:not([aria-pressed=true]),.inst-page .inst-side button:not([aria-pressed=true]):hover) {background:var(--ui-panel);color:var(--ui-muted);border-color:transparent}
+:root[data-theme=dark] :is(.inst-link,.inst-details summary::after,.assay-appendix a,.dilution-table th button,.dilution-target,.dilution-composition dd,.dilution-composition h4) {color:var(--ui-accent)}
+:root[data-theme=dark] .assay-steps li::marker {color:var(--ui-accent)}
+:root[data-theme=dark] :is(.inst-table td,.inst-details,.inst-calibrations fieldset,.ra-scroll td,.ra-scroll th,.assay-detail-section,.assay-appendix,.assay-appendix details,.assay-aux,.assay-plan-table th,.assay-plan-table td,.distribution-scroll,.heatmap-scroll,.heatmap-data td,.heatmap-data th,.dilution-curve) {border-color:var(--ui-line)}
+:root[data-theme=dark] :is(.ra-workspace,.ra-dialog) {--ra-ink:var(--ui-ink);--ra-dim:var(--ui-muted);--ra-green:var(--ui-accent);--ra-line:var(--ui-line)}
+:root[data-theme=dark] .ra-workspace .inst-form {background:var(--ui-panel);color:var(--ui-ink)}
+:root[data-theme=dark] :is(.inst-req,.ra-warning-text,.dilution-planner p.dilution-error) {color:#f3ca82}
+:root[data-theme=dark] .ra-warning {background:#352e20;color:#ffe2ab;border-color:#77633a}
+:root[data-theme=dark] .assay-form .assay-form-error {color:#ffada4}
+:root[data-theme=dark] :is(.distribution-scroll,.heatmap-scroll,.dilution-curve) {background:var(--ui-well)}
+:root[data-theme=dark] :is(.heatmap-scroll,.distribution-scroll) svg > rect:first-of-type {fill:var(--ui-well)}
+:root[data-theme=dark] .distribution-scroll text,:root[data-theme=dark] .dilution-curve :is(text,figcaption),:root[data-theme=dark] .heatmap-scroll svg {color:var(--ui-ink);fill:var(--ui-ink)}
+:root[data-theme=dark] .heatmap-scroll :is([fill="#425b4b"],[fill="#476050"],[fill="#496351"]) {fill:var(--ui-muted)}
+:root[data-theme=dark] .distribution-scroll :is([stroke="#205f43"],[stroke="#153e2d"]),:root[data-theme=dark] .dilution-curve polyline {stroke:#a4d9b3}
+:root[data-theme=dark] .distribution-scroll [fill="#205f43"] {fill:#a4d9b3}
+:root[data-theme=dark] .inst-chart .recharts-cartesian-axis-tick-value {fill:var(--ui-muted)}
+:root[data-theme=dark] .inst-chart .recharts-legend-item-text {color:var(--ui-ink)!important}
+:root[data-theme=dark] .inst-chart .recharts-default-tooltip {background:var(--ui-panel)!important;color:var(--ui-ink)}
+:root[data-theme=dark] :is(a,button,input,summary,select,textarea):focus-visible {outline-color:var(--ui-focus)}
+@media(max-width:960px) {.studio-header .studio-brand .brand-product,.studio-header .studio-brand .brand-divider {display:none}}
+@media(max-width:690px) {.studio-header-inner .studio-nav a {white-space:normal;text-align:center}}
+
+/* Keep live instrument charts legible without changing standalone export inks. */
+:root[data-theme=dark] .inst-chart .recharts-label {fill:var(--ui-muted)}
+:root[data-theme=dark] .inst-chart .recharts-scatter-symbol path {fill:var(--ui-accent)}
+:root[data-theme=dark] .inst-chart .recharts-cartesian-grid line {stroke:var(--ui-line)}
+:root[data-theme=dark] .inst-chart .recharts-default-tooltip {border-color:var(--ui-line)!important}
+:root[data-theme=dark] .inst-chart .recharts-tooltip-item {color:var(--ui-ink)!important}
+:root[data-theme=dark] .heatmap-scroll g[transform] > text[text-anchor=middle] {fill:#48584c}

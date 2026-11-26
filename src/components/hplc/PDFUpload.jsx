@@ -1,307 +1,417 @@
+import { useRef, useState } from "react";
+import { FileUp, Trash2 } from "lucide-react";
+import {
+  hplcFileInfo,
+  parsePeakTable,
+  rematchHplcFile,
+} from "@/utils/hplcPeaks";
+import { measurementNumber } from "@/utils/instrumentData";
+import "@/components/instruments/instruments.css";
 
-import React, { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Upload, FileText, AlertCircle, CheckCircle, Loader, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExtractDataFromUploadedFile, UploadFile } from "@/api/integrations";
-
-export default function PDFUpload({ onFilesUploaded, rtStandards, onResultsGenerated, analysisType, calculationParams, uploadedFiles = [], lang = "ko" }) {
-  const isEn = lang === "en";
-  const text = {
-    needRT: isEn ? "Please enter and apply RT standards first." : "RT 기준을 먼저 입력하고 적용해주세요.",
-    processed: (n) => isEn ? `${n} file(s) were processed successfully.` : `${n}개 파일이 성공적으로 처리되었습니다.`,
-    error: isEn ? "Error while processing files: " : "파일 처리 중 오류 발생: ",
-    title: isEn ? "Upload PDF files" : "PDF 파일 업로드",
-    uploadTitle: isEn ? "PDF upload" : "PDF 업로드",
-    uploading: isEn ? "Uploading..." : "업로드 중...",
-    choose: isEn ? "Choose files" : "파일 선택",
-    needRTShort: isEn ? "⚠️ Enter RT standards first." : "⚠️ RT 기준을 먼저 입력해주세요.",
-    filenameFormat: isEn ? "Filename format: Factor_Treatment_Replicate.pdf" : "파일명 형식: Factor_Treatment_Replicate.pdf",
-    uploadedFiles: (n) => isEn ? `Uploaded files (${n})` : `업로드된 파일 (${n}개)`,
-    remove: isEn ? "Remove" : "삭제"
-  };
-  const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState(null);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef(null);
-
-  // 지수 표기법 숫자 파싱 함수
-  const parseScientificNumber = (value) => {
-    if (value === null || value === undefined) return 0;
-    
-    let strValue = String(value).trim();
-    
-    // 공백이 포함된 지수 표기법 정규화 (예: "2.95e -2" → "2.95e-2")
-    strValue = strValue.replace(/e\s*[-−+]?\s*(\d+)/gi, (match, digits) => {
-      const sign = match.includes('-') || match.includes('−') ? '-' : '+';
-      return `e${sign}${digits}`;
-    });
-    
-    // E도 e로 통일
-    strValue = strValue.replace(/E/g, 'e');
-    
-    // 마이너스 기호 통일 (−를 -로)
-    strValue = strValue.replace(/−/g, '-');
-    
-    // 지수 표기법 숫자 정규식으로 추출
-    const numRegex = /-?\d+\.?\d*(?:e[-+]?\d+)?/i;
-    const match = strValue.match(numRegex);
-    
-    if (match) {
-      const parsed = parseFloat(match[0]);
-      return isNaN(parsed) ? 0 : parsed;
-    }
-    
-    // 일반 숫자로 파싱 시도
-    const parsed = parseFloat(strValue);
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  const parseFileName = (fileName) => {
-    const nameWithoutExt = fileName.replace(/\.pdf$/i, '');
-    const parts = nameWithoutExt.split('_');
+export default function PDFUpload({
+  onFilesUploaded,
+  rtStandards,
+  onResultsGenerated,
+  uploadedFiles = [],
+  lang = "ko",
+}) {
+  const en = lang === "en",
+    t = (ko, english) => (en ? english : ko);
+  const [tolerance, setTolerance] = useState("0.10"),
+    [drag, setDrag] = useState(false),
+    [busy, setBusy] = useState(false);
+  const [notices, setNotices] = useState([]),
+    [pending, setPending] = useState([]);
+  const [sample, setSample] = useState(""),
+    [table, setTable] = useState("");
+  const [unreadPdfs, setUnreadPdfs] = useState([]);
+  const picker = useRef(null),
+    reading = useRef(false);
+  const hasStandards = Object.keys(rtStandards || {}).length > 0;
+  function stage(parsed, name) {
+    const tol = measurementNumber(tolerance);
+    if (tol === null || tol < 0)
+      throw new Error(
+        t(
+          "RT 허용 오차는 0 이상이어야 합니다.",
+          "RT tolerance must be zero or greater.",
+        ),
+      );
+    if (!parsed.peaks.length)
+      throw new Error(
+        t(
+          "RT와 Area가 포함된 수치 표가 필요합니다. 스캔 또는 복잡한 PDF는 CSV로 내보내거나 표를 붙여넣으세요.",
+          "No readable RT/Area table. For scans or complex reports, export CSV or paste the table.",
+        ),
+      );
     return {
-      factor: parts[0] || nameWithoutExt,
-      treatment: parts[1] || 'N/A', 
-      replicate: parts[2] || '1'
+      ...hplcFileInfo(name),
+      rawPeaks: parsed.peaks,
+      peaks: parsed.peaks.length,
+      tolerance: tol,
+      skipped: parsed.skipped,
     };
-  };
-
-  const matchRTWithStandards = (sampleRTs, standards) => {
-    let matchedData = [];
-    
-    Object.entries(standards).forEach(([compound, standardRT]) => {
-      const integerRange = Math.floor(standardRT);
-      const rangeStart = integerRange;
-      const rangeEnd = integerRange + 1;
-      
-      const candidates = sampleRTs.filter(rt => rt.rt >= rangeStart && rt.rt < rangeEnd);
-      
-      if (candidates.length > 0) {
-        const closestMatch = candidates.reduce((prev, curr) => 
-          Math.abs(curr.rt - standardRT) < Math.abs(prev.rt - standardRT) ? curr : prev
-        );
-        
-        matchedData.push({
-          compound,
-          standardRT,
-          matchedRT: closestMatch.rt,
-          area: closestMatch.area,
-        });
-      } else {
-        matchedData.push({
-          compound,
-          standardRT,
-          matchedRT: null,
-          area: null,
-        });
+  }
+  function nameUsed(name, staged) {
+    return [...uploadedFiles, ...staged].some((f) => f.name === name);
+  }
+  async function loadFiles(fileList) {
+    if (reading.current || !hasStandards) return;
+    reading.current = true;
+    setBusy(true);
+    const staged = [...pending],
+      messages = [],
+      unread = [...unreadPdfs];
+    try {
+      for (const file of fileList) {
+        try {
+          if (nameUsed(file.name, staged))
+            throw new Error(
+              t(
+                "같은 이름의 시료가 있습니다.",
+                "A sample with this name already exists.",
+              ),
+            );
+          let parsed;
+          if (/\.pdf$/i.test(file.name)) {
+            try {
+              const { readPeakPdf } = await import("@/utils/localPeakPdf");
+              parsed = await readPeakPdf(file);
+              if (!parsed.peaks.length) throw new Error("NO_PEAKS");
+            } catch {
+              const same = unread.findIndex((item) => item.name === file.name);
+              if (same === -1) unread.push(file);
+              else unread[same] = file;
+              throw new Error(
+                t(
+                  "이 PDF에서 피크 표를 읽지 못했습니다. 표를 붙여넣거나 아래에서 외부 추출을 선택할 수 있습니다.",
+                  "Could not read a peak table in this PDF. Paste a table or choose external extraction below.",
+                ),
+              );
+            }
+          } else if (/\.(csv|txt|tsv)$/i.test(file.name)) {
+            parsed = parsePeakTable(await file.text());
+          } else
+            throw new Error(
+              t(
+                "PDF, CSV 또는 TSV 파일을 선택하세요.",
+                "Choose a PDF, CSV or TSV file.",
+              ),
+            );
+          staged.push(stage(parsed, file.name));
+        } catch (error) {
+          messages.push(file.name + " · " + error.message);
+        }
       }
-    });
-    
-    return matchedData;
-  };
-
-  const handleRemoveFile = (indexToRemove) => {
-    // 기존 업로드된 파일 목록에서 해당 인덱스 파일 제거
-    const updatedFiles = uploadedFiles.filter((_, index) => index !== indexToRemove);
-    
-    // 남은 파일들로부터 결과 재생성
-    let allResults = [];
-    updatedFiles.forEach(fileInfo => {
-      if (fileInfo.processedResults) {
-        allResults.push(...fileInfo.processedResults);
-      }
-    });
-    
-    // 상태 업데이트: 결과와 파일 목록 모두 업데이트
-    onResultsGenerated(allResults);
-    
-    // 파일 목록을 직접 업데이트하도록 부모에게 전달
-    // 이때 processedResults는 유지해야 하므로 제거하지 않음
-    onFilesUploaded(updatedFiles, true); // 두 번째 인수로 덮어쓰기 모드 표시
-  };
-
-  const processAllFiles = async (newFiles) => {
-    if (Object.keys(rtStandards).length === 0) {
-      setUploadResult({ success: false, message: text.needRT });
+      setPending(staged);
+      setNotices(messages);
+      setUnreadPdfs(unread.filter((file) => !nameUsed(file.name, staged)));
+    } finally {
+      reading.current = false;
+      setBusy(false);
+    }
+  }
+  async function extractRemotely(file) {
+    if (reading.current || !hasStandards) return;
+    if (nameUsed(file.name, pending)) {
+      setNotices([
+        t(
+          "같은 이름의 시료가 있습니다.",
+          "A sample with this name already exists.",
+        ),
+      ]);
       return;
     }
-
-    setUploading(true);
-    setUploadResult(null);
-
+    reading.current = true;
+    setBusy(true);
+    setNotices([]);
     try {
-      let allResults = [];
-      let newProcessedFiles = [];
-
-      // 기존 파일들의 결과를 먼저 추가
-      uploadedFiles.forEach(existingFile => {
-        if (existingFile.processedResults) {
-          allResults.push(...existingFile.processedResults);
-        }
-      });
-
-      // 새 파일들 처리
-      for (const { file, name } of newFiles) {
-        if (!name.toLowerCase().endsWith('.pdf')) continue;
-        
-        const uploadResponse = await UploadFile({ file });
-        const fileUrl = uploadResponse.file_url;
-        
-        const extractResponse = await ExtractDataFromUploadedFile({
-          file_url: fileUrl,
-          json_schema: {
-            type: "object",
-            properties: {
-              peaks: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    "Ret. Time": { type: "number" },
-                    "Area": { type: "number" },
-                    "retention_time": { type: "number" },
-                    "area": { type: "number" },
-                    "rt": { type: "number" },
-                    "peak_area": { type: "number" },
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        if (extractResponse.status === "success" && extractResponse.output?.peaks) {
-          const fileInfo = parseFileName(name);
-          
-          // 지수 표기법을 포함한 숫자 파싱 개선
-          const normalizedPeaks = extractResponse.output.peaks.map(peak => ({
-            rt: parseScientificNumber(peak['Ret. Time'] || peak.retention_time || peak.rt || 0),
-            area: parseScientificNumber(peak['Area'] || peak.area || peak.peak_area || 0)
-          })).filter(peak => peak.rt > 0 && peak.area > 0);
-          
-          const matchResults = matchRTWithStandards(normalizedPeaks, rtStandards);
-          
-          const fileResults = matchResults.map(result => ({
-            sampleName: name,
-            ...fileInfo,
-            ...result
-          }));
-
-          allResults.push(...fileResults);
-
-          // 파일 정보에 처리 결과 저장
-          newProcessedFiles.push({ 
-            name, 
-            originalFile: file, 
-            ...fileInfo, 
-            peaks: normalizedPeaks.length,
-            processedResults: fileResults
-          });
-        }
-      }
-      
-      onResultsGenerated(allResults);
-      onFilesUploaded(newProcessedFiles, false); // 두 번째 인수로 추가 모드 표시
-
-      if (newFiles.length > 0) {
-        setUploadResult({ success: true, message: text.processed(newFiles.length) });
-      }
-
-    } catch (error) {
-      setUploadResult({ success: false, message: text.error + error.message });
+      const { readRemotePeakPdf } = await import("@/utils/remotePeakPdf");
+      const parsed = await readRemotePeakPdf(file);
+      const next = stage(parsed, file.name);
+      setPending((previous) => [...previous, { ...next, source: "base44" }]);
+      setUnreadPdfs((previous) =>
+        previous.filter((candidate) => candidate !== file),
+      );
+    } catch {
+      setNotices([
+        file.name +
+          " · " +
+          t(
+            "외부 서비스가 응답하지 않거나 읽을 수 있는 피크가 없습니다. CSV 또는 표 붙여넣기를 사용할 수 있습니다.",
+            "The external service is unavailable or returned no readable peaks. You can use CSV or paste the table.",
+          ),
+      ]);
     } finally {
-      setUploading(false);
+      reading.current = false;
+      setBusy(false);
+    }
+  }
+  const paste = () => {
+    const name = sample.trim();
+    try {
+      if (!name)
+        throw new Error(t("시료명을 입력하세요.", "Enter a sample name."));
+      if (nameUsed(name, pending))
+        throw new Error(
+          t(
+            "같은 이름의 시료가 있습니다.",
+            "A sample with this name already exists.",
+          ),
+        );
+      setPending([...pending, stage(parsePeakTable(table), name)]);
+      setNotices([]);
+      setSample("");
+      setTable("");
+    } catch (e) {
+      setNotices([e.message]);
     }
   };
-
-  const handleFileUpload = async (event) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length === 0) return;
-    
-    const filesToProcess = files.map(f => ({ file: f, name: f.name }));
-    await processAllFiles(filesToProcess);
-    
-    // 파일 input 초기화
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+  function replaceFiles(next) {
+    onFilesUploaded(next, true);
+    onResultsGenerated(next.flatMap((file) => file.processedResults || []));
+  }
+  const commit = () => {
+    const matched = pending.map((file) => rematchHplcFile(file, rtStandards));
+    replaceFiles([...uploadedFiles, ...matched]);
+    setPending([]);
+    setNotices([
+      t(
+        `시료 ${matched.length}개를 결과에 추가했습니다.`,
+        `Added ${matched.length} samples to results.`,
+      ),
+    ]);
   };
-  
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const files = e.dataTransfer.files;
-    if (files.length > 0) handleFileUpload({ target: { files } });
-  };
-
   return (
-    <Card className="ios-card ios-blur rounded-3xl ios-shadow-lg border-0">
-      <CardHeader>
-        <CardTitle className="text-gray-900 text-lg font-semibold flex items-center space-x-2">
-          <Upload className="h-4 w-4" />
-          <span>{text.title}</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div 
-          className={`border-2 border-dashed rounded-2xl p-4 text-center transition-all duration-300 ${isDragOver ? 'border-blue-400 bg-blue-50/50' : 'border-gray-200 bg-gray-50/50'}`}
-          onDragOver={(e) => {e.preventDefault(); setIsDragOver(true);}}
-          onDragLeave={(e) => {e.preventDefault(); setIsDragOver(false);}}
-          onDrop={handleDrop}
+    <section className="inst-form">
+      <h3>{t("피크 표 불러오기", "Import peak tables")}</h3>
+      <p className="inst-muted">
+        {t(
+          "브라우저에서 파일을 읽습니다. RT(min)와 Area 열을 포함한 표를 시료별로 준비하세요. 파일명을 요인_처리_반복 형식으로 지정하면 처리군을 비교할 수 있습니다.",
+          "Files are read in your browser. Provide one table per sample with RT (min) and Area columns. Use Factor_Treatment_Replicate filenames to group your results.",
+        )}
+      </p>
+      <label className="inst-field" style={{ maxWidth: 250, margin: "12px 0" }}>
+        {t("RT 허용 오차 (± min)", "RT tolerance (± min)")}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          value={tolerance}
+          onChange={(e) => setTolerance(e.target.value)}
+        />
+      </label>
+      <p className="inst-muted">
+        {t(
+          "새로 읽는 시료에 적용합니다. 범위 안에서 가장 가까운 피크를 찾고, 같은 거리이거나 여러 화합물이 공유하는 피크는 미확정으로 남깁니다.",
+          "Applies to incoming samples. The closest peak within range is matched. Equidistant peaks or peaks shared by multiple compounds remain unassigned.",
+        )}
+      </p>
+      {!hasStandards && (
+        <p className="inst-req">
+          {t(
+            "먼저 표준물질 RT를 입력하고 적용하세요.",
+            "Apply reference RT values first.",
+          )}
+        </p>
+      )}
+      <div
+        className="inst-drop"
+        data-dragging={drag}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          loadFiles(Array.from(e.dataTransfer.files));
+        }}
+      >
+        <button
+          className="inst-button"
+          disabled={!hasStandards || busy}
+          onClick={() => picker.current.click()}
         >
-          <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            {uploading ? <Loader className="h-6 w-6 text-blue-600 animate-spin" /> : <FileText className="h-6 w-6 text-blue-600" />}
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{text.uploadTitle}</h3>
-          
-          <Button onClick={() => fileInputRef.current?.click()} disabled={uploading || Object.keys(rtStandards).length === 0} className="ios-button bg-blue-600 hover:bg-blue-700 h-10 px-6 text-sm rounded-xl">
-            {uploading ? text.uploading : text.choose}
-          </Button>
-          
-          <input ref={fileInputRef} type="file" accept=".pdf" multiple onChange={handleFileUpload} className="hidden" />
-
-          {Object.keys(rtStandards).length === 0 && <p className="text-amber-600 text-xs mt-2">{text.needRTShort}</p>}
-           <p className="text-xs text-gray-500 mt-2">{text.filenameFormat}</p>
+          <FileUp size={15} />
+          {busy
+            ? t("읽는 중…", "Reading…")
+            : t("PDF / CSV / TSV 선택", "Choose PDF / CSV / TSV")}
+        </button>
+        <input
+          type="file"
+          ref={picker}
+          accept=".pdf,.csv,.tsv,.txt"
+          hidden
+          multiple
+          onChange={(e) => {
+            loadFiles(Array.from(e.target.files));
+            e.target.value = "";
+          }}
+        />
+      </div>
+      <details className="inst-details">
+        <summary>{t("피크 표 직접 입력", "Paste peak table")}</summary>
+        <label className="inst-field">
+          {t("시료명", "Sample name")}
+          <input
+            value={sample}
+            placeholder="Light_Control_1"
+            onChange={(e) => setSample(e.target.value)}
+          />
+        </label>
+        <label className="inst-field" style={{ margin: "10px 0" }}>
+          {t("열 이름과 값", "Headers and values")}
+          <textarea
+            value={table}
+            rows={3}
+            placeholder={"RT,Area\n4.32,1800"}
+            onChange={(e) => setTable(e.target.value)}
+          />
+        </label>
+        <button
+          className="inst-outline"
+          disabled={!hasStandards || busy}
+          onClick={paste}
+        >
+          {t("미리보기", "Preview peaks")}
+        </button>
+      </details>
+      {notices.length > 0 && (
+        <div className="inst-note" role="status">
+          {notices.map((n, i) => (
+            <p key={i}>{n}</p>
+          ))}
         </div>
-
-        {uploadResult && (
-          <Alert className={`mt-3 ${uploadResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-            <div className="flex items-center space-x-2">
-              {uploadResult.success ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4 text-red-600" />}
-              <AlertDescription className={`text-xs ${uploadResult.success ? 'text-green-800' : 'text-red-800'}`}>{uploadResult.message}</AlertDescription>
-            </div>
-          </Alert>
-        )}
-
-        {uploadedFiles.length > 0 && (
-          <div className="mt-4">
-            <h4 className="text-gray-900 text-sm font-semibold mb-2">{text.uploadedFiles(uploadedFiles.length)}</h4>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {uploadedFiles.map((file, index) => (
-                <div key={`${file.name}-${index}`} className="flex items-center justify-between p-2 bg-white/60 rounded-lg border border-gray-100">
-                  <div className="flex items-center space-x-2 min-w-0">
-                    <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 text-xs truncate" title={file.name}>{file.name}</p>
-                      <p className="text-xs text-gray-600">{file.factor} • {file.treatment} • Rep{file.replicate}</p>
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={() => handleRemoveFile(index)} 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 p-0 text-red-500 hover:bg-red-50 flex-shrink-0"
+      )}
+      {unreadPdfs.length > 0 && (
+        <div className="inst-drop">
+          <h3>{t("읽지 못한 PDF", "Unreadable PDF reports")}</h3>
+          <p className="inst-muted">
+            {t(
+              "버튼을 누르면 해당 PDF 원본을 외부 서비스 Base44에 전송해 피크 표 추출을 요청합니다. 서비스 상태에 따라 처리가 제한될 수 있습니다. 추출 후 원본과 대조하세요.",
+              "Choosing an upload below sends that original PDF to the external Base44 service to extract its peak table. Availability may vary. Compare the extracted values with your report before analysis.",
+            )}
+          </p>
+          <ul className="inst-filelist">
+            {unreadPdfs.map((file) => (
+              <li key={file.name}>
+                <span>{file.name}</span>
+                <div className="inst-actions">
+                  <button
+                    className="inst-outline"
+                    disabled={busy || !hasStandards}
+                    onClick={() => extractRemotely(file)}
+                    aria-label={
+                      t("이 PDF를 Base44에 전송", "Send this PDF to Base44") +
+                      " · " +
+                      file.name
+                    }
                   >
-                    <X className="h-3 w-3" />
-                  </Button>
+                    {t("이 PDF를 Base44에 전송", "Send this PDF to Base44")}
+                  </button>
+                  <button
+                    className="inst-outline"
+                    disabled={busy}
+                    onClick={() =>
+                      setUnreadPdfs(
+                        unreadPdfs.filter((candidate) => candidate !== file),
+                      )
+                    }
+                  >
+                    {t("제외", "Dismiss")}
+                  </button>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {!!pending.length && (
+        <div className="inst-section">
+          <h3>{t("피크 확인", "Review imported peaks")}</h3>
+          {pending.map((f) => (
+            <details key={f.name} className="inst-details" open>
+              <summary>
+                {f.name} · {f.peaks} {t("피크", "peaks")} · ±{f.tolerance} min
+              </summary>
+              {f.source === "base44" && (
+                <p className="inst-note">
+                  {t(
+                    "Base44 추출값입니다. 분석 전에 RT와 Area를 원본 PDF와 대조하세요.",
+                    "Values extracted by Base44. Check RT and area against the original PDF before applying.",
+                  )}
+                </p>
+              )}
+              {f.skipped > 0 && (
+                <p className="inst-req">
+                  {t(
+                    `읽지 못한 행 ${f.skipped}개. 원본 표를 확인하세요.`,
+                    `${f.skipped} lines were skipped. Check the source table.`,
+                  )}
+                </p>
+              )}
+              <div className="inst-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>RT (min)</th>
+                      <th>Area</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {f.rawPeaks.map((p, i) => (
+                      <tr key={i}>
+                        <td>{p.rt}</td>
+                        <td>{p.area}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                className="inst-outline"
+                disabled={busy}
+                onClick={() =>
+                  setPending(pending.filter((p) => p.name !== f.name))
+                }
+              >
+                {t("제외", "Discard")}
+              </button>
+            </details>
+          ))}
+          <button
+            className="inst-button"
+            style={{ marginTop: 12 }}
+            disabled={busy || !hasStandards}
+            onClick={commit}
+          >
+            {t("확인한 피크로 분석", "Use reviewed peaks")}
+          </button>
+        </div>
+      )}
+      {!!uploadedFiles.length && (
+        <ul className="inst-filelist">
+          {uploadedFiles.map((file, index) => (
+            <li key={file.name + "-" + index}>
+              <span>
+                {file.name} · {file.peaks} {t("피크", "peaks")}
+              </span>
+              <button
+                className="inst-outline"
+                disabled={busy}
+                aria-label={t("시료 제거 ", "Remove sample ") + file.name}
+                onClick={() =>
+                  replaceFiles(uploadedFiles.filter((_, i) => i !== index))
+                }
+              >
+                <Trash2 size={14} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

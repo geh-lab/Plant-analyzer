@@ -1,142 +1,83 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { FileText, CheckCircle } from "lucide-react";
-import { getHplcCompounds } from "@/data/hplcProtocols";
+import { useEffect, useState } from "react";
+import { getHplcCompounds, hplcCompoundLabel } from "@/data/hplcProtocols";
+import { measurementNumber } from "@/utils/instrumentData";
+import "@/components/instruments/instruments.css";
 
-const getShortName = (compoundName) => {
-  const shortNames = {
-    "4-Hydroxybenzoic acid": "4-Hydroxybenzoic",
-    "(-)-Epicatechin": "Epicatechin",
-    "4-Hydroxy-3-benzoic acid": "4-Hydroxy-3-benzoic",
-    "p-Coumaric acid": "p-Coumaric",
-    "trans-Ferulic acid": "trans-Ferulic",
-    "trans-Cinnamic acid": "trans-Cinnamic",
-    "4-Hydroxyglucobrassicin": "4-Hydroxygluco",
-    "Glucobrassicanapin": "Glucobrassican",
-    "4-Methoxyglucobrassicin": "4-Methoxygluco",
-    "Rosmarinic acid": "Rosmarinic acid",
-    "Artemisinin": "Artemisinin",
-    "Δ9-THC": "Δ9-THC"
-  };
-  return shortNames[compoundName] || compoundName;
-};
-
-export default function RTInput({ analysisType, onRTStandardsChange, initialValues = {}, lang = "ko" }) {
-  const [compounds, setCompounds] = useState([]);
-  const [rtValues, setRtValues] = useState({});
-  const [isApplied, setIsApplied] = useState(false);
-  const isEn = lang === "en";
-
+const empty = {};
+export default function RTInput({
+  analysisType,
+  onRTStandardsChange,
+  initialValues = empty,
+  lang = "ko",
+}) {
+  const en = lang === "en",
+    compounds = getHplcCompounds(analysisType, lang);
+  const [values, setValues] = useState(initialValues);
+  const [message, setMessage] = useState("");
   useEffect(() => {
-    if (analysisType) {
-      const defaultList = getHplcCompounds(analysisType, lang);
-      setCompounds(defaultList);
-      const initialRTValues = {};
-      defaultList.forEach(compound => {
-        initialRTValues[compound] = initialValues[compound] || "";
-      });
-      setRtValues(initialRTValues);
-      setIsApplied(Object.keys(initialValues).length > 0 && Object.values(initialValues).some(v => v !== ""));
+    setValues(initialValues);
+    setMessage("");
+  }, [initialValues, analysisType]);
+  const apply = (e) => {
+    e.preventDefault();
+    const parsed = Object.fromEntries(
+      Object.entries(values)
+        .filter(([, v]) => v !== "")
+        .map(([k, v]) => [k, measurementNumber(v)]),
+    );
+    if (
+      !Object.keys(parsed).length ||
+      Object.values(parsed).some((v) => v === null || v <= 0)
+    ) {
+      setMessage(
+        en
+          ? "Enter at least one positive retention time."
+          : "하나 이상의 양수 머무름 시간을 입력하세요.",
+      );
+      return;
     }
-  }, [analysisType, initialValues, lang]);
-
-  const handleRTChange = (compound, value) => {
-    setRtValues(prev => ({ ...prev, [compound]: value }));
-    setIsApplied(false);
+    onRTStandardsChange(parsed);
   };
-
-  const handleApply = () => {
-    const validRTValues = {};
-    Object.entries(rtValues).forEach(([comp, rt]) => {
-      if (rt !== "" && !isNaN(parseFloat(rt))) {
-        validRTValues[comp] = parseFloat(rt);
-      }
-    });
-    onRTStandardsChange(validRTValues);
-    setIsApplied(true);
-  };
-
-  const getCompoundsByColumns = () => {
-    const compoundsArray = [...compounds];
-    const columnSize = Math.ceil(compoundsArray.length / 3) || 1;
-    return [
-      compoundsArray.slice(0, columnSize),
-      compoundsArray.slice(columnSize, columnSize * 2),
-      compoundsArray.slice(columnSize * 2)
-    ];
-  };
-
-  const t = {
-    title: isEn ? "RT standards" : "RT 기준 입력",
-    apply: isEn ? "Apply" : "적용",
-    applied: isEn ? "Applied" : "적용됨",
-    desc: isEn ? "Enter the reference retention time for each target compound." : "각 화합물의 기준 Retention Time을 입력하세요.",
-    appliedTitle: isEn ? "Applied RT values" : "적용된 RT"
-  };
-
-  const compoundColumns = getCompoundsByColumns();
-
   return (
-    <Card className="ios-card ios-blur rounded-3xl ios-shadow-lg border-0">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-gray-900 text-xl font-semibold flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>{t.title}</span>
-          </CardTitle>
-          <Button
-            onClick={handleApply}
-            className={`ios-button rounded-xl h-10 px-6 flex items-center space-x-2 ${
-              isApplied ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {isApplied && <CheckCircle className="h-4 w-4" />}
-            <span>{isApplied ? t.applied : t.apply}</span>
-          </Button>
-        </div>
-        <p className="text-gray-600 text-sm">{t.desc}</p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-4">
-          {compoundColumns.map((column, colIndex) => (
-            <div key={colIndex} className="space-y-4">
-              {column.map((compound) => (
-                <div key={compound} className="bg-white rounded-lg p-3 border border-gray-200">
-                  <Label htmlFor={compound} className="text-gray-700 font-medium text-xs mb-2 block" title={compound}>
-                    {getShortName(compound)}
-                  </Label>
-                  <Input
-                    id={compound}
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={rtValues[compound] || ""}
-                    onChange={(e) => handleRTChange(compound, e.target.value)}
-                    className="ios-input border-0 text-gray-900 placeholder:text-gray-400 text-center h-8 text-sm"
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {isApplied && Object.keys(initialValues).length > 0 && (
-          <div className="applied-summary mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-            <h4 className="text-blue-800 font-semibold mb-3">{t.appliedTitle}</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-2 gap-y-2 text-xs text-blue-900 font-mono">
-              {Object.entries(initialValues).map(([compound, rt]) => (
-                <div key={compound} className="bg-blue-100 rounded p-2 text-center">
-                  <div className="text-blue-700 font-medium mb-1" title={compound}>{getShortName(compound)}</div>
-                  <div className="font-bold text-blue-900">{parseFloat(rt).toFixed(2)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <form className="inst-form" onSubmit={apply}>
+      <h3>{en ? "Reference retention times" : "표준물질 머무름 시간"}</h3>
+      <p className="inst-muted">
+        {en
+          ? "Enter a retention time in minutes for each compound measured with this method."
+          : "측정할 화합물의 표준물질 머무름 시간(RT)을 분 단위로 입력하세요."}
+      </p>
+      <div className="inst-labels">
+        {compounds.map((c) => (
+          <label className="inst-field" key={c}>
+            {hplcCompoundLabel(c, lang)} (min)
+            <input
+              type="number"
+              step="any"
+              min="0"
+              value={values[c] ?? ""}
+              onChange={(e) => {
+                setMessage("");
+                setValues({ ...values, [c]: e.target.value });
+              }}
+            />
+          </label>
+        ))}
+      </div>
+      <button className="inst-button">
+        {en ? "Apply RT standards" : "RT 기준 적용"}
+      </button>
+      {Object.keys(initialValues).length > 0 && (
+        <p className="inst-muted" role="status">
+          {en
+            ? `${Object.keys(initialValues).length} applied standards`
+            : `적용한 표준물질 ${Object.keys(initialValues).length}개`}
+        </p>
+      )}
+      {message && (
+        <p role="alert" className="inst-req">
+          {message}
+        </p>
+      )}
+    </form>
   );
 }

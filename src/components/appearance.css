@@ -1,0 +1,43 @@
+:root {--ui-bg:#f6f8f4;--ui-panel:#fff;--ui-well:#edf2eb;--ui-hover:#e2ede2;--ui-ink:#162e21;--ui-muted:#4d6356;--ui-line:#bfcdc2;--ui-focus:#327452;--ui-accent:#1c6142;color-scheme:light}
+:root[data-theme=dark] {
+  color-scheme:dark;
+  --ui-bg:#101914;--ui-panel:#19251f;--ui-well:#23342b;--ui-hover:#334c3e;--ui-ink:#ecf4ee;--ui-muted:#bbccbf;--ui-line:#4a6051;--ui-focus:#a6dfac;--ui-accent:#a2e5b3;
+  --background:144 21% 8%;--card:150 19% 12%;--popover:150 19% 12%;
+  --foreground:137 22% 94%;--card-foreground:137 22% 94%;--popover-foreground:137 22% 94%;
+  --primary:142 48% 74%;--primary-foreground:149 35% 13%;--secondary:145 18% 21%;--secondary-foreground:135 24% 92%;
+  --muted:145 15% 19%;--muted-foreground:138 15% 75%;--accent:145 20% 24%;--accent-foreground:137 33% 91%;
+  --destructive:0 62% 65%;--destructive-foreground:0 0% 8%;--border:142 13% 31%;--input:142 16% 36%;--ring:135 52% 75%;
+}
+html {scroll-padding-top:1rem}
+body {background:var(--ui-bg);color:var(--ui-ink)}
+.display-trigger,.display-heading button,.display-stepper button {display:inline-flex;align-items:center;justify-content:center}
+.display-trigger {border-radius:12px;min-height:42px;min-width:40px;gap:7px;padding:0 10px;font-size:.79rem;font-weight:620}
+.display-trigger:is(:hover,[data-state=open]),.display-heading button:hover,.display-stepper button:not(:disabled):hover {background:var(--ui-hover)}
+.display-settings {z-index:120;width:min(20rem,calc(100vw - 20px));max-height:var(--radix-popover-content-available-height);overflow:auto;background:var(--ui-panel);color:var(--ui-ink);border:1px solid var(--ui-line);border-radius:18px;padding:1.1rem;box-shadow:0 16px 60px #071b142b;transform-origin:var(--radix-popover-content-transform-origin)}
+.display-settings[data-state=open] {animation:open-display .16s ease-out}
+@keyframes open-display {from{opacity:0;transform:translateY(-4px) scale(.985)}}
+.display-heading {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.display-heading h2 {font-size:1.12rem;font-weight:680;letter-spacing:-.035em}
+.display-heading button {width:36px;height:36px;border-radius:50%}
+.display-settings fieldset {margin-top:1rem;min-width:0}
+.display-settings legend {font-size:.83rem;color:var(--ui-muted);font-weight:600;margin-bottom:.38rem}
+.display-modes,.display-stepper {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--ui-line);border-radius:12px;background:var(--ui-well);padding:3px}
+.display-modes label {position:relative;min-width:0;cursor:pointer}
+.display-modes input {position:absolute;opacity:0;width:1px;height:1px}
+.display-modes label > span {display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;border:1px solid transparent;border-radius:9px;min-height:52px;font-size:.83rem}
+.display-modes input:checked + span {background:var(--ui-panel);color:var(--ui-accent);border-color:var(--ui-line);font-weight:700;box-shadow:0 1px 3px #0a271b12}
+.display-modes input:focus-visible + span {outline:2px solid var(--ui-focus);outline-offset:-2px}
+.display-stepper {grid-template-columns:1fr 1.7fr 1fr;align-items:center;text-align:center;font-variant-numeric:tabular-nums}
+.display-stepper button {min-height:40px;border-radius:9px}
+.display-stepper button:disabled {opacity:.32}
+.display-stepper output {font-size:.95rem;font-weight:630}
+@media(max-width:1020px) {.display-trigger span {display:none}}
+@media(max-width:420px) {.display-trigger {padding:0;min-width:33px}.studio-utilities {gap:1px}}
+@media(max-width:690px) {.studio-header .brand-product {display:none}.studio-header .brand-divider {display:none}.studio-header .studio-brand {display:flex}}
+@media(max-width:690px) {
+  .studio-header-inner .studio-brand {display:grid;grid-template-columns:auto auto;align-content:center;gap:2px 7px}
+  .studio-header-inner .studio-brand img {grid-row:1/3;border-radius:6px}
+  .studio-header-inner .studio-brand .brand-product {display:block;grid-column:2;font-size:.64rem;line-height:1.1}
+}
+/* Scale the plotted labels and their coordinates together inside the scrollable chart. */
+.distribution-scroll > svg,.heatmap-scroll > svg {zoom:var(--type-scale,1)}

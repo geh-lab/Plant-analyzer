@@ -1,0 +1,85 @@
+.assay-detail .method-panels {
+  --method-panel-gap:clamp(.65rem,1.2vw,1rem);
+  padding:clamp(.85rem,1.8vw,1.55rem);
+  background:var(--ui-bg);
+  container-type:inline-size;
+}
+.method-layout {
+  display:grid;
+  align-items:start;
+  gap:var(--method-panel-gap);
+}
+.method-stack {display:contents}
+.assay-detail .method-block,.assay-detail .method-quality {
+  min-width:0;
+  padding:clamp(.95rem,1.55vw,1.35rem);
+  border:1px solid var(--ui-line);
+  border-radius:.65rem;
+  background:var(--ui-panel);
+  color:var(--ui-ink);
+  margin:0;
+}
+.assay-detail .method-procedure {
+  border-top:3px solid var(--ui-accent);
+  scroll-margin-top:1rem;
+}
+.assay-detail .method-block h3,.assay-detail .method-quality h3 {color:var(--ui-ink);font-size:1.14rem;font-weight:670;line-height:1.28;margin:0 0 .75rem;letter-spacing:-.025em}
+.assay-detail .method-procedure h3 {font-size:1.35rem;}
+.assay-detail .method-block :is(li,dd,p) {color:var(--ui-muted);font-size:.9rem;line-height:1.68;overflow-wrap:anywhere}
+.method-procedure ol {margin:0;padding-inline-start:1.55rem;list-style:decimal outside}
+.method-procedure li {padding-inline-start:.2rem}
+.method-procedure li+li {margin-top:.55rem}
+.method-procedure li::marker {color:var(--ui-accent);font-weight:650;font-variant-numeric:tabular-nums}
+.method-inventory ul,.method-storage ul {margin:0;padding-inline-start:1.2rem;list-style:disc outside}
+.method-inventory li+li,.method-storage li+li {margin-top:.4rem}
+.method-inventory li::marker,.method-storage li::marker {color:var(--ui-accent)}
+.assay-detail .method-quality {padding:0;container-type:inline-size}
+.method-quality summary {list-style:none;cursor:pointer;padding:.65rem 1rem}
+.method-quality summary::-webkit-details-marker {display:none}
+.assay-detail .method-quality h3 {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.3rem .9rem;min-height:1.5rem;margin:0;font-size:1rem}
+.method-quality-name,.method-quality-range {display:inline-flex;align-items:center;gap:.45rem}
+.method-quality summary svg {flex:none;color:var(--ui-accent)}
+.method-quality-range {font-size:.82rem;color:var(--ui-accent);font-weight:600}
+.method-quality details[open] .method-quality-range svg {transform:rotate(180deg)}
+.method-quality-body {border-top:1px solid var(--ui-line);padding:.3rem 1rem 1rem}
+.method-block .method-recipes {margin:0}
+.method-recipes > div+div {border-top:1px solid var(--ui-line);margin-top:.65rem;padding-top:.65rem}
+.method-recipes dt {color:var(--ui-ink);font-weight:650;font-size:.9rem;line-height:1.5}
+.method-recipes dd {margin:.2rem 0 0}
+.method-reagent-sources {display:flex;flex-wrap:wrap;gap:.3rem .9rem;margin-top:.85rem}
+.method-reagent-sources a,.assay-detail .method-jump {display:inline-flex;align-items:center;gap:.25rem;color:var(--ui-accent);font-size:.8rem;line-height:1.5;text-decoration:underline;text-underline-offset:.15rem;overflow-wrap:anywhere}
+.method-reagent-sources svg {flex:none}
+.assay-detail .method-calculations .assay-equations {padding:.7rem .8rem;font-size:.87rem;line-height:1.65;overflow-wrap:anywhere}
+.assay-detail .method-calculations p {margin:.7rem 0 0}
+.method-quick-links {display:flex;flex-wrap:wrap;gap:.4rem .9rem;justify-content:flex-end;}
+.assay-detail .assay-plates > .assay-diagram:first-child {border-left:0}
+@container (min-width:38rem) {
+  .method-layout {grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+  .method-layout > .method-quality {grid-column:1/-1}
+  .method-stack {display:grid;gap:var(--method-panel-gap);min-width:0}
+}
+@container (width < 38rem) {
+  .method-layout {reading-flow:grid-rows}
+  .method-procedure {order:1}
+  .method-inventory {order:2}
+  .method-quality {order:3}
+  .method-preparation {order:4}
+  .method-storage {order:5}
+  .method-calculations {order:6}
+}
+@media(max-width:600px){
+  .assay-detail .method-quick-links {grid-column:1 / -1;justify-self:start;justify-content:flex-start}
+}
+@media print {
+  .method-recipes > div,.method-storage li,.method-procedure li {break-inside:avoid}
+  .method-panels {container-type:normal}
+  .method-quick-links {display:none}
+}
+.assay-detail .method-planner {background:var(--ui-panel);border-top:1px solid var(--ui-line)}
+.method-planner > summary {display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:3.5rem;padding:.85rem clamp(1rem,2.4vw,1.8rem);cursor:pointer;color:var(--ui-ink);list-style:none}
+.method-planner > summary::-webkit-details-marker {display:none}
+.method-planner > summary h3 {font-size:1.05rem;line-height:1.45}
+.method-planner > summary svg {flex:none;color:var(--ui-accent)}
+.method-planner[open] > summary svg {transform:rotate(180deg)}
+.method-planner > .dilution-planner > h3 {display:none}
+.assay-method-page .method-planner > .dilution-planner {padding-top:0}

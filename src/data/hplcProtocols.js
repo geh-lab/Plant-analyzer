@@ -5,80 +5,109 @@ export const HPLC_PROTOCOLS = {
       title: "페놀 화합물",
       subtitle: "Phenolic compounds",
       badge: "DAD/UV",
-      overview: "식물 추출물 내 주요 phenolic acids와 flavonoids를 HPLC 피크 면적과 표준곡선으로 정량합니다.",
-      matrix: "건조 분말 또는 동결건조 분말",
+      overview:
+        "개별 페놀산·플라보노이드의 피크 면적을 물질별 표준곡선으로 환산합니다.",
+      matrix: "건조 식물 분말. 문헌 검증은 체리 과실 추출물 기준입니다.",
       compounds: [
-        "Arbutin", "Gallic acid", "Catechin hydrate", "4-Hydroxybenzoic acid",
-        "Chlorogenic acid", "Caffeic acid", "(-)-Epicatechin", "4-Hydroxy-3-benzoic acid",
-        "p-Coumaric acid", "trans-Ferulic acid", "Benzoic acid", "Rutin",
-        "trans-Cinnamic acid", "Quercetin", "Kaempferol"
+        "Arbutin",
+        "Gallic acid",
+        "Catechin hydrate",
+        "4-Hydroxybenzoic acid",
+        "Chlorogenic acid",
+        "Caffeic acid",
+        "(-)-Epicatechin",
+        "p-Coumaric acid",
+        "trans-Ferulic acid",
+        "Benzoic acid",
+        "Rutin",
+        "trans-Cinnamic acid",
+        "Quercetin",
+        "Kaempferol",
       ],
       samplePrep: [
-        "시료는 동결건조 또는 저온 열풍건조 후 균질하게 분쇄하고, 흡습을 피해서 보관합니다.",
-        "분말 시료 0.1 g에 80% MeOH 또는 90% MeOH 10 mL를 넣고 vortex합니다.",
-        "초음파 추출 30~60분 후 15,000 rpm, 4℃, 10분 원심분리합니다.",
-        "상층액을 0.22 또는 0.45 μm PTFE/PVDF membrane filter로 여과 후 HPLC vial에 옮깁니다."
+        "건조질량과 최종 추출액 부피를 기록하세요. 건조 분말로 옮겨 적용할 때는 용매 조성, 추출 회수율과 매트릭스 간섭을 확인해야 합니다.",
       ],
       chromatographic: [
-        "Column: C18 reverse-phase column, 4.6 × 250 mm, 5 μm 또는 동등품",
-        "Mobile phase: A = water + 0.1% formic acid, B = acetonitrile 또는 methanol",
-        "Flow rate: 0.8~1.0 mL/min, injection volume: 10~20 μL, column temperature: 30℃ 권장",
-        "Detection: 280 nm 중심, hydroxycinnamic acid류는 320~330 nm 보조 확인 가능"
+        "체리 분석법의 C18-DAD 검출 파장은 gallic acid·epicatechin 280 nm, chlorogenic acid·p-coumaric acid 320 nm, rutin·quercetin 360 nm입니다.",
+        "다른 표적은 자체 표준품의 흡수 스펙트럼과 분리도를 확인한 채널에서 분석하세요.",
       ],
       calculation: [
-        "각 표준품으로 Area = a × C + b 표준곡선을 작성합니다.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × 추출부피(mL) × DF / 시료무게(g) / 1000"
+        "화합물마다 해당 인증 표준품의 검량선 Area = a × C + b를 사용합니다. C의 단위는 µg/mL입니다.",
+        "측정 피크의 C = (Area − b)/a입니다. 원 추출액 부피 V(mL), 주입 용액까지의 총 희석 배수 DF, 건조질량 m(g)을 사용하면 함량(mg/g DW) = C × V × DF / (1000 × m)입니다.",
+        "검량 범위와 정량한계는 표준품 및 매트릭스 검증값으로 확인하세요. 절편보다 작은 면적은 정량값을 표시하지 않습니다.",
       ],
       storage: [
-        "건조 분말은 밀봉·차광·방습 조건에서 −20℃ 또는 4℃ 단기 보관합니다.",
-        "MeOH 추출액은 amber vial에서 4℃ 보관하고 가능하면 24~48시간 내 분석합니다.",
-        "표준용액은 갈색 vial에 소분하여 −20℃ 보관하고 반복 동결융해를 피합니다."
+        "표준품은 인증서의 온도·유효기간을 따르고, 분석용 추출액은 해당 매트릭스에서 확인한 안정 시간 안에 측정하세요.",
       ],
       notes: [
-        "피크 동정은 RT만으로 확정하지 말고 표준품 spiking 또는 PDA spectrum을 함께 확인하는 것이 안전합니다.",
-        "표준곡선 절편 b가 0이어도 계산 가능해야 하며, a는 반드시 양수여야 합니다."
-      ]
+        "머무름 시간만으로 동정하기 어려운 피크는 개별 표준품의 스펙트럼 또는 첨가 시험을 확인하세요.",
+      ],
+      sources: [
+        {
+          name: "Gonçalves et al. (2019) · HPLC–DAD",
+          url: "https://doi.org/10.1007/s42452-019-0680-4",
+          scope:
+            "체리에서 검증한 화합물별 검출 파장과 면적 검량선. 이 목록 전체를 검증한 문헌은 아닙니다.",
+        },
+      ],
+      archiveNotes: [
+        "기존 프로젝트는 건조 시료 0.1 g에 메탄올 수용액 10 mL를 사용하는 실험실 예시를 제시했습니다. 체리 문헌과 매트릭스·추출 조건이 다릅니다.",
+      ],
     },
     en: {
       title: "Phenolic Compounds",
       subtitle: "Phenolic compounds",
       badge: "DAD/UV",
-      overview: "Quantifies major phenolic acids and flavonoids in plant extracts using HPLC peak areas and calibration curves.",
-      matrix: "Dry or freeze-dried plant powder",
+      overview:
+        "Quantify individual phenolic acids and flavonoids against compound-specific calibration curves.",
+      matrix:
+        "Dry plant powder. The cited validation used sweet cherry extracts.",
       compounds: [
-        "Arbutin", "Gallic acid", "Catechin hydrate", "4-Hydroxybenzoic acid",
-        "Chlorogenic acid", "Caffeic acid", "(-)-Epicatechin", "4-Hydroxy-3-benzoic acid",
-        "p-Coumaric acid", "trans-Ferulic acid", "Benzoic acid", "Rutin",
-        "trans-Cinnamic acid", "Quercetin", "Kaempferol"
+        "Arbutin",
+        "Gallic acid",
+        "Catechin hydrate",
+        "4-Hydroxybenzoic acid",
+        "Chlorogenic acid",
+        "Caffeic acid",
+        "(-)-Epicatechin",
+        "p-Coumaric acid",
+        "trans-Ferulic acid",
+        "Benzoic acid",
+        "Rutin",
+        "trans-Cinnamic acid",
+        "Quercetin",
+        "Kaempferol",
       ],
       samplePrep: [
-        "Dry or freeze-dry the plant material, grind it uniformly, and keep it protected from moisture.",
-        "Add 10 mL of 80% or 90% MeOH to 0.1 g of powder and vortex.",
-        "Sonicate for 30–60 min, then centrifuge at 15,000 rpm, 4℃, for 10 min.",
-        "Filter the supernatant through a 0.22 or 0.45 μm PTFE/PVDF membrane into an HPLC vial."
+        "Record dry mass and final extract volume. Verify solvent composition, recovery and matrix interference when transferring the cherry method to dry powder.",
       ],
       chromatographic: [
-        "Column: C18 reversed-phase column, 4.6 × 250 mm, 5 μm or equivalent",
-        "Mobile phase: A = water + 0.1% formic acid, B = acetonitrile or methanol",
-        "Flow rate: 0.8–1.0 mL/min; injection volume: 10–20 μL; column temperature: around 30℃",
-        "Detection: mainly 280 nm; hydroxycinnamic acids can also be checked at 320–330 nm"
+        "In the cherry C18-DAD method, gallic acid and epicatechin used 280 nm, chlorogenic and p-coumaric acids 320 nm, and rutin and quercetin 360 nm.",
+        "Choose the detector channel for each additional analyte from its own standard spectrum and verify separation.",
       ],
       calculation: [
-        "Prepare a calibration curve for each standard: Area = a × C + b.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × extraction volume(mL) × DF / sample weight(g) / 1000"
+        "Use a separate certified reference standard for each compound. Fit Area = a × C + b with C in µg/mL.",
+        "C = (Area − b)/a. Using the original extract volume V (mL), cumulative dilution to the injected vial DF and dry mass m (g), content (mg/g DW) = C × V × DF / (1000 × m).",
+        "Compare with the laboratory calibration range and LOQ. Areas below the intercept yield no reportable concentration.",
       ],
       storage: [
-        "Store dried powder sealed, protected from light and moisture, at −20℃ or short-term at 4℃.",
-        "Keep MeOH extracts in amber vials at 4℃ and analyze within 24–48 h when possible.",
-        "Aliquot standards in amber vials at −20℃ and avoid repeated freeze-thaw cycles."
+        "Follow certified standard storage conditions and expiry. Use the extract within its demonstrated stability period for the sample matrix.",
       ],
       notes: [
-        "Do not identify peaks by RT alone; confirm using standard spiking or PDA spectra when possible.",
-        "The intercept b may be zero; the slope a must be positive."
-      ]
-    }
+        "Confirm uncertain assignments with the individual standard spectrum or a spike experiment.",
+      ],
+      sources: [
+        {
+          name: "Gonçalves et al. (2019) · HPLC–DAD",
+          url: "https://doi.org/10.1007/s42452-019-0680-4",
+          scope:
+            "Compound-specific detection wavelengths and area calibration in sweet cherries. Its validation covers a subset of this list.",
+        },
+      ],
+      archiveNotes: [
+        "The earlier lab worksheet used 10 mL of aqueous methanol per 0.1 g of dry sample. Its matrix and extraction differ from the published cherry method.",
+      ],
+    },
   },
   glucosinolate: {
     group: "general",
@@ -86,210 +115,271 @@ export const HPLC_PROTOCOLS = {
       title: "글루코시놀레이트",
       subtitle: "Glucosinolates",
       badge: "HPLC-UV",
-      overview: "십자화과 시료의 desulfo-glucosinolate 또는 총 glucosinolate 계열 피크를 정량합니다.",
-      matrix: "동결건조 또는 열풍건조 분말",
+      overview:
+        "탈황 유도체의 UV 피크를 내부표준과 비교해 원래 글루코시놀레이트의 몰 함량을 계산합니다.",
+      matrix: "건조질량을 확인한 십자화과 식물 시료",
       compounds: [
-        "Progoitrin", "Sinigrin", "Glucoalyssin", "Gluconapoleiferin",
-        "Gluconapin", "4-Hydroxyglucobrassicin", "Glucobrassicanapin", "Glucoerucin",
-        "Glucobrassicin", "4-Methoxyglucobrassicin", "Gluconasturtiin", "Neoglucobrassicin"
+        "Progoitrin",
+        "Sinigrin",
+        "Glucoalyssin",
+        "Gluconapoleiferin",
+        "Gluconapin",
+        "4-Hydroxyglucobrassicin",
+        "Glucobrassicanapin",
+        "Glucoerucin",
+        "Glucobrassicin",
+        "4-Methoxyglucobrassicin",
+        "Gluconasturtiin",
+        "Neoglucobrassicin",
       ],
       samplePrep: [
-        "시료는 건조 후 곱게 분쇄하고 myrosinase 활성을 줄이기 위해 추출 전까지 냉동·건조 상태로 보관합니다.",
-        "분말 시료를 70% MeOH로 고온 추출하여 내인성 myrosinase를 불활성화합니다.",
-        "원심분리 후 상층액을 정제 컬럼에 통과시키고 필요 시 sulfatase 처리 후 여과합니다."
+        "미로시나아제에 의한 분해를 억제하는 조건으로 시료를 추출합니다. 시료에 원래 없거나 공시험으로 보정한 내부표준을 정량 첨가하여 처음부터 시료와 함께 처리하세요.",
+        "음이온 교환 컬럼에서 포집한 글루코시놀레이트에 설파타아제를 적용합니다. 이 계산에는 탈황된 분석물과 탈황된 내부표준의 피크를 사용합니다.",
       ],
       chromatographic: [
-        "Column: C18 reverse-phase column",
-        "Mobile phase: water/acetonitrile gradient",
-        "Detection: 229 nm 중심",
-        "각 glucosinolate는 표준품 또는 response factor로 보정합니다."
+        "탈황 유도체를 역상 C18에서 분리하고 229 nm에서 검출합니다. 머무름 시간, UV 스펙트럼과 표준품으로 피크를 확인하고 혼재 피크는 제외하세요.",
       ],
       calculation: [
-        "표준품 또는 response factor 기반 계산식을 사용합니다.",
-        "앱의 HPLC 계산기는 RT matching과 peak area 정리를 지원하며, 최종 함량식은 실험실 표준식에 맞춰 입력값을 조정하세요."
+        "함량(µmol/g DW) = (분석물 면적 / 동일 크로마토그램의 내부표준 면적) × 첨가한 내부표준량(µmol) × (분석물 보정계수 / 내부표준 보정계수) / 추출한 건조질량(g).",
+        "완전 탈황을 전제로 원물질 1 mol과 탈황 유도체 1 mol이 대응합니다. 원물질과 유도체는 분자량이 다르므로 피크 면적 또는 질량을 서로 직접 대입하지 않습니다.",
       ],
       storage: [
-        "건조 분말은 −20℃, 방습 조건에서 보관합니다.",
-        "추출액은 4℃ 차광 보관하고 장기 보관은 피합니다."
+        "표준품은 인증서의 온도·유효기간을 따르고, 분석용 추출액은 해당 매트릭스에서 확인한 안정 시간 안에 측정하세요.",
       ],
-      notes: ["myrosinase 불활성화가 늦으면 glucosinolate가 분해될 수 있습니다."]
+      notes: [
+        "ISO 계열 내부표준 면적비와 외부 sinigrin 검량선은 서로 다른 계산법입니다. 이 화면은 내부표준법을 사용합니다. 시료별 첨가량과 표준 피크 면적이 필요합니다.",
+      ],
+      sources: [
+        {
+          name: "ISO 9167:2019 · scope",
+          url: "https://www.iso.org/standard/72207.html",
+          scope:
+            "공개 적용 범위. 유채·유채박 검증 및 다른 식물에서 기동정된 규격 수록 성분에 대한 제한.",
+        },
+        {
+          name: "Commission Regulation (EEC) 1864/90 · Annex VIII §§4.5, 7",
+          url: "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A31990R1864",
+          scope: "유채 종자 내부표준법의 면적비, 첨가량, 건조질량 보정 원리.",
+        },
+        {
+          name: "Grosser & van Dam (2017) · Table 3",
+          url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5409297/",
+          scope:
+            "탈황 유도체의 229 nm 상대 보정계수. 이 논문의 정량 절차는 외부 sinigrin 표준곡선을 사용합니다.",
+        },
+      ],
+      archiveNotes: [
+        "기존 계산기의 고정값 0.5와 공통 분자량·피크 면적만으로는 시료별 첨가량과 각 물질의 보정계수를 확인할 수 없습니다. 기존 피크를 유지하고 새 계산 조건을 입력할 수 있습니다.",
+      ],
     },
     en: {
       title: "Glucosinolates",
       subtitle: "Glucosinolates",
       badge: "HPLC-UV",
-      overview: "Quantifies desulfo-glucosinolates or total glucosinolate peaks in Brassicaceae samples.",
-      matrix: "Freeze-dried or oven-dried powder",
+      overview:
+        "Compare desulfated analyte peaks with an internal standard to report the molar content of parent glucosinolates.",
+      matrix: "Brassicaceae sample of known dry mass",
       compounds: [
-        "Progoitrin", "Sinigrin", "Glucoalyssin", "Gluconapoleiferin",
-        "Gluconapin", "4-Hydroxyglucobrassicin", "Glucobrassicanapin", "Glucoerucin",
-        "Glucobrassicin", "4-Methoxyglucobrassicin", "Gluconasturtiin", "Neoglucobrassicin"
+        "Progoitrin",
+        "Sinigrin",
+        "Glucoalyssin",
+        "Gluconapoleiferin",
+        "Gluconapin",
+        "4-Hydroxyglucobrassicin",
+        "Glucobrassicanapin",
+        "Glucoerucin",
+        "Glucobrassicin",
+        "4-Methoxyglucobrassicin",
+        "Gluconasturtiin",
+        "Neoglucobrassicin",
       ],
       samplePrep: [
-        "Dry and grind the sample; keep it frozen and dry until extraction to minimize myrosinase activity.",
-        "Extract powder with hot 70% MeOH to inactivate endogenous myrosinase.",
-        "Centrifuge, purify the supernatant on a column, apply sulfatase if required, and filter before HPLC."
+        "Use extraction conditions that suppress myrosinase. Add a known amount of an internal standard absent from the sample or corrected for its native contribution, and carry it through preparation.",
+        "Capture glucosinolates by anion exchange and desulfate with sulfatase. This calculator uses the desulfated analyte and desulfated internal-standard peaks.",
       ],
       chromatographic: [
-        "Column: C18 reversed-phase column",
-        "Mobile phase: water/acetonitrile gradient",
-        "Detection: mainly 229 nm",
-        "Correct individual glucosinolates using standards or response factors."
+        "Separate desulfated analytes on reversed-phase C18 and measure at 229 nm. Confirm assignments against standards, retention times and UV spectra, excluding unresolved peaks.",
       ],
       calculation: [
-        "Use standard-based or response-factor-based equations.",
-        "The app supports RT matching and peak-area organization; adjust the final equation to your laboratory standard method."
+        "Content (µmol/g DW) = (analyte area / IS area in the same chromatogram) × IS added (µmol) × (analyte correction factor / IS correction factor) / extracted dry mass (g).",
+        "Complete desulfation yields one mole of derivative per mole of parent. Parent and derivative have different molecular masses. Use the amount of the actual standard added, including its certified salt or hydrate form.",
       ],
       storage: [
-        "Store dry powder at −20℃ under moisture-proof conditions.",
-        "Keep extracts protected from light at 4℃ and avoid long storage."
+        "Follow certified standard storage conditions and expiry. Use the extract within its demonstrated stability period for the sample matrix.",
       ],
-      notes: ["Delayed myrosinase inactivation can degrade glucosinolates."]
-    }
+      notes: [
+        "This worksheet uses the internal-standard ratio approach. An external sinigrin calibration is a separate procedure. Supply the spike amount and measured standard peak for each sample.",
+      ],
+      sources: [
+        {
+          name: "ISO 9167:2019 · scope",
+          url: "https://www.iso.org/standard/72207.html",
+          scope:
+            "Public scope. Tested on rapeseed and rapeseed meals. Other matrices require previously identified glucosinolates covered by the standard.",
+        },
+        {
+          name: "Commission Regulation (EEC) 1864/90 · Annex VIII §§4.5, 7",
+          url: "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A31990R1864",
+          scope:
+            "Historical rapeseed internal-standard procedure, spike amount, peak-area ratio and dry-mass correction.",
+        },
+        {
+          name: "Grosser & van Dam (2017) · Table 3",
+          url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5409297/",
+          scope:
+            "229 nm correction factors of desulfo forms. The paper itself uses an external sinigrin calibration.",
+        },
+      ],
+      archiveNotes: [
+        "The old fixed 0.5 and shared molecular weight/area do not identify each sample’s added standard amount or each analyte’s factor. Saved peaks remain available for recalculation.",
+      ],
+    },
   },
   lamiaceae_markers: {
     group: "new",
     ko: {
-      title: "로즈마린산·아카세틴·틸리아닌",
+      title: "배초향 로즈마린산·아카세틴·틸리아닌",
       subtitle: "Rosmarinic acid / Acacetin / Tilianin",
-      badge: "HPLC-DAD",
-      overview: "사용자가 제공한 분석법을 기준으로 80% MeOH 추출 후 C18-HPLC에서 로즈마린산, 아카세틴, 틸리아닌을 동시 정량합니다.",
-      matrix: "세척 후 건조한 식물체 분말",
+      badge: "HPLC · 330 nm",
+      overview: "배초향의 뿌리·줄기·잎·꽃에서 로즈마린산, 아카세틴, 틸리아닌을 추출하고 성분별 외부 표준품으로 정량합니다.",
+      matrix: "동결건조한 배초향 기관별 분말",
       compounds: ["Rosmarinic acid", "Acacetin", "Tilianin"],
       samplePrep: [
-        "세척한 생시료는 50℃ 열풍건조기에서 충분히 건조한 뒤 균일하게 분쇄합니다.",
-        "분말 시료 0.1 g에 80% MeOH 10 mL를 넣고 vortex합니다.",
-        "초음파 추출을 약 60분 수행한 뒤 15,000 rpm, 4℃, 10분 원심분리합니다.",
-        "상층액을 0.45 μm membrane filter로 여과하여 HPLC vial에 옮깁니다."
+        "기관별로 동결한 시료를 −50 °C에서 4일간 동결건조한 뒤 분쇄해 체로 칩니다.",
+        "분말 200 mg에 순수 메탄올 10 mL를 넣어 30분간 초음파 추출합니다. 1,358 × g에서 20분간 원심분리한 뒤 상층액을 0.45 µm 필터로 여과합니다.",
       ],
       chromatographic: [
-        "Column: C18 column, 4.6 × 250 mm, 5 μm 또는 동등품",
-        "Mobile phase: A = 0.1% formic acid in water, B = acetonitrile",
-        "Gradient 예: B 10% 시작 → 15% → 35% → 70% 세척 → 10% 재평형",
-        "Flow rate: 1.0 mL/min, injection volume: 10~20 μL, column temperature: 30℃",
-        "Detection: 330 nm 권장; acacetin은 330~350 nm 범위에서 PDA spectrum 확인"
+        "이동상 A는 0.1% 포름산 수용액, B는 아세토니트릴입니다. 논문에 보고된 B 조성은 0–5분 20%, 5–20분 50%, 20–22분 100%입니다.",
+        "유속 0.8 mL/min, 주입량 10 µL, 검출 파장 330 nm입니다. 논문의 머무름 시간은 로즈마린산 11.655분, 아카세틴 19.659분, 틸리아닌 12.542분입니다. 각 배치의 표준품과 대조해 피크를 배정하세요.",
       ],
       calculation: [
-        "각 표준품으로 Area = a × C + b 표준곡선을 작성합니다.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × 10 mL × DF / 0.1 g / 1000 = C × 0.1 × DF"
+        "성분별 표준품의 농도 C(µg/mL)와 피크 면적으로 검량선 Area = a × C + b를 구합니다. 시료 농도는 (Area − b)/a입니다.",
+        "기관별 함량(mg/g DW) = C × V × DF / (1000 × m). V는 실제 추출액 부피(mL), DF는 주입 전 희석 배수, m은 동결건조 분말 질량(g)입니다. 10 mL와 0.200 g을 썼다면 C × 0.05 × DF입니다.",
       ],
-      storage: [
-        "건조 분말은 차광·방습 상태로 −20℃ 보관합니다.",
-        "80% MeOH 추출액은 갈색 vial에 담아 4℃에서 보관하고 가급적 당일 또는 48시간 내 분석합니다.",
-        "로즈마린산·아카세틴·틸리아닌 표준용액은 MeOH에 조제 후 소분하여 −20℃ 차광 보관합니다."
-      ],
+      storage: ["채취 시료는 액체질소로 동결해 −70 °C에 보관했습니다. 여과한 추출액의 보관기한은 원문에 제시되지 않았습니다."],
       notes: [
-        "열풍건조는 조건 차이에 따라 phenolic/flavone glycoside 함량에 영향을 줄 수 있으므로 모든 처리구에 동일하게 적용하세요.",
-        "제공된 이미지 기준을 앱에 반영했으며, 실제 장비 컬럼/용매 조성에 맞춰 gradient는 미세 조정할 수 있습니다."
-      ]
+        "논문은 표준액 0.1–100 µg/mL를 사용했습니다. 결과를 보고할 때는 해당 배치와 성분의 검량 범위·정량한계를 확인하세요.",
+        "기관 전체에 포함된 양(mg)은 기관별 함량(mg/g DW)에 해당 기관의 건물중(g)을 곱합니다. 식물 전체 농도는 기관별 농도를 건물중 비율로 가중한 평균입니다.",
+      ],
+      sources: [
+        { name: "Lam 등 (2026) · Scientific Reports 16, 9632",
+          url: "https://doi.org/10.1038/s41598-025-34712-x",
+          scope: "첨부 논문 13쪽의 세 지표성분 추출·330 nm 검출법과 14쪽 식 (1)의 기관별 건물중 환산. 12쪽의 280 nm 분석은 별도의 페놀성분 다섯 종에 해당합니다." },
+        { name: "Lam 등 (2020) · Agronomy 10, 76, §2.6",
+          url: "https://doi.org/10.3390/agronomy10010076",
+          scope: "과거 275 nm 분석 자료를 해석할 때 참조하는 별도 시험법입니다." },
+      ],
+      archiveNotes: [
+        "2020년 시험법은 건조 분말 0.1 g을 80% 메탄올 1.5 mL로 추출해 275 nm로 측정했습니다. 기존 실험실 기록에는 0.1 g당 10 mL와 330 nm를 사용한 경우도 있습니다. 과거 자료에는 당시의 시료량·부피·검량선을 적용하세요.",
+      ],
     },
     en: {
-      title: "Rosmarinic Acid / Acacetin / Tilianin",
+      title: "Korean mint · Rosmarinic acid, acacetin and tilianin",
       subtitle: "Rosmarinic acid / Acacetin / Tilianin",
-      badge: "HPLC-DAD",
-      overview: "Based on the user-provided method: 80% MeOH extraction followed by C18-HPLC quantification of rosmarinic acid, acacetin, and tilianin.",
-      matrix: "Washed and dried plant powder",
+      badge: "HPLC · 330 nm",
+      overview: "Quantify rosmarinic acid, acacetin and tilianin in Korean mint (Agastache rugosa) roots, stems, leaves and flowers using separate external standards.",
+      matrix: "Freeze-dried A. rugosa organ powder",
       compounds: ["Rosmarinic acid", "Acacetin", "Tilianin"],
       samplePrep: [
-        "Dry washed fresh material thoroughly at 50℃, then grind it uniformly.",
-        "Add 10 mL of 80% MeOH to 0.1 g of powder and vortex.",
-        "Sonicate for about 60 min, then centrifuge at 15,000 rpm, 4℃, for 10 min.",
-        "Filter the supernatant through a 0.45 μm membrane into an HPLC vial."
+        "Freeze-dry each organ separately at −50 °C for four days, then grind and sieve the powder.",
+        "Sonicate 200 mg powder in 10 mL neat methanol for 30 min. Centrifuge at 1,358 × g for 20 min and pass the supernatant through a 0.45 µm filter.",
       ],
       chromatographic: [
-        "Column: C18 column, 4.6 × 250 mm, 5 μm or equivalent",
-        "Mobile phase: A = 0.1% formic acid in water, B = acetonitrile",
-        "Example gradient: start at 10% B → 15% → 35% → 70% wash → 10% re-equilibration",
-        "Flow rate: 1.0 mL/min; injection volume: 10–20 μL; column temperature: 30℃",
-        "Detection: 330 nm recommended; confirm acacetin using the PDA spectrum around 330–350 nm"
+        "Use aqueous 0.1% formic acid as A and acetonitrile as B. The paper reports 20% B for 0–5 min, 50% B for 5–20 min and 100% B for 20–22 min.",
+        "Inject 10 µL at 0.8 mL/min and monitor 330 nm. Reported retention times were 11.655 min for rosmarinic acid, 19.659 min for acacetin and 12.542 min for tilianin. Verify peak assignments against the standards for the run.",
       ],
       calculation: [
-        "Prepare a calibration curve for each standard: Area = a × C + b.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × 10 mL × DF / 0.1 g / 1000 = C × 0.1 × DF"
+        "Fit Area = a × C + b for each analyte using its reference standard concentration C in µg/mL. Calculate C for the sample as (Area − b)/a.",
+        "Organ concentration (mg/g DW) = C × V × DF / (1000 × m). Use actual extract volume V (mL), dilution before injection DF and dry powder mass m (g). For 10 mL and 0.200 g the result is C × 0.05 × DF.",
       ],
-      storage: [
-        "Store dried powder at −20℃ protected from light and moisture.",
-        "Keep 80% MeOH extracts in amber vials at 4℃ and analyze the same day or within 48 h when possible.",
-        "Prepare standards in MeOH, aliquot them, and store at −20℃ protected from light."
-      ],
+      storage: ["The authors froze harvested material in liquid nitrogen and stored it at −70 °C. They did not specify a holding time for the filtered extract."],
       notes: [
-        "Oven-drying conditions may affect phenolic and flavone glycoside contents; apply the same drying protocol to all treatments.",
-        "The method from the supplied image was incorporated; minor gradient tuning may be needed for your exact column and system."
-      ]
-    }
+        "Published standards spanned 0.1–100 µg/mL. Check each batch’s calibration range and each analyte’s LOQ before reporting.",
+        "Multiply the organ concentration (mg/g DW) by its dry mass (g) to obtain mg per organ. Whole-plant concentration is the dry-mass-weighted mean of the organ concentrations.",
+      ],
+      sources: [
+        { name: "Lam et al. (2026) · Scientific Reports 16, 9632",
+          url: "https://doi.org/10.1038/s41598-025-34712-x",
+          scope: "Target-marker extraction and 330 nm detection on p. 13 of the supplied paper. Equation (1) on p. 14 weights organs by dry mass. The 280 nm method on p. 12 covers five other phenolics." },
+        { name: "Lam et al. (2020) · Agronomy 10, 76, §2.6",
+          url: "https://doi.org/10.3390/agronomy10010076",
+          scope: "Separate method for interpreting archived 275 nm analyses." },
+      ],
+      archiveNotes: [
+        "The 2020 method extracted 0.1 g powder in 1.5 mL of 80% methanol and measured at 275 nm. Older laboratory records also used 10 mL per 0.1 g at 330 nm. Use each run’s recorded mass, volume and calibration for reanalysis.",
+      ],
+    },
   },
   artemisinin: {
     group: "new",
     ko: {
-      title: "쑥 아르테미시닌",
-      subtitle: "Artemisia artemisinin content",
-      badge: "HPLC-UV",
-      overview: "쑥/Artemisia 건조 분말에서 artemisinin을 추출하고, UV 검출을 위해 필요 시 유도체화 후 C18-HPLC로 정량합니다.",
-      matrix: "쑥 또는 Artemisia spp. 건조 분말",
-      compounds: ["Artemisinin"],
+      title: "개똥쑥 아르테미시닌",
+      subtitle: "Artemisia annua · artemisinin pathway",
+      badge: "RP-HPLC · 197 nm",
+      overview: "개똥쑥 동결건조 조직에서 메탄올로 추출한 뒤, 역상 HPLC로 아르테미시닌과 관련 대사산물 세 종을 함께 정량합니다.",
+      matrix: "개똥쑥 동결건조 분말 · 반복당 0.5 g",
+      compounds: ["Artemisinin", "Arteannuin B", "Dihydroartemisinic acid", "Artemisinic acid"],
       samplePrep: [
-        "시료는 저온 건조 또는 동결건조 후 균질하게 분쇄하고 차광·방습 상태로 보관합니다.",
-        "분말 시료 0.1~0.5 g에 MeOH 또는 acetonitrile 10 mL를 넣고 30~60분 초음파 추출합니다.",
-        "원심분리 후 상층액을 취하고, UV 260 nm 방법을 사용할 경우 알칼리 유도체화 과정을 동일하게 적용합니다.",
-        "유도체화 예: 추출액 aliquot에 NaOH 용액을 넣어 45~50℃에서 반응시킨 후 acetic acid로 중화하고 0.45 μm filter로 여과합니다."
+        "동결건조한 조직을 균일하게 분쇄합니다. 분말 0.5 g에 HPLC급 메탄올 10 mL를 넣고 60 °C에서 1시간 초음파 추출합니다.",
+        "842 × g에서 20분간 원심분리한 뒤 상층액을 0.45 µm 시린지 필터로 여과합니다.",
+        "여과액을 농축한 뒤 메탄올에 재용해해 추출물 농도를 10,000 mg/L로 맞춥니다. 주입 전 1,000 mg/L로 10배 희석합니다.",
       ],
       chromatographic: [
-        "Column: C18 column, 4.6 × 250 mm, 5 μm 또는 동등품",
-        "Mobile phase: acetonitrile:water = 60:40(v/v) 등 isocratic 조건을 우선 검토",
-        "Flow rate: 1.0 mL/min, injection volume: 20 μL, column temperature: 30℃",
-        "Detection: 유도체화 UV 방법은 260 nm 사용; ELSD/CAD/MS 장비가 있으면 비유도체화 분석도 가능"
+        "Optimapak C18 컬럼(4.6 × 250 mm)을 30 °C로 유지합니다. 이동상은 아세토니트릴과 물 60:40(v/v), 유속은 1.0 mL/min, 검출 파장은 197 nm입니다.",
+        "각 성분의 외부 표준액 10–100 mg/L로 피크 면적 검량선을 작성합니다. 같은 조건에서 측정한 표준품의 머무름 시간으로 피크를 확인합니다.",
       ],
       calculation: [
-        "Artemisinin 표준품으로 Area = a × C + b 표준곡선을 작성합니다.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × 추출부피(mL) × DF / 시료무게(g) / 1000"
+        "표준품별로 Area = a × C + b를 적용합니다. C = (Area − b)/a이며, 표준액의 1 mg/L는 1 µg/mL입니다.",
+        "여과액 전량을 농축했다면 건물중당 함량(mg/g DW) = C(µg/mL) × 주입 전 희석배수 × 재용해 부피(mL) / [1,000 × 건조질량(g)]입니다. 일부만 농축했다면 분취 비율도 반영합니다.",
       ],
       storage: [
-        "건조 분말은 −20℃, 차광·방습 조건에서 보관합니다.",
-        "Artemisinin 표준용액과 유도체화 시약은 갈색 vial에 소분하고 반복 동결융해를 피합니다.",
-        "유도체화한 시료는 안정성이 제한될 수 있으므로 가능한 한 당일 분석합니다."
+        "논문은 수확 조직을 액체질소로 급속 동결하고 드라이아이스로 운반한 뒤, 동결건조 전까지 −80 °C에 보관했습니다.",
       ],
       notes: [
-        "Artemisinin은 UV chromophore가 약하므로 UV 분석에서는 유도체화 여부와 반응시간을 표준품과 시료에 동일하게 적용해야 합니다.",
-        "사용자가 제공한 쑥 HPLC 분석 항목을 새 분석 카드와 계산 항목에 추가했습니다."
-      ]
+        "10,000 및 1,000 mg/L는 전체 추출물의 농도입니다. 아르테미시닌 표준액 농도와 구분해 기록하세요. 농축·재용해한 시료의 정량에는 실제 재용해 부피가 필요합니다.",
+      ],
+      sources: [
+        { name: "Kim et al. (2026) · §§2.5, 2.5.6", url: "https://doi.org/10.1016/j.indcrop.2026.124025", scope: "시료 보관, 추출·재용해, 197 nm 분리 조건과 네 성분의 외부 표준 검량 범위." },
+        { name: "Qian et al. (2005) · Q260", url: "https://doi.org/10.1081/JLC-200048890", scope: "기존 260 nm 유도체화법으로 측정한 데이터의 참고 문헌." },
+      ],
+      archiveNotes: [
+        "기존 Q260 방식은 NaOH와 아세트산으로 유도체화한 뒤 260 nm에서 검출합니다. 이 방식으로 측정한 데이터에는 당시의 표준품, 검량선과 희석배수를 사용하세요.",
+      ],
     },
     en: {
-      title: "Artemisia Artemisinin",
-      subtitle: "Artemisia artemisinin content",
-      badge: "HPLC-UV",
-      overview: "Extracts artemisinin from dried Artemisia powder and quantifies it by C18-HPLC, with derivatization when using UV detection.",
-      matrix: "Dried Artemisia spp. powder",
-      compounds: ["Artemisinin"],
+      title: "Artemisinin in sweet wormwood",
+      subtitle: "Artemisia annua · artemisinin pathway",
+      badge: "RP-HPLC · 197 nm",
+      overview: "Extract freeze-dried Artemisia annua tissue with methanol and quantify artemisinin and three related metabolites by reversed-phase HPLC.",
+      matrix: "Freeze-dried A. annua powder · 0.5 g per replicate",
+      compounds: ["Artemisinin", "Arteannuin B", "Dihydroartemisinic acid", "Artemisinic acid"],
       samplePrep: [
-        "Dry or freeze-dry the sample, grind uniformly, and store protected from light and moisture.",
-        "Extract 0.1–0.5 g powder with 10 mL MeOH or acetonitrile by sonication for 30–60 min.",
-        "Centrifuge and collect the supernatant; apply the same derivatization to standards and samples when using the 260 nm UV method.",
-        "Example derivatization: react an aliquot with NaOH at 45–50℃, neutralize with acetic acid, and filter through a 0.45 μm membrane."
+        "Grind the freeze-dried tissue to a uniform powder. Sonicate 0.5 g in 10 mL of HPLC-grade methanol at 60 °C for 1 hour.",
+        "Centrifuge at 842 × g for 20 minutes and pass the supernatant through a 0.45 µm syringe filter.",
+        "Concentrate the filtrate and reconstitute in methanol at 10,000 mg/L of extract. Dilute tenfold to 1,000 mg/L before injection.",
       ],
       chromatographic: [
-        "Column: C18 column, 4.6 × 250 mm, 5 μm or equivalent",
-        "Mobile phase: acetonitrile:water = 60:40(v/v) as an initial isocratic condition",
-        "Flow rate: 1.0 mL/min; injection volume: 20 μL; column temperature: 30℃",
-        "Detection: 260 nm for derivatized UV methods; ELSD/CAD/MS can be used for non-derivatized analysis"
+        "Use an Optimapak C18 column (4.6 × 250 mm) at 30 °C. Run acetonitrile/water (60:40, v/v) at 1.0 mL/min and detect at 197 nm.",
+        "Calibrate peak area with external standards of each compound at 10–100 mg/L. Identify peaks by matching retention times against standards run under the same conditions.",
       ],
       calculation: [
-        "Prepare an artemisinin calibration curve: Area = a × C + b.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × extraction volume(mL) × DF / sample weight(g) / 1000"
+        "For each standard, fit Area = a × C + b and obtain C = (Area − b)/a. A standard at 1 mg/L is equivalent to 1 µg/mL.",
+        "When the entire filtrate is concentrated, content (mg/g DW) = C (µg/mL) × pre-injection dilution factor × reconstitution volume (mL) / [1,000 × dry mass (g)]. Account for the aliquot fraction if only part of the filtrate was concentrated.",
       ],
       storage: [
-        "Store dry powder at −20℃ protected from light and moisture.",
-        "Aliquot artemisinin standards and derivatization reagents in amber vials; avoid repeated freeze-thaw cycles.",
-        "Analyze derivatized samples on the same day when possible because derivative stability may be limited."
+        "The study flash-froze harvested tissue in liquid nitrogen, transported it on dry ice and stored it at −80 °C before freeze-drying.",
       ],
       notes: [
-        "Artemisinin has weak native UV absorbance; use identical derivatization conditions for standards and samples in UV methods.",
-        "The Artemisia HPLC item from the supplied images has been added as a new protocol and calculator option."
-      ]
-    }
+        "The 10,000 and 1,000 mg/L values describe the whole extract. Use separate analyte concentrations for calibration. Dry-weight calculations require the actual reconstitution volume.",
+      ],
+      sources: [
+        { name: "Kim et al. (2026) · §§2.5, 2.5.6", url: "https://doi.org/10.1016/j.indcrop.2026.124025", scope: "Tissue storage, extraction and reconstitution, 197 nm separation and the external standard range for the four compounds." },
+        { name: "Qian et al. (2005) · Q260", url: "https://doi.org/10.1081/JLC-200048890", scope: "Reference for historical measurements made using the 260 nm derivatization method." },
+      ],
+      archiveNotes: [
+        "The earlier Q260 method uses NaOH and acetic acid for derivatization and detection at 260 nm. Process its runs using the corresponding standards, calibration and dilution.",
+      ],
+    },
   },
   cannabinoid: {
     group: "new",
@@ -297,73 +387,87 @@ export const HPLC_PROTOCOLS = {
       title: "대마 성분",
       subtitle: "Cannabinoid profiling",
       badge: "HPLC-DAD/LC-MS",
-      overview: "허가된 시료에서 cannabinoids를 추출하여 CBD/CBDA/THC/THCA 등 주요 성분을 HPLC-DAD 또는 LC-MS 조건으로 정량합니다.",
+      overview:
+        "건조 식물 시료의 산성형과 중성형 칸나비노이드를 개별 피크로 정량합니다.",
       matrix: "허가된 Cannabis/Hemp 건조 분말",
       compounds: ["CBDA", "CBD", "THCA", "Δ9-THC", "CBN", "CBG", "CBC"],
       samplePrep: [
-        "법적 취급 권한이 있는 시료만 사용하고, 건조 시료를 균일하게 분쇄합니다.",
-        "분말 시료 0.05~0.1 g에 MeOH 또는 MeOH:acetonitrile 혼합용매 10 mL를 넣고 vortex합니다.",
-        "초음파 추출 15~30분 후 원심분리하고 상층액을 필요 농도로 희석합니다.",
-        "0.22 또는 0.45 μm PTFE membrane filter로 여과하여 amber HPLC vial에 옮깁니다."
+        "분쇄한 대표 시료의 추출량과 희석 배수를 기록하고, 건조질량은 검증한 수분 측정 절차로 확인합니다. 산성형이 탈탄산되지 않도록 분석 시료와 건조질량 측정용 분취 시료를 구분하세요.",
       ],
       chromatographic: [
-        "Column: C18 column 또는 UHPLC C18, 예: 100 × 2.1 mm, 1.7~3 μm",
-        "Mobile phase: A = water + 0.1% formic acid, B = acetonitrile + 0.1% formic acid",
-        "Gradient: B를 약 60%에서 시작해 90~95%까지 증가시켜 중성/산성 cannabinoids를 분리합니다.",
-        "Flow rate: 0.3~0.5 mL/min(UHPLC) 또는 1.0 mL/min(HPLC), column temperature: 35~40℃",
-        "Detection: DAD 220 nm 중심, MS 사용 시 표준품 기반 ion transition/accurate mass 확인"
+        "AOAC 2018.11 단일 실험실 검증은 건조 Cannabis 등에서 12종을 LC–DAD로 정량했으며, 질량분석 검출기를 동정 확인에 사용했습니다. 해당 장비·컬럼에 검증한 분리조건과 화합물별 검량 범위를 적용하세요.",
       ],
       calculation: [
-        "각 cannabinoid 표준품으로 Area = a × C + b 표준곡선을 작성합니다.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × 추출부피(mL) × DF / 시료무게(g) / 1000"
+        "화합물마다 해당 인증 표준품의 검량선 Area = a × C + b를 사용합니다. C의 단위는 µg/mL입니다.",
+        "측정 피크의 C = (Area − b)/a입니다. 원 추출액 부피 V(mL), 주입 용액까지의 총 희석 배수 DF, 건조질량 m(g)을 사용하면 함량(mg/g DW) = C × V × DF / (1000 × m)입니다.",
+        "검량 범위와 정량한계는 표준품 및 매트릭스 검증값으로 확인하세요. 절편보다 작은 면적은 정량값을 표시하지 않습니다.",
       ],
       storage: [
-        "시료와 추출액은 법적 보관 규정을 따르고, 차광·밀봉 상태로 4℃ 단기 또는 −20℃ 장기 보관합니다.",
-        "산성 cannabinoid(CBDA, THCA)는 열과 장시간 노출에서 decarboxylation될 수 있으므로 고온 건조/장시간 방치를 피합니다.",
-        "표준용액은 amber vial에 소분하여 −20℃ 보관하고 반복 동결융해를 피합니다."
+        "표준품은 인증서의 온도·유효기간을 따르고, 분석용 추출액은 해당 매트릭스에서 확인한 안정 시간 안에 측정하세요.",
       ],
       notes: [
-        "이 항목은 허가된 연구·품질관리 목적의 정량 분석용입니다. 규제물질 취급과 폐기는 반드시 기관 및 지역 법규를 따르세요.",
-        "중성형과 산성형을 분리해서 보고하고, 총 THC/CBD 환산은 실험실 보고 기준에 맞춰 별도로 계산하세요."
-      ]
+        "현재 결과표는 각 성분의 mg/g DW를 별도로 표시합니다. THCA와 Δ9-THC, CBDA와 CBD의 피크를 각각 확인하세요.",
+      ],
+      sources: [
+        {
+          name: "Václavík et al. (2019) · AOAC 2018.11",
+          url: "https://doi.org/10.1093/jaoac/102.6.1822",
+          scope: "LC–DAD 정량법의 매트릭스·성분별 검증 범위.",
+        },
+        {
+          name: "Václavík et al. (2020) · dry-weight modification",
+          url: "https://cdnmedia.eurofins.com/eurofins-us/media/1713016/modification-of-aoac-official-methods-201811-for-quantification-of-cannabinoids-in-plant-materials-concentrates-and-oils.pdf",
+          scope: "건조질량 환산에 사용한 별도 분취와 수분 측정.",
+        },
+      ],
+      archiveNotes: [
+        "기존 프로젝트의 C18·220 nm 설정은 장비별 실험실 예시입니다. 인용 논문이 이 프로젝트의 컬럼, 구배와 모든 보관 조건을 검증한 것은 아닙니다.",
+      ],
     },
     en: {
       title: "Cannabinoid Profiling",
       subtitle: "Cannabinoid profiling",
       badge: "HPLC-DAD/LC-MS",
-      overview: "Quantifies major cannabinoids such as CBD, CBDA, THC, and THCA in authorized cannabis/hemp samples by HPLC-DAD or LC-MS.",
+      overview:
+        "Quantify acidic and neutral cannabinoids individually in dry plant material.",
       matrix: "Authorized dried Cannabis/Hemp powder",
       compounds: ["CBDA", "CBD", "THCA", "Δ9-THC", "CBN", "CBG", "CBC"],
       samplePrep: [
-        "Use only legally authorized material and grind the dried sample uniformly.",
-        "Add 10 mL MeOH or MeOH:acetonitrile solvent to 0.05–0.1 g powder and vortex.",
-        "Sonicate for 15–30 min, centrifuge, and dilute the supernatant as needed.",
-        "Filter through a 0.22 or 0.45 μm PTFE membrane into an amber HPLC vial."
+        "Record the representative ground sample, extract volume and dilution. Determine dry mass with a validated moisture procedure on a separate portion to preserve acidic analytes in the analytical aliquot.",
       ],
       chromatographic: [
-        "Column: C18 or UHPLC C18, e.g., 100 × 2.1 mm, 1.7–3 μm",
-        "Mobile phase: A = water + 0.1% formic acid, B = acetonitrile + 0.1% formic acid",
-        "Gradient: increase B from about 60% to 90–95% to separate acidic and neutral cannabinoids.",
-        "Flow rate: 0.3–0.5 mL/min for UHPLC or 1.0 mL/min for HPLC; column temperature: 35–40℃",
-        "Detection: DAD around 220 nm; for MS, confirm transitions or accurate masses using standards"
+        "The single-laboratory validation for AOAC 2018.11 quantified 12 cannabinoids by LC–DAD and used MS for additional identity confirmation. Use separation settings and calibration ranges verified on your own column and system.",
       ],
       calculation: [
-        "Prepare a calibration curve for each cannabinoid standard: Area = a × C + b.",
-        "C(μg/mL) = (Area − b) / a",
-        "Content(mg/g DW) = C × extraction volume(mL) × DF / sample weight(g) / 1000"
+        "Use a separate certified reference standard for each compound. Fit Area = a × C + b with C in µg/mL.",
+        "C = (Area − b)/a. Using the original extract volume V (mL), cumulative dilution to the injected vial DF and dry mass m (g), content (mg/g DW) = C × V × DF / (1000 × m).",
+        "Compare with the laboratory calibration range and LOQ. Areas below the intercept yield no reportable concentration.",
       ],
       storage: [
-        "Follow all legal storage rules; keep samples and extracts sealed and protected from light at 4℃ short-term or −20℃ long-term.",
-        "Acidic cannabinoids such as CBDA and THCA may decarboxylate with heat or long exposure; avoid high-temperature drying and extended standing.",
-        "Aliquot standards in amber vials at −20℃ and avoid repeated freeze-thaw cycles."
+        "Follow certified standard storage conditions and expiry. Use the extract within its demonstrated stability period for the sample matrix.",
       ],
       notes: [
-        "This entry is for authorized research and quality-control analysis only. Handling and disposal must follow institutional and local regulations.",
-        "Report neutral and acidic forms separately; total THC/CBD conversions should be calculated according to your laboratory reporting standard."
-      ]
-    }
-  }
+        "Results are reported separately as mg/g DW per analyte. Resolve THCA from Δ9-THC and CBDA from CBD and verify their identities.",
+      ],
+      sources: [
+        {
+          name: "Václavík et al. (2019) · AOAC 2018.11",
+          url: "https://doi.org/10.1093/jaoac/102.6.1822",
+          scope:
+            "Single-laboratory LC–DAD validation and analyte/matrix scope.",
+        },
+        {
+          name: "Václavík et al. (2020) · dry-weight modification",
+          url: "https://cdnmedia.eurofins.com/eurofins-us/media/1713016/modification-of-aoac-official-methods-201811-for-quantification-of-cannabinoids-in-plant-materials-concentrates-and-oils.pdf",
+          scope:
+            "Modification for moisture determination and dry-weight reporting.",
+        },
+      ],
+      archiveNotes: [
+        "The archived C18, 220 nm setup was a lab example. The cited study has a defined scope and does not establish performance for the earlier instrument, gradient or storage conditions.",
+      ],
+    },
+  },
 };
 
 const LEGACY_ALIASES = {
@@ -371,10 +475,11 @@ const LEGACY_ALIASES = {
   acacetin: "lamiaceae_markers",
   tilianin: "lamiaceae_markers",
   cannabis: "cannabinoid",
-  cannabinoids: "cannabinoid"
+  cannabinoids: "cannabinoid",
 };
 
-export const resolveHplcType = (analysisType) => LEGACY_ALIASES[analysisType] || analysisType;
+export const resolveHplcType = (analysisType) =>
+  LEGACY_ALIASES[analysisType] || analysisType;
 
 export const getHplcProtocol = (analysisType, lang = "ko") => {
   const resolved = resolveHplcType(analysisType);
@@ -388,6 +493,14 @@ export const getHplcCompounds = (analysisType, lang = "ko") => {
   return protocol?.compounds || [];
 };
 
+const mintCompoundNames = {
+  "Rosmarinic acid": "로즈마린산",
+  Acacetin: "아카세틴",
+  Tilianin: "틸리아닌",
+};
+export const hplcCompoundLabel = (compound, lang) =>
+  lang === "ko" && Object.hasOwn(mintCompoundNames, compound) ? mintCompoundNames[compound] : compound;
+
 export const calibrationCurveHplcTypes = new Set([
   "phenol",
   "lamiaceae_markers",
@@ -397,13 +510,15 @@ export const calibrationCurveHplcTypes = new Set([
   "acacetin",
   "tilianin",
   "cannabis",
-  "cannabinoids"
+  "cannabinoids",
 ]);
 
-export const isCalibrationCurveHplcType = (analysisType) => calibrationCurveHplcTypes.has(analysisType);
+export const isCalibrationCurveHplcType = (analysisType) =>
+  calibrationCurveHplcTypes.has(analysisType);
 
-export const getHplcProtocolEntries = (lang = "ko") => Object.entries(HPLC_PROTOCOLS).map(([key, value]) => ({
-  key,
-  ...(value[lang] || value.ko),
-  group: value.group
-}));
+export const getHplcProtocolEntries = (lang = "ko") =>
+  Object.entries(HPLC_PROTOCOLS).map(([key, value]) => ({
+    key,
+    ...(value[lang] || value.ko),
+    group: value.group,
+  }));

@@ -1,0 +1,200 @@
+{
+  "ko": {
+    "equipment": {
+      "title": "콘솔과 센서 헤드",
+      "steps": [
+        "본체와 헤드, 챔버, 광원을 구성에 맞게 연결합니다. 전원을 넣기 전 커넥터 정렬과 가스 연결 상태를 확인하세요.",
+        "참조·시료 분석기의 CO₂ 및 수증기 농도차로 가스 교환을 계산합니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/assembly.html",
+      "videoId": "5sZ6T5nwIko"
+    },
+    "chemicals": {
+      "title": "약품과 가스 공급",
+      "steps": [
+        "건조제와 CO₂ 흡수제의 종류, 교체 방법과 상태 표시를 해당 제품과 제조사 지침에서 확인하세요.",
+        "장착 전 칼럼과 실링을 확인하고 충전량과 취급 절차를 지키세요."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/assembly.html",
+      "videoId": "0cBmQYEbLaw"
+    },
+    "startup": {
+      "title": "예열과 시스템 검사",
+      "steps": [
+        "Start Up의 Warmup/System Tests를 실행합니다. 제조사의 준비 예시에서 시험은 약 10~15분 걸립니다.",
+        "결과 요약에서 경고 원인을 확인하고 유량, 챔버 밀폐와 환경 제어가 안정된 뒤 측정을 시작합니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/making-leaf-level-measurements.html",
+      "videoId": "xUOHknO_tBA"
+    },
+    "zeroing": {
+      "title": "영점 및 스팬 교정",
+      "steps": [
+        "영점·스팬 교정은 알려진 농도의 가스를 기준으로 분석기의 응답을 조정합니다. 정기적인 IRGA 매칭과는 절차가 다릅니다.",
+        "가스나 흡수제의 상태와 안정도 조건을 제조사 교정 지침에서 확인한 뒤 필요한 교정을 진행하세요."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/calibration.html",
+      "videoId": "5Zo2NzJTGaY"
+    },
+    "spot": {
+      "title": "일반 광합성 측정",
+      "steps": [
+        "챔버에 실제로 포함된 잎 면적 S(cm²)를 설정하고 잎과 가스켓의 밀폐 상태를 확인합니다.",
+        "측정 전 필요에 따라 IRGA를 매칭합니다. 선택한 환경 조건에서 A와 기공전도도 등이 안정된 후 기록합니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/making-leaf-level-measurements.html",
+      "videoId": "0tN7VzwNprs",
+      "settings": [
+        "기존 실험실 예시는 유량 500 µmol/s와 팬 10,000 rpm을 사용했습니다. 챔버와 시료의 요구 조건에 따라 조정하세요."
+      ]
+    },
+    "light": {
+      "title": "광 반응 곡선 A/Q",
+      "steps": [
+        "식물의 광 순화 상태와 실험 목적에 맞춰 광량 범위, 단계 순서, CO₂ 및 온도 제어를 정합니다.",
+        "각 단계에서 생리적으로 안정된 A를 기록하세요. 제조사의 광 반응 예시는 시작 시 매칭하고 측정 중에는 조건부 매칭을 사용합니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/light-response-curves.html",
+      "videoId": "uE7qvL1k99g",
+      "settings": [
+        "기존 실험실 예시의 높은 광량 → 암조건 순서는 여러 가능한 시퀀스 중 하나입니다."
+      ]
+    },
+    "aci": {
+      "title": "CO₂ 반응 곡선 A/Ci",
+      "steps": [
+        "해당 잎에서 광포화가 확인된 광량을 사용합니다. 일반적인 순서는 주변 CO₂에서 저농도로 내려갔다가 주변 농도로 돌아와 고농도로 올립니다.",
+        "농도 변화가 크면 매 측정 전 매칭 또는 범위 매칭을 고려합니다. 그래프의 가로축은 기기가 계산한 잎 내부 Ci입니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/co2-response-curves.html",
+      "videoId": "v12OdvKQEUg",
+      "settings": [
+        "400 → 50 → 400 → 1200 µmol/mol은 기존 실험실 설정 예시입니다. 안정화 시간과 농도 범위는 시료에 맞춰 결정합니다."
+      ]
+    },
+    "matching": {
+      "title": "IRGA와 범위 매칭",
+      "steps": [
+        "동일 공기를 참조·시료 분석기에 공급해 상대 차이를 보정합니다. CO₂ 또는 H₂O가 실제로 0인 상태를 만드는 작업과 구분하세요.",
+        "농도가 넓게 바뀌는 시퀀스는 제조사의 범위 매칭 조건과 적용 범위를 확인하세요."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/matching-the-analyzers.html",
+      "videoId": "7fwDaFZEwLE"
+    },
+    "export": {
+      "title": "기록과 품질 확인",
+      "steps": [
+        "처리구·반복·엽면적·챔버·시간·환경 설정을 원본 로그와 함께 보관하세요.",
+        "정상상태 측정은 설정한 안정도 기준과 실제 A, 기공전도도 변화를 함께 확인합니다. 산점도는 관측값을 표시하며 Vcmax나 Jmax를 피팅하지 않습니다."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/log-files-tab.html"
+    },
+    "trouble": {
+      "title": "측정 문제 진단",
+      "steps": [
+        "밀폐, 가스 유량, 약품 상태와 시스템 시험 경고부터 확인합니다.",
+        "수분·CO₂ 제어에 실패하면 해당 증상의 제조사 진단 순서를 따르세요. 한 번의 이상값만으로 센서 고장이나 재교정을 단정하지 마세요."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/troubleshooting-problems.html"
+    }
+  },
+  "en": {
+    "equipment": {
+      "title": "Console and sensor head",
+      "steps": [
+        "Connect the console, sensor head, chamber and light source for the configuration in use. Check connectors and gas connections before power-up.",
+        "Gas exchange is computed from the sample and reference CO₂ and water-vapour measurements."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/assembly.html",
+      "videoId": "5sZ6T5nwIko"
+    },
+    "chemicals": {
+      "title": "Chemicals and gas supply",
+      "steps": [
+        "Check the specified desiccant and CO₂ scrubber, their condition indicators and the replacement instructions for the material installed.",
+        "Inspect the columns and seals before installation. Follow the specified fill and handling instructions."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/assembly.html",
+      "videoId": "0cBmQYEbLaw"
+    },
+    "startup": {
+      "title": "Startup and warm-up",
+      "steps": [
+        "Run Warmup/System Tests from Start Up. The manufacturer’s preparation example takes about 10–15 min for the test sequence.",
+        "Review warnings in the test summary and confirm flow, chamber sealing and environmental control before measuring."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/making-leaf-level-measurements.html",
+      "videoId": "xUOHknO_tBA"
+    },
+    "zeroing": {
+      "title": "Zero and span calibration",
+      "steps": [
+        "Zero/span calibration adjusts analyzer response using known gas concentrations. Matching is a separate differential correction.",
+        "Use the specified reference gas or fresh scrubbers and meet the manufacturer’s stability criteria before an indicated calibration."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/calibration.html",
+      "videoId": "5Zo2NzJTGaY"
+    },
+    "spot": {
+      "title": "Spot photosynthesis",
+      "steps": [
+        "Set S to the actual leaf area enclosed in the chamber (cm²). Check the seal around the leaf.",
+        "Match the IRGAs before measurements as appropriate. Allow A and conductance to stabilize under the selected conditions before logging."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/making-leaf-level-measurements.html",
+      "videoId": "0tN7VzwNprs",
+      "settings": [
+        "The archived lab example used flow of 500 µmol/s and a 10,000 rpm fan. Confirm settings for the chamber and sample in use."
+      ]
+    },
+    "light": {
+      "title": "Light response A/Q",
+      "steps": [
+        "Choose the light range, sequence, CO₂ and temperature control for the acclimated leaf and the experimental question.",
+        "Log stabilized A at each light level. The manufacturer’s example matches at the start and uses conditional matching during the light sequence."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/light-response-curves.html",
+      "videoId": "uE7qvL1k99g",
+      "settings": [
+        "The archived lab sequence starts at high light and descends to darkness. Other sequences address different questions."
+      ]
+    },
+    "aci": {
+      "title": "CO₂ response A/Ci",
+      "steps": [
+        "Use a light level shown to saturate assimilation in the leaf. One steady-state sequence goes from ambient down to low CO₂, returns to ambient and then increases CO₂.",
+        "Across a wide CO₂ range, match before readings or use range matching. Plot calculated intercellular Ci on the horizontal axis."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/co2-response-curves.html",
+      "videoId": "v12OdvKQEUg",
+      "settings": [
+        "400 → 50 → 400 → 1200 µmol/mol was the archived lab example. Choose stabilization criteria and setpoints for your leaf."
+      ]
+    },
+    "matching": {
+      "title": "IRGA and range matching",
+      "steps": [
+        "Matching sends the same air to the two analyzers to correct their relative offset. It does not establish an absolute gas zero.",
+        "For sequences spanning a wide concentration range, check range-matching coverage and use conditions in the manufacturer’s instructions."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/matching-the-analyzers.html",
+      "videoId": "7fwDaFZEwLE"
+    },
+    "export": {
+      "title": "Logging and data quality",
+      "steps": [
+        "Retain treatment, replicate, enclosed leaf area, chamber, time and environmental settings with the original log.",
+        "For steady-state logs, inspect the specified stability criteria alongside A and conductance. The plot displays observed points; Vcmax and Jmax require a separate model fit."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/log-files-tab.html"
+    },
+    "trouble": {
+      "title": "Troubleshooting",
+      "steps": [
+        "Check chamber sealing, gas flow, chemical condition and system-test warnings first.",
+        "For a failed humidity or CO₂ setpoint, follow the troubleshooting sequence for the symptom before changing calibration."
+      ],
+      "url": "https://www.licor.com/support/LI-6800/topics/troubleshooting-problems.html"
+    }
+  }
+}

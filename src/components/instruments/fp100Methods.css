@@ -1,0 +1,42 @@
+.fp-method-picker {display:flex;align-items:center;flex-wrap:wrap;gap:.35rem;margin:1rem 0 1.15rem}
+.fp-method-picker button {color:var(--ui-muted);background:var(--ui-well);border:1px solid var(--ui-line);border-radius:.5rem;min-height:2.55rem;padding:.45rem .8rem;font-size:.85rem;font-weight:650}
+.fp-method-picker button[aria-pressed=true] {background:var(--ui-ink);color:var(--ui-panel);border-color:var(--ui-ink)}
+.fp-method-picker button:focus-visible,.fp-method-source:focus-visible {outline:2px solid var(--ui-accent);outline-offset:2px}
+@media(hover:hover){.fp-method-picker button:not([aria-pressed=true]):hover {background:var(--ui-hover);color:var(--ui-ink)}}
+.fp-method-sheet {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);gap:clamp(1rem,2.5vw,2rem);align-items:start}
+.fp-guide .fp-method-title {font-size:clamp(1.35rem,2vw,1.8rem);line-height:1.25;margin:0}
+.fp-guide .fp-method-principle {margin:.55rem 0 1rem}
+.fp-guide .fp-method-heading {font-size:.98rem;margin:0 0 .55rem}
+.fp-guide .fp-method-sheet ol {margin:0;padding-inline-start:1.5rem}
+.fp-guide .fp-method-sheet li::marker {color:var(--ui-accent);font-weight:650}
+.fp-method-output {margin:1rem 0 0;padding-top:.9rem;border-top:1px solid var(--ui-line)}
+.fp-method-output ul {list-style:disc;padding-inline-start:1.25rem;margin:0}
+.fp-guide .fp-method-next {margin:.8rem 0 0}
+.fp-method-next strong {color:var(--ui-ink);margin-inline-end:.3rem}
+.fp-method-source {display:inline-flex;align-items:center;gap:.3rem;color:var(--ui-accent);font-size:.83rem;font-weight:620;margin-top:.8rem;text-decoration:underline;text-underline-offset:.18rem}
+.fp-method-figure {margin:0;background:linear-gradient(125deg,#182c31,#112127);border:1px solid #344c50;color:#ecf6ed;border-radius:.65rem;padding:.8rem .8rem .45rem}
+.fp-method-figure figcaption {font-size:.75rem;font-weight:620;color:#cfddd7;margin:0 0 .3rem}
+.fp-method-figure svg {display:block;width:100%;max-height:240px;font-family:inherit}
+.fp-method-figure text {font-size:13px;fill:#e1ece8}
+.fp-method-figure .fp-level {font-size:12.5px;fill:#c0ebc9}
+.fp-axis,.fp-tick {stroke:#8da49f;stroke-width:1.4;fill:none}
+.fp-signal,.fp-pulse,.fp-leaf-veins {stroke-linejoin:round;stroke-linecap:round;fill:none}
+.fp-signal {stroke:#a7e3bf;stroke-width:3}
+.fp-mark {stroke:#c4ecd5;fill:#183d31;stroke-width:2}
+.fp-step-fill {fill:#72b797;opacity:.23}
+.fp-light-field {fill:#504735}.fp-dark-field {fill:#283a4c}
+.fp-pulse {stroke:#f1c87d;stroke-width:2.4}
+.fp-leaf {fill:#548e70;stroke:#a8d6af;stroke-width:2}
+.fp-leaf-veins {stroke:#cce4b7;stroke-width:1.8}
+.fp-study-protocol {padding-top:.75rem;margin-top:1.15rem;border-top:1px solid var(--ui-line)}
+@media(prefers-reduced-motion:no-preference){.fp-method-figure svg {animation:fp-figure-appear 220ms ease-out}@keyframes fp-figure-appear {from{opacity:.55}to{opacity:1}}}
+@media(max-width:800px){.fp-method-sheet {grid-template-columns:minmax(0,1fr)}}
+
+.fp-method-figure {container-type:inline-size}
+.fp-guide .fp-model-scope {margin:.5rem 0 .75rem;max-width:100ch}
+.fp-model-scope .fp-method-source {margin-top:0}
+.fp-method-sources {display:flex;flex-wrap:wrap;align-items:center;gap:0 .85rem}
+@container (max-width:410px) {
+  .fp-method-figure text,
+  .fp-method-figure .fp-level {font-size:clamp(13px,calc(37px - 6cqi),24px)}
+}

@@ -1,246 +1,113 @@
-import React, { useState, useRef } from "react";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Download } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { getFieldValueFromRow, getMeasurementFields } from "@/utils/analysisFields";
+import { assayTemplate, readAssayCsv } from "@/utils/assayCsv";
+import { getMeasurementFields } from "@/utils/analysisFields";
+import PlateImport from "./PlateImport";
+import "@/pages/assay.css";
+import "./plateImport.css";
 
-const parseCSV = (text) => {
-  const lines = text.split(/\r?\n/).filter(line => line.trim());
-  if (lines.length < 2) return [];
+export default function ExcelUpload({ analysisType, onSamplesUploaded, onCalibrationPreview, params, initialWorkbook, onSwitchAssay, lang = "ko" }) {
+  const en = lang === "en";
+  const t = (ko, eng) => en ? eng : ko;
+  const input = useRef(null);
+  const readId = useRef(0);
+  const [dragging, setDragging] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [workbookFile, setWorkbookFile] = useState(initialWorkbook || null);
 
-  const delimiters = [",", ";", "\t"];
-  let bestDelimiter = ",";
-  let maxCount = 0;
+  useEffect(() => () => { readId.current++; }, []);
 
-  delimiters.forEach(delimiter => {
-    const count = lines[0].split(delimiter).length;
-    if (count > maxCount) {
-      maxCount = count;
-      bestDelimiter = delimiter;
-    }
-  });
-
-  const headers = lines[0].replace(/^\uFEFF/, "").split(bestDelimiter).map(header => header.trim().replace(/^"|"$/g, ""));
-  
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(bestDelimiter).map(value => value.trim().replace(/^"|"$/g, ""));
-    if (values.length === headers.length) {
-      const row = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] || "";
-      });
-      rows.push(row);
-    }
+  function added(samples, calibration) {
+    const counts = onSamplesUploaded(samples, calibration);
+    const imported = counts?.added ?? samples.length;
+    const skipped = counts?.skipped ?? 0;
+    setWorkbookFile(null);
+    const message = t(`시료 ${imported}개를 추가했습니다.`, `Added ${imported} samples.`);
+    setStatus({ message: skipped ? message + " " + t(`이미 등록한 측정값 ${skipped}개를 건너뛰었습니다.`, `Skipped ${skipped} previously added readings.`) : message });
   }
-
-  return rows;
-};
-
-const getExampleValue = (analysisType, field, rowIndex) => {
-  if (field.optional) return "";
-  if (analysisType === "cat") return ["-0.048", "-0.052", "-0.044"][rowIndex] || "-0.050";
-  if (analysisType === "pod") return ["0.085", "0.092", "0.078"][rowIndex] || "0.080";
-  if (analysisType === "sod" && field.key === "560") return ["0.420", "0.455", "0.390"][rowIndex] || "0.400";
-  return ["0.123", "0.145", "0.098"][rowIndex] || "0.000";
-};
-
-export default function ExcelUpload({ analysisType, onSamplesUploaded }) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState(null);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const fields = getMeasurementFields(analysisType, "ko");
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const { files } = e.dataTransfer;
-    if (files.length > 0) {
-      handleFileUpload({ target: { files } });
-    }
-  };
-
-  const downloadSampleTemplate = () => {
-    if (!analysisType) return;
-    
-    const headers = ["treatment_name", "sample_name", ...fields.map(field => field.key)];
-    const sampleRows = ["Rep1", "Rep2", "Rep3"].map((replicate, rowIndex) => [
-      rowIndex < 2 ? "Control" : "Treatment",
-      replicate,
-      ...fields.map(field => getExampleValue(analysisType, field, rowIndex))
-    ]);
-    
-    const csvRows = [headers.join(","), ...sampleRows.map(row => row.join(","))];
-    const csvContent = csvRows.join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `sample_template_${analysisType}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+  async function importFile(file) {
     if (!file) return;
-
-    setUploading(true);
-    setUploadResult(null);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        let json = [];
-        
-        if (file.name.toLowerCase().endsWith(".csv")) {
-          json = parseCSV(e.target.result);
-        } else {
-          throw new Error("현재 업로드는 CSV 파일을 지원합니다. Excel에서 CSV로 저장한 뒤 업로드해주세요.");
-        }
-
-        if (json.length === 0) {
-          throw new Error("파일에서 유효한 데이터를 읽지 못했습니다. 헤더와 구분자를 확인해주세요.");
-        }
-
-        const processedSamples = json.map(row => {
-          const absorbance_values = {};
-
-          fields.forEach(field => {
-            const rawValue = getFieldValueFromRow(row, field);
-            if (field.optional && rawValue === "") return;
-
-            const valueStr = String(rawValue || "0").replace(",", ".");
-            absorbance_values[field.key] = parseFloat(valueStr) || 0;
-          });
-
-          return {
-            treatment_name: row.treatment_name || row["Treatment Name"] || "N/A",
-            sample_name: row.sample_name || row["Sample Name"] || "N/A",
-            absorbance_values,
-          };
-        });
-
-        if (processedSamples.length > 0) {
-          onSamplesUploaded(processedSamples);
-          setUploadResult({
-            success: true,
-            message: `${processedSamples.length}개 샘플을 업로드했습니다.`
-          });
-        } else {
-          throw new Error("샘플 데이터를 처리하지 못했습니다. 컬럼명을 확인해주세요.");
-        }
-      } catch (error) {
-        setUploadResult({
-          success: false,
-          message: "파일 처리 오류: " + error.message
-        });
-      } finally {
-        setUploading(false);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+    const request = ++readId.current;
+    setLoading(true);
+    setStatus(null);
+    setWorkbookFile(null);
+    const xlsx = /\.xlsx$/i.test(file.name);
+    try {
+      if (xlsx) {
+        const { readPlateWorkbook } = await import("@/utils/plateWorkbook");
+        const workbook = await readPlateWorkbook(file);
+        if (request === readId.current) setWorkbookFile({ fileName: file.name, workbook });
+      } else if (/\.csv$/i.test(file.name)) {
+        const csv = await file.text();
+        if (request === readId.current) added(readAssayCsv(csv, analysisType, lang));
+      } else {
+        throw new Error(t("장비의 .xlsx 파일 또는 시료 양식의 .csv 파일을 선택하세요.", "Choose a reader .xlsx workbook or a .csv sample template."));
       }
-    };
-    
-    reader.onerror = (error) => {
-      setUploadResult({ success: false, message: "파일 읽기 오류: " + error.toString() });
-      setUploading(false);
-    };
-    
-    if (file.name.toLowerCase().endsWith(".csv")) {
-      reader.readAsText(file, "UTF-8");
-    } else {
-      setUploadResult({ success: false, message: "CSV 파일만 업로드할 수 있습니다." });
-      setUploading(false);
+    } catch (error) {
+      if (request !== readId.current) return;
+      let message = error.message;
+      if (xlsx) {
+        message = /size|large|dimensions/i.test(error.message)
+          ? t("이 통합문서의 크기나 시트 범위가 지원 한도를 넘습니다. 필요한 플레이트 시트만 새 .xlsx 파일로 저장하세요.", "The workbook exceeds the supported size or sheet dimensions. Save the required plate worksheet in a smaller .xlsx file.")
+          : t("엑셀을 읽을 수 없습니다. 장비에서 내보낸 .xlsx 파일인지 확인하세요.", "Could not read this workbook. Check that it is an .xlsx file exported by your plate reader.");
+      }
+      setStatus({ error: true, message });
+    } finally {
+      if (request === readId.current) {
+        setLoading(false);
+        if (input.current) input.current.value = "";
+      }
     }
-  };
-  
-  if (!analysisType) {
-    return (
-      <Card className="ios-card ios-blur rounded-3xl ios-shadow-lg border-0">
-        <CardContent className="p-8 text-center">
-          <p className="text-gray-500 font-medium">분석 항목을 먼저 선택해주세요</p>
-        </CardContent>
-      </Card>
-    );
   }
 
-  return (
-    <div 
-      className={`ios-card ios-blur rounded-3xl ios-shadow-lg border-0 p-8 transition-all duration-300 ${
-        isDragOver ? "border-2 border-dashed border-blue-400 bg-blue-50/50" : "border-2 border-dashed border-gray-200"
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className="flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <FileSpreadsheet className="h-8 w-8 text-green-600" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">CSV 업로드</h3>
-        <p className="text-gray-500 mb-2">템플릿을 받은 뒤 Excel에서 열어 입력하고 CSV로 저장해 업로드하세요.</p>
-        <p className="text-gray-400 text-sm mb-3">필수 컬럼: treatment_name, sample_name, {fields.filter(field => !field.optional).map(field => field.key).join(", ")}</p>
-        {fields.some(field => field.optional) && (
-          <p className="text-gray-400 text-xs mb-6">선택 컬럼: {fields.filter(field => field.optional).map(field => field.key).join(", ")}</p>
-        )}
-        {!fields.some(field => field.optional) && <div className="mb-3" />}
-        
-        <div className="flex flex-col sm:flex-row gap-3 w-full mb-6">
-          <Button 
-            onClick={downloadSampleTemplate}
-            variant="outline"
-            className="h-14 flex-1 text-base rounded-2xl border-blue-300 text-blue-600 hover:bg-blue-50"
-          >
-            <Download className="h-5 w-5 mr-2" />
-            템플릿 다운로드
-          </Button>
-          <Button 
-            onClick={() => fileInputRef.current?.click()} 
-            disabled={uploading} 
-            className="ios-button bg-green-600 hover:bg-green-700 h-14 flex-1 text-base rounded-2xl"
-          >
-            <Upload className="h-5 w-5 mr-2" />
-            {uploading ? "업로드 중..." : "파일 선택"}
-          </Button>
-        </div>
-        
-        <input 
-          ref={fileInputRef} 
-          type="file" 
-          accept=".csv" 
-          onChange={handleFileUpload} 
-          className="hidden" 
-        />
+  function downloadTemplate() {
+    try {
+      const blob = new Blob([assayTemplate(analysisType)], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `sample_template_${analysisType}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setStatus({ error: true, message: t("CSV 양식을 저장하지 못했습니다. 다시 시도하세요.", "Could not save the CSV template. Try again.") });
+    }
+  }
 
-        {uploadResult && (
-          <Alert className={`mt-4 w-full ${uploadResult.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
-            <div className="flex items-center space-x-2">
-              {uploadResult.success ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-red-600" />
-              )}
-              <AlertDescription className={uploadResult.success ? "text-green-800" : "text-red-800"}>
-                {uploadResult.message}
-              </AlertDescription>
-            </div>
-          </Alert>
-        )}
+  return <div className="plate-import-shell" data-dragging={dragging}
+      onDragOver={e => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={e => {
+        e.preventDefault();
+        setDragging(false);
+        if (e.dataTransfer.files.length > 1) {
+          setStatus({error:true,message:t("파일은 한 번에 하나씩 선택하세요. 각 파일에서 추가할 시료를 확인할 수 있습니다.", "Choose one file at a time so you can review its samples.")});
+          return;
+        }
+        importFile(e.dataTransfer.files[0]);
+      }}>
+    <input ref={input} hidden type="file" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+      aria-label={t("플레이트 Excel 또는 시료 CSV", "Plate Excel or sample CSV")} onChange={e => importFile(e.target.files?.[0])}/>
+    {!workbookFile && <div className="assay-form assay-form-drop plate-file-drop" data-dragging={dragging}>
+      <div className="plate-file-intro"><FileSpreadsheet size={24} aria-hidden="true"/><div>
+        <strong>{t("플레이트 리더 Excel 또는 시료 CSV", "Plate reader Excel or sample CSV")}</strong>
+        <p>{t("파일을 놓으면 Excel의 검량선과 시료를 확인할 수 있습니다.", "Drop a workbook to review its calibration and samples.")}</p>
+      </div></div>
+      <div className="assay-form-tools">
+        <Button type="button" className="assay-form-submit" onClick={() => input.current?.click()} disabled={loading}><Upload aria-hidden="true"/>{loading ? t("파일 읽는 중…", "Reading file…") : t("Excel / CSV 선택", "Choose Excel / CSV")}</Button>
+        <Button type="button" variant="outline" onClick={downloadTemplate}><Download aria-hidden="true"/>{t("CSV 양식 다운로드", "Download CSV template")}</Button>
       </div>
-    </div>
-  );
+      <details className="plate-csv-help"><summary>{t("CSV 양식의 열", "CSV template columns")}</summary>
+        <p>{t("필수 열", "Required columns")} · treatment_name, sample_name, {getMeasurementFields(analysisType, lang).filter(f => !f.optional).map(f => f.key).join(", ")}</p>
+        {analysisType === "mda" && <p>{t("흡광도는 현재 설정한 광경로 길이로 다시 계산합니다.", "Readings are recalculated with the current optical path length.")}</p>}
+      </details>
+    </div>}
+    {status && <p role={status.error ? "alert" : "status"} className={status.error ? "plate-error" : "plate-note"}>{status.message}</p>}
+    {workbookFile && <PlateImport key={workbookFile.fileName} {...workbookFile} analysisType={analysisType} lang={lang} params={params}
+      onReplace={() => input.current?.click()} onSwitchAssay={onSwitchAssay} onCalibrationPreview={onCalibrationPreview} onSamplesUploaded={added} onCancel={() => setWorkbookFile(null)}/>}
+  </div>;
 }

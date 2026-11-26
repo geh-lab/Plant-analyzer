@@ -1,322 +1,128 @@
-
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Calculator, CheckCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { enzymeDefaults } from "@/utils/antioxidantCalculations";
+import { DEFAULT_MDA_PATHLENGTH } from "@/utils/mda";
+import "@/pages/assay.css";
 
-const ParamInput = ({ label, value, onChange, placeholder, type = "number" }) => (
-  <div>
-    <Label className="text-gray-600 text-sm">{label}</Label>
-    <Input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="ios-input border-0 text-gray-900 placeholder:text-gray-400"
-    />
-  </div>
-);
-
-const HighlightedValue = ({ value, placeholder }) => {
-  const hasValue = value !== undefined && value !== null && value !== "";
-  return (
-    <span className={`transition-colors duration-300 ${hasValue ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
-      {hasValue ? value : placeholder}
-    </span>
-  );
+const field = (key, ko, en, initial, positive = false, aliases = []) => ({ key, ko, en, initial, positive, aliases });
+const pathlength = field("pathlength", "광경로 길이 (cm)", "Path length (cm)", 1, true, ["path_length", "l"]);
+const dilution = field("dilutionFactor", "희석배수", "Dilution factor", 1, true, ["DF", "df"]);
+const slope = field("std_a", "검량선 기울기 (a)", "Calibration slope (a)", "", true);
+const intercept = field("std_b", "검량선 절편 (b)", "Calibration intercept (b)", 0);
+const extract = field("extractMl", "전체 추출액 부피 (mL)", "Total extract (mL)", enzymeDefaults.extractMl, true);
+const mass = field("dryMassMg", "추출한 조직의 건물중 상당량 (mg)", "Dry mass equivalent of extracted tissue (mg)", enzymeDefaults.dryMassMg, true);
+const reaction = field("reactionUl", "전체 반응 부피 (µL)", "Total reaction volume (µL)", enzymeDefaults.reactionUl, true);
+const aliquot = size => field("aliquotUl", "반응에 넣은 추출액 (µL)", "Extract added to the reaction (µL)", size, true);
+const dryNormalization = [field("extractVolume", "총 추출 부피 (mL)", "Full extract volume (mL)", 2, true), field("dryMass", "건조 시료 무게 (g)", "Dry sample mass (g)", 0.02, true), dilution];
+const pigmentParams = { fields: [pathlength, ...dryNormalization] };
+const calibrationParams = { fields: [slope, intercept, ...dryNormalization] };
+const configs = {
+  mda: { nested: true, fields: [{ ...pathlength, initial: DEFAULT_MDA_PATHLENGTH }] },
+  chlorophyll_a_b: pigmentParams,
+  carotenoid: pigmentParams,
+  total_phenol: calibrationParams,
+  total_flavonoid: calibrationParams,
+  h2o2: { nested: true, fields: [{ ...slope, key: "a" }, { ...intercept, key: "b" }, field("vol", "추출 부피 (mL)", "Extract volume (mL)", 2, true), field("dw", "건물중 (g)", "Dry weight (g)", 0.02, true), dilution] },
+  dpph_scavenging: { fields: [field("dpph_control", "대조구 A517", "Control A517", "", true)] },
+  anthocyanin: calibrationParams,
+  glucosinolate: calibrationParams,
+  cat: { nested: true, fields: [field("h2o2_control_slope", "대조구 기울기 (ΔA240/min)", "Control slope (ΔA240/min)", 0, false, ["H2O2_control_slope","control_slope"]), pathlength, dilution, extract, mass, reaction, aliquot(enzymeDefaults.catAliquotUl)] },
+  pod: { nested: true, fields: [field("blank_slope", "블랭크 기울기 (ΔA470/min)", "Blank slope (ΔA470/min)", 0, false, ["Blank_slope"]), pathlength, dilution, extract, mass, reaction, aliquot(enzymeDefaults.podAliquotUl)] },
+  sod: { nested: true, fields: [field("light_control_abs", "광조건 대조구 A560", "Light control A560", "", false, ["control_abs", "light_control"]), field("dark_blank_abs", "암조건 블랭크 A560", "Dark blank A560", 0, false, ["dark_blank"]), extract, mass] }
 };
 
-export default function CalculationParams({ analysisType, onParamsChange, initialParams = {} }) {
-  const [params, setParams] = useState(initialParams);
-  const [isApplied, setIsApplied] = useState(false);
+function fieldsFromParams(type, config, params) {
+  const nested = config.nested ? params[type] || {} : params;
+  const entries = config.fields.map(({ key, initial, aliases }) => {
+    const recognizedKeys = [key, ...aliases];
+    const saved = recognizedKeys.map(k => nested[k]).find(v => v !== undefined && v !== "" && v !== null);
+    const legacy = config.nested && ["cat", "pod", "sod"].includes(type) && ["dilutionFactor", "pathlength"].includes(key)
+      ? recognizedKeys.map(k => params[k]).find(v => v !== undefined && v !== "" && v !== null) : undefined;
+    const oldAnthocyaninKey = { extractVolume: "V", dryMass: "m", dilutionFactor: "n" }[key];
+    const oldAnthocyaninValue = type === "anthocyanin" && oldAnthocyaninKey ? params.anthocyanin?.[oldAnthocyaninKey] : undefined;
+    return [key, saved ?? legacy ?? oldAnthocyaninValue ?? initial];
+  });
+  return Object.fromEntries(entries);
+}
 
-  useEffect(() => {
-    setParams(initialParams);
-    setIsApplied(Object.keys(initialParams).length > 0 && Object.values(initialParams).some(v => v));
-  }, [initialParams]);
+const emptyParams = {};
+export default function CalculationParams({ analysisType, onParamsChange, initialParams = emptyParams, platePreview = null, lang = "ko" }) {
+  const en = lang === "en";
+  const config = configs[analysisType];
+  const [draft, setDraft] = useState({});
+  const [status, setStatus] = useState("");
+  if (!config) return null;
+  const fields = config.fields;
+  const defaults = fieldsFromParams(analysisType, config, initialParams);
+  const curveKeys = analysisType === "h2o2" ? ["a", "b"] : ["std_a", "std_b"];
+  const curve = platePreview?.applied && platePreview.calibration?.curve;
+  const savedSource = initialParams.plateCalibrationSource;
+  const curveVersion = JSON.stringify([defaults[curveKeys[0]], defaults[curveKeys[1]], savedSource?.savedAt ?? savedSource?.fileName]);
+  const values = { ...defaults };
+  for (const [key, edit] of Object.entries(draft)) {
+    if (!curveKeys.includes(key) || edit.curveVersion === curveVersion) values[key] = edit.value;
+  }
+  if (curve) { values[curveKeys[0]] = curve.a; values[curveKeys[1]] = curve.b; }
 
-  const handleParamChange = (key, value) => {
-    setParams(prev => ({ ...prev, [key]: value }));
-    setIsApplied(false);
-  };
-
-  const handleNestedParamChange = (group, key, value) => {
-    setParams(prev => ({
-      ...prev,
-      [group]: {
-        ...(prev[group] || {}),
-        [key]: value
+  function apply(e) {
+    e.preventDefault();
+    const parsed = {};
+    for (const f of fields) {
+      if (curve && curveKeys.includes(f.key)) continue;
+      const n = Number(values[f.key]);
+      if (values[f.key] === "" || !Number.isFinite(n) || (f.positive && n <= 0)) {
+        setStatus(en ? `Check ${f.en.toLowerCase()}. ${f.positive ? "Enter a value greater than zero." : "Enter a number."}` : `${f.ko} 값을 ${f.positive ? "0보다 큰 수로" : "숫자로"} 입력하세요.`);
+        return;
       }
-    }));
-    setIsApplied(false);
-  };
-
-  const handleApply = () => {
-    onParamsChange(params);
-    setIsApplied(true);
-  };
-
-  const renderParams = () => {
-    switch (analysisType) {
-      case "chlorophyll_a_b":
-        return (
-          <motion.div layout className="flex items-end gap-4">
-            <div className="flex-grow space-y-2">
-              <Label className="text-gray-600 text-sm">희석배수</Label>
-              <Input
-                type="number"
-                value={params.dilutionFactor || ""}
-                onChange={(e) => handleParamChange('dilutionFactor', e.target.value)}
-                placeholder="예: 1, 10"
-                className="ios-input border-0 text-gray-900 placeholder:text-gray-400"
-              />
-            </div>
-            <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex-shrink-0 flex items-center justify-center">
-              {isApplied && params.dilutionFactor ? <CheckCircle className="h-4 w-4 mr-2" /> : null}
-              {isApplied && params.dilutionFactor ? "적용됨" : "적용"}
-            </Button>
-            <AnimatePresence>
-              {isApplied && params.dilutionFactor && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0, x: -20 }}
-                  animate={{ opacity: 1, width: 'auto', x: 0 }}
-                  exit={{ opacity: 0, width: 0, x: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="bg-blue-50 border border-blue-200 rounded-xl h-12 flex items-center px-4"
-                >
-                  <p className="text-blue-800 font-semibold whitespace-nowrap">
-                    적용된 배수: {params.dilutionFactor}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        );
-      case "total_phenol":
-      case "total_flavonoid":
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-end gap-4">
-              <div className="flex-1 w-full"><ParamInput label="기울기 (a)" value={params.std_a || ""} onChange={e => handleParamChange('std_a', e.target.value)} placeholder="Standard curve's slope" /></div>
-              <div className="flex-1 w-full"><ParamInput label="Y절편 (b)" value={params.std_b || ""} onChange={e => handleParamChange('std_b', e.target.value)} placeholder="Standard curve's y-intercept" /></div>
-              <Button onClick={handleApply} className="ios-button rounded-xl h-12 w-full sm:w-auto flex items-center justify-center">
-                {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                {isApplied ? "적용됨" : "적용"}
-              </Button>
-            </div>
-            <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center">
-                y = <HighlightedValue value={params.std_a} placeholder="a" />x + (<HighlightedValue value={params.std_b} placeholder="b" />)
-            </p>
-          </div>
-        );
-
-case "h2o2":
-        return (
-          <div className="flex flex-col space-y-4">
-            {/* 1. 입력 Row: 기울기, 절편, 그리고 적용 버튼 */}
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput 
-                  label="기울기 (a)" 
-                  value={params.h2o2?.a || ""} 
-                  onChange={e => handleNestedParamChange('h2o2', 'a', e.target.value)} 
-                  placeholder="Standard curve's slope" 
-                />
-              </div>
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput 
-                  label="Y절편 (b)" 
-                  value={params.h2o2?.b || ""} 
-                  onChange={e => handleNestedParamChange('h2o2', 'b', e.target.value)} 
-                  placeholder="Standard curve's y-intercept" 
-                />
-              </div>
-              
-              {/* 버튼 위치: 입력창 바로 오른쪽 */}
-              <div className="flex-shrink-0">
-                <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                  {isApplied ? "적용됨" : "적용"}
-                </Button>
-              </div>
-            </div>
-
-            {/* 2. 표준곡선 수식 표시 (깔끔하게 하단 배치) */}
-            <div className="text-white font-mono p-4 bg-white/10 rounded-lg text-center text-sm">
-               Standard Curve: y = <HighlightedValue value={params.h2o2?.a} placeholder="a" />x + (<HighlightedValue value={params.h2o2?.b} placeholder="b" />)
-            </div>
-          </div>
-        );
-
-        
-      case "dpph_scavenging":
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-end gap-4">
-              <div className="flex-1 w-full"><ParamInput label="Control 흡광도" value={params.dpph_control || ""} onChange={e => handleParamChange('dpph_control', e.target.value)} placeholder="Absorbance of control" /></div>
-              <Button onClick={handleApply} className="ios-button rounded-xl h-12 w-full sm:w-auto flex items-center justify-center">
-                 {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                 {isApplied ? "적용됨" : "적용"}
-              </Button>
-            </div>
-            <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center">
-                Inhibition (%) = ((<HighlightedValue value={params.dpph_control} placeholder="Control" /> - Sample) / <HighlightedValue value={params.dpph_control} placeholder="Control" />) * 100
-            </p>
-          </div>
-        );
-case "anthocyanin":
-        return (
-           <div className="flex flex-col space-y-4">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="추출 부피 (V, mL)" value={params.anthocyanin?.V || ""} onChange={e => handleNestedParamChange('anthocyanin', 'V', e.target.value)} placeholder="Default: 2" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="희석 배수 (n)" value={params.anthocyanin?.n || ""} onChange={e => handleNestedParamChange('anthocyanin', 'n', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="분자량 (Mw)" value={params.anthocyanin?.Mw || ""} onChange={e => handleNestedParamChange('anthocyanin', 'Mw', e.target.value)} placeholder="Default: 449.2" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="Molar absorptivity (ε)" value={params.anthocyanin?.epsilon || ""} onChange={e => handleNestedParamChange('anthocyanin', 'epsilon', e.target.value)} placeholder="Default: 26900" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="시료 무게 (m, g)" value={params.anthocyanin?.m || ""} onChange={e => handleNestedParamChange('anthocyanin', 'm', e.target.value)} placeholder="Default: 0.02" />
-              </div>
-              <div className="flex-shrink-0">
-                 <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                   {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                   {isApplied ? "적용됨" : "적용"}
-                 </Button>
-               </div>
-            </div>
-            <p className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                Anthocyanin = (A530 - A600) × <HighlightedValue value={params.anthocyanin?.V} placeholder="V"/> × <HighlightedValue value={params.anthocyanin?.n} placeholder="n"/> × <HighlightedValue value={params.anthocyanin?.Mw} placeholder="Mw"/> / (<HighlightedValue value={params.anthocyanin?.epsilon} placeholder="ε"/> × <HighlightedValue value={params.anthocyanin?.m} placeholder="m"/>)
-            </p>
-           </div>
-        );
-
-case "sod":
-        return (
-          <div className="flex flex-col space-y-4">
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput label="Light control A560" value={params.sod?.light_control_abs || ""} onChange={e => handleNestedParamChange('sod', 'light_control_abs', e.target.value)} placeholder="예: 0.800" />
-              </div>
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput label="Dark blank A560" value={params.sod?.dark_blank_abs || ""} onChange={e => handleNestedParamChange('sod', 'dark_blank_abs', e.target.value)} placeholder="예: 0.050" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="희석배수 (DF)" value={params.sod?.dilutionFactor || ""} onChange={e => handleNestedParamChange('sod', 'dilutionFactor', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-shrink-0">
-                <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                  {isApplied ? "적용됨" : "적용"}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-sm leading-relaxed text-center">
-                Control<sub>corr</sub> = Light control − Dark blank, Sample<sub>corr</sub> = Sample A560 − Sample dark blank 또는 Dark blank
-              </div>
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-sm leading-relaxed text-center">
-                SOD inhibition (%) = ((Control<sub>corr</sub> − Sample<sub>corr</sub>) / Control<sub>corr</sub>) × 100
-              </div>
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-sm leading-relaxed text-center">
-                SOD activity = inhibition × 0.02 × <HighlightedValue value={params.sod?.dilutionFactor} placeholder="DF" /> (unit/mg DW)
-              </div>
-            </div>
-          </div>
-        );
-
-      case "cat":
-        return (
-          <div className="flex flex-col space-y-4">
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput label="H₂O₂ control slope" value={params.cat?.h2o2_control_slope || ""} onChange={e => handleNestedParamChange('cat', 'h2o2_control_slope', e.target.value)} placeholder="예: -0.005" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="Path length (cm)" value={params.cat?.pathlength || ""} onChange={e => handleNestedParamChange('cat', 'pathlength', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="희석배수 (DF)" value={params.cat?.dilutionFactor || ""} onChange={e => handleNestedParamChange('cat', 'dilutionFactor', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-shrink-0">
-                <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                  {isApplied ? "적용됨" : "적용"}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                ΔA<sub>corr</sub>/min = −(Sample slope − H₂O₂ control slope)
-              </div>
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                CAT activity = ΔA<sub>corr</sub>/min × 152.9 / <HighlightedValue value={params.cat?.pathlength} placeholder="l" /> × <HighlightedValue value={params.cat?.dilutionFactor} placeholder="DF" /> (μmol/min/mg DW)
-              </div>
-            </div>
-          </div>
-        );
-
-      case "pod":
-        return (
-          <div className="flex flex-col space-y-4">
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[150px]">
-                <ParamInput label="Blank slope" value={params.pod?.blank_slope || ""} onChange={e => handleNestedParamChange('pod', 'blank_slope', e.target.value)} placeholder="예: 0.002" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="Path length (cm)" value={params.pod?.pathlength || ""} onChange={e => handleNestedParamChange('pod', 'pathlength', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-1 min-w-[120px]">
-                <ParamInput label="희석배수 (DF)" value={params.pod?.dilutionFactor || ""} onChange={e => handleNestedParamChange('pod', 'dilutionFactor', e.target.value)} placeholder="Default: 1" />
-              </div>
-              <div className="flex-shrink-0">
-                <Button onClick={handleApply} className="ios-button rounded-xl h-12 flex items-center justify-center px-6">
-                  {isApplied && <CheckCircle className="h-4 w-4 mr-2" />}
-                  {isApplied ? "적용됨" : "적용"}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                ΔA<sub>corr</sub>/min = Sample slope − Blank slope
-              </div>
-              <div className="text-gray-800 font-mono p-3 bg-gray-100 rounded-lg text-center text-sm">
-                POD activity = ΔA<sub>corr</sub>/min × 0.0376 / <HighlightedValue value={params.pod?.pathlength} placeholder="l" /> × <HighlightedValue value={params.pod?.dilutionFactor} placeholder="DF" /> (μmol/min/mg DW)
-              </div>
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                ε = 26.6 mM⁻¹ cm⁻¹ 기준이므로 POD 계산에는 ×1000을 넣지 않습니다.
-              </p>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
+      parsed[f.key] = n;
     }
-  };
-
-  const renderedParams = renderParams();
-  if (!renderedParams) return null;
-
+    if (["cat", "pod"].includes(analysisType) && parsed.aliquotUl > parsed.reactionUl) {
+      setStatus(en ? "The extract aliquot must fit within the reaction volume." : "추출액 분주량이 전체 반응 부피를 초과합니다.");
+      return;
+    }
+    if (analysisType === "sod" && parsed.light_control_abs <= parsed.dark_blank_abs) {
+      setStatus(en ? "The light control must exceed the dark blank." : "광조건 대조구는 암조건 블랭크보다 커야 합니다.");
+      return;
+    }
+    const next = config.nested ? { ...initialParams, [analysisType]: { ...initialParams[analysisType], ...parsed } } : { ...initialParams, ...parsed };
+    if (savedSource && !curve && curveKeys.some(key => Number(defaults[key]) !== parsed[key])) delete next.plateCalibrationSource;
+    onParamsChange(next);
+    setDraft({});
+    setStatus(curve ? (en ? "Saved the other parameters. Adding samples will save the Excel curve." : "다른 계산 조건을 저장했습니다. Excel 검량선은 시료를 추가하면 저장합니다.") : (en ? "Parameters applied." : "분석 변수에 적용했습니다."));
+  }
+  function inputField(f) {
+    const fromFile = Boolean(curve && curveKeys.includes(f.key));
+    const fieldValue = values[f.key];
+    const shown = fromFile && Number.isFinite(fieldValue) ? Number(fieldValue.toPrecision(14)) : fieldValue;
+    return <label key={f.key}>{f[lang]}<Input required type="number" step="any" readOnly={fromFile} value={shown ?? ""} onChange={e => {
+      setDraft({ ...draft, [f.key]: {value:e.target.value, curveVersion} }); setStatus(en ? "Apply to update the results." : "결과에 반영하려면 적용을 누르세요.");
+    }}/></label>;
+  }
   return (
-    <Card className="ios-card ios-blur rounded-3xl ios-shadow-lg border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2 text-gray-900 text-xl font-semibold">
-          <Calculator className="h-5 w-5" />
-          <span>계산 변수 입력</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {renderedParams}
-      </CardContent>
-    </Card>
+    <form className="assay-form" onSubmit={apply}>
+      {analysisType === "glucosinolate" && <p>{en ? "Use the sinigrin standard curve measured at 425 nm alongside the leaf extract. Report results as mg sinigrin equivalents per gram of leaf dry weight." : "잎 추출액과 같은 조건에서 425 nm로 측정한 시니그린 표준액의 검량선을 입력하세요. 결과는 잎 건물중 1 g당 시니그린 당량(mg SnE/g DW)으로 표시합니다."}</p>}
+      {config === calibrationParams && !platePreview && <p>{en ? "Fit y = a × x + b with x in μg/mL before reagents are added. Use matched sample/standard processing and your verified linear range. V is the total extract volume. DF includes extra pre-assay dilution." : "시약 반응 전 표준액 농도 x (μg/mL)에 대해 y = a × x + b를 구하세요. 같은 조건으로 처리한 표준물질·시료와 검증한 직선 범위를 사용합니다. V는 전체 추출액 부피, DF는 반응 전 추가 희석배수입니다."}</p>}
+      {config === pigmentParams && <p>{en ? "Use 90% methanol. Set the optical path to 1 cm for instrument-normalized readings, or enter the actual path length of the raw readings." : "90% 메탄올 추출액용 계수입니다. 장비에서 1 cm로 보정한 측정값은 광경로 1 cm, 보정 전 측정값은 실제 광경로 길이를 입력하세요."}</p>}
+      {analysisType === "mda" && <p>{en ? "The default is a 1 cm cuvette. For plate readings, use the effective path length or enter 1 cm for instrument-normalized readings. Results are μM in the measured reaction mixture." : "기본값은 1 cm 큐벳입니다. 플레이트 측정값에는 실제 광경로 길이를, 장비가 1 cm로 보정한 값에는 1 cm를 입력하세요. 결과는 측정한 반응액의 농도(μM)입니다."}</p>}
+      {["cat","pod"].includes(analysisType) && <p>{en ? "Use the initial linear slope per minute. Enter the effective plate path length or 1 cm for readings normalized to 1 cm. The default volumes and tissue dry mass correspond to the laboratory plate setup." : "초기 선형 구간의 분당 기울기를 입력하세요. 실제 광경로나 장비가 1 cm로 보정한 값에 해당하는 1 cm를 사용하세요. 기본 부피와 건물중은 실험실 플레이트 조건입니다."}</p>}
+      {analysisType === "h2o2" && <p>{en ? "Use a slope fitted to pre-reaction standard concentrations in mM. The dilution factor applies only to any extra dilution of the extract." : "반응 전 표준액 농도(mM)를 기준으로 구한 검량선 기울기를 입력하세요. 희석배수에는 추출액에 별도로 적용한 희석만 반영합니다."}</p>}
+      {analysisType === "sod" && <p>{en ? "The measured dilution gives NBT inhibition (%). To also report U/mg DW, enter each sample’s undiluted extract equivalent at the 50% inhibition endpoint of a dilution series." : "측정한 희석액에서 NBT 광환원 억제율(%)을 구합니다. U/mg DW도 계산하려면 희석계열에서 구한 50% 억제점의 원추출액 상당 부피를 시료별로 입력하세요."}</p>}
+      {platePreview ? <p role="status" className="plate-note">{curve
+        ? <><strong>{en ? "Filled from Excel" : "Excel 검량선 자동 입력"}</strong>{" · "}{platePreview.fileName} / {platePreview.sheetName}{". "}{en
+          ? "Adding samples saves these coefficients. To enter your own, turn off the file curve in the preview."
+          : "시료를 추가하면 이 계수가 저장됩니다. 직접 입력하려면 미리보기에서 파일 검량선 사용을 해제하세요."}{curve.unitAssumed && (" " + (en ? "Confirm the standard unit ("+curve.unit+") in your records." : "표준 농도 단위("+curve.unit+")를 실험 기록과 대조하세요."))}</>
+        : platePreview.calibration?.curve ? (en ? "The file curve is off. The fields below use your workspace settings." : "파일 검량선 사용을 해제했습니다. 아래 계수는 워크스페이스 계산 조건입니다.")
+        : <><strong>{en ? "Excel curve unavailable. " : "Excel 검량선 없음. "}</strong>{platePreview.status?.reason?.[lang]}{" "}{en ? "Use verified coefficients here." : "검증한 기울기와 절편을 아래에 입력할 수 있습니다."}</>}</p>
+        : savedSource && <p className="plate-note">{en ? "Saved Excel curve" : "저장된 Excel 검량선"} · {savedSource.fileName} / {savedSource.sheetName}</p>}
+      {platePreview ? <><div className="assay-form-fields">{fields.filter(f=>curveKeys.includes(f.key)).map(inputField)}</div>
+        <details className="plate-csv-help"><summary>{en ? "Extraction and dilution settings" : "추출 부피·질량·희석 설정"}</summary>
+          <div className="assay-form-fields">{fields.filter(f=>!curveKeys.includes(f.key)).map(inputField)}</div>
+        </details></> : <div className="assay-form-fields">{fields.map(inputField)}</div>}
+      <div className="assay-form-tools">{(!curve || Object.keys(draft).some(key => !curveKeys.includes(key))) && <Button type="submit" className="assay-form-submit"><Check/>{en ? "Apply parameters" : "분석 변수 적용"}</Button>}
+        {status && <p role="status">{status}</p>}
+      </div>
+    </form>
   );
 }

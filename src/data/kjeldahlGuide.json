@@ -1,0 +1,267 @@
+{
+  "ko": {
+    "step1": {
+      "title": "분해",
+      "subtitle": "Organic N → Ammonium",
+      "tags": [
+        "Heat Block",
+        "H₂SO₄",
+        "270℃→400℃"
+      ],
+      "protocol": [
+        "건조 시료 0.1g(채 300μm)을 켈달 튜브에 넣고 라벨링",
+        "농황산(H₂SO₄)을 벽면을 타고 흘러내리도록 천천히 주입",
+        "270℃ 예열된 히트블록에 5분간 삽입 (탄화 과정, 튀는 것 방지)",
+        "꺼내서 식힌 후 촉매(Kjeltab) 2g 투입",
+        "실험실 예시에서는 400℃ 구간이 이어집니다. 정해진 분해 종료 조건과 투명화 후 추가 가열 시간을 해당 시료의 검증된 절차에서 확인합니다."
+      ],
+      "configurations": [
+        "설정 온도 1: 270℃ (초기 탄화, 5분)",
+        "설정 온도 2: 400℃ (본 분해, 15~30분)",
+        "건조 시료 0.1 g, 촉매 2 g. 황산 부피는 해당 실험실의 검증된 방법을 따릅니다."
+      ],
+      "notes": [
+        "가열 블록의 실제 온도가 지정 온도에 도달했는지 확인합니다.",
+        "용액 투명화는 과정 중 관찰 항목입니다. 촉매에 따라 색이 달라지며 완료 기준은 해당 표준작업절차를 따릅니다.",
+        "황산 증기가 매우 위험하므로 반드시 후드 내에서 진행하고 머리를 넣지 말 것"
+      ],
+      "visualSteps": [
+        {
+          "title": "시료 및 장비 준비",
+          "image": "Step_1-1.png",
+          "text": "건조된 시료 0.1g을 튜브에 넣습니다. 히트블록은 미리 예열합니다."
+        },
+        {
+          "title": "온도 설정 (Heat Block)",
+          "image": "Step_1-2.png",
+          "text": "Mode 버튼으로 목표 온도를 설정한 뒤 실제 블록 온도를 확인합니다."
+        },
+        {
+          "title": "270℃ 탄화 과정",
+          "image": "Step_1-3.png",
+          "text": "시료를 270℃ 블록에 5분간 넣어 탄화시킵니다. 이때 끓어넘치지 않도록 주의합니다."
+        },
+        {
+          "title": "400℃ 본 분해",
+          "image": "Step_1-4.png",
+          "text": "촉매를 넣고 400℃에서 분해합니다. 검은색에서 맑은 색이 될 때까지 가열합니다."
+        },
+        {
+          "title": "분해액의 투명화 관찰",
+          "image": "Step_1-5.png",
+          "text": "색과 투명도를 기록하고 해당 방법의 종료 기준을 확인합니다."
+        },
+        {
+          "title": "냉각 및 보관",
+          "image": "Step_1-6.png",
+          "text": "상온에서 식히면 하늘색으로 변합니다. 먼지가 들어가지 않게 호일로 덮어 보관합니다."
+        }
+      ],
+      "videoId": "9oXqw1Umg8o"
+    },
+    "step2": {
+      "title": "증류",
+      "subtitle": "Ammonium → Ammonia Gas",
+      "tags": [
+        "NaOH",
+        "Steam",
+        "Boric Acid"
+      ],
+      "protocol": [
+        "분해된 시료에 증류수 20mL를 넣고 흔들어 완전히 녹임 (굳어있을 수 있음)",
+        "증류 장치 세팅: 둥근 플라스크 증류수 확인, 냉각수(수돗물) ON",
+        "삼각플라스크(포집액)에 2% 붕산+지시약 50mL 준비하여 냉각관 아래 배치",
+        "켈달 튜브 장착 후 45% NaOH 15mL 주입 (코크 조작 주의)",
+        "증류 시작: 포집액이 약 100mL가 될 때까지 진행 (약 90mL 시점부터 주시)"
+      ],
+      "configurations": [
+        "NaOH 농도: 45% (강알칼리 환경 조성)",
+        "NaOH 주입량: 15mL",
+        "포집 목표량: 100mL (삼각플라스크 눈금 확인)"
+      ],
+      "notes": [
+        "NaOH 주입 시 코크를 다 열어두면 증기가 새어나올 수 있으므로 용액이 다 들어가면 즉시 잠글 것",
+        "삼각플라스크 안의 유리관 끝부분이 용액에 잠겨 있어야 암모니아 가스 포집 가능",
+        "증류수 보충은 장비 설명서의 정지·냉각 절차를 따른 후 진행합니다."
+      ],
+      "visualSteps": [
+        {
+          "title": "시료 용해",
+          "image": "Step_2-1.png",
+          "text": "분해된 시료에 증류수 20mL를 넣고 흔들어 녹입니다."
+        },
+        {
+          "title": "증류 장치 및 포집 준비",
+          "image": "Step_2-2.png",
+          "text": "냉각수를 틀고, 붕산 용액이 담긴 삼각플라스크를 냉각관 출구에 배치합니다."
+        },
+        {
+          "title": "NaOH 주입 및 증류",
+          "image": "Step_2-3.png",
+          "text": "NaOH 15mL를 넣고 코크를 닫습니다. 증류가 시작되면 포집액 색이 변하며 양이 늘어납니다."
+        },
+        {
+          "title": "증류 종료 (100mL)",
+          "image": "Step_2-4.png",
+          "text": "약 100mL가 되면 받침대를 낮춰 플라스크를 빼내고 냉각수를 끕니다."
+        }
+      ],
+      "videoId": "m_c3lnD0kn0"
+    },
+    "step3": {
+      "title": "적정",
+      "subtitle": "Kjeldahl nitrogen",
+      "tags": [
+        "0.05N H₂SO₄",
+        "Color Change"
+      ],
+      "protocol": [
+        "자동 적정기(Burette) 전원 ON 및 영점 조절",
+        "탱크의 0.05N 황산 용액을 기기에 채움 (Fill 버튼, 공기 방울 제거 필수)",
+        "삼각플라스크에 마그네틱 바를 넣고 교반 시작 (강도 5~6)",
+        "황산을 조금씩 적하하며 색 변화 관찰 (청색 → 옅은 분홍/주황색)",
+        "종말점의 황산 주입량을 기록하여 함량 계산"
+      ],
+      "configurations": [
+        "표준 용액: 0.05N H₂SO₄",
+        "교반 속도: 5~6 (튀지 않을 정도)",
+        "공시험 부피를 뺀 적정량으로 계산합니다."
+      ],
+      "notes": [
+        "Fill 작업 시 호스에 공기가 차면 정량 주입이 안 되므로 용액을 버리면서 공기 빼기",
+        "오른쪽 조절 바퀴는 반드시 '시계 반대 방향'으로만 돌려야 함",
+        "비교군(Reference) 색상을 옆에 두고 비교하며 적정하면 정확함"
+      ],
+      "visualSteps": [
+        {
+          "title": "적정기 세팅",
+          "image": "Step_3-1.png",
+          "text": "On/Off 및 영점 조절. Fill 버튼으로 용액을 채웁니다."
+        },
+        {
+          "title": "공기 방울 제거",
+          "image": "Step_3-2.png",
+          "text": "노즐 끝의 공기를 완전히 제거해야 정확한 부피 측정이 가능합니다."
+        },
+        {
+          "title": "교반 및 적정 시작",
+          "image": "Step_3-3.png",
+          "text": "마그네틱 바를 넣고 교반하며 황산을 천천히 주입합니다."
+        },
+        {
+          "title": "1차 색 변화",
+          "image": "Step_3-4.png",
+          "text": "청색에서 1차적으로 색이 변하는 시점을 주시합니다."
+        },
+        {
+          "title": "종말점 확인",
+          "image": "Step_3-5.png",
+          "text": "더 밝은 주황색(붉은색)으로 변하는 순간의 수치를 기록합니다."
+        },
+        {
+          "title": "결과 계산",
+          "image": "Step_3-6.png",
+          "text": "공시험을 보정한 적정량, 시료 무게, 산의 노르말 농도로 질소 함량을 계산합니다."
+        }
+      ],
+      "videoId": "aRHpBCz7R18"
+    }
+  },
+  "en": {
+    "step1": {
+      "title": "Digestion",
+      "subtitle": "Organic nitrogen → ammonium",
+      "tags": [
+        "Heat block",
+        "H₂SO₄",
+        "270℃ → 400℃"
+      ],
+      "protocol": [
+        "Place 0.1 g dry, finely ground sample in a Kjeldahl tube and label it clearly.",
+        "Add concentrated H₂SO₄ slowly down the inner wall of the tube inside a fume hood.",
+        "Insert the tube into a preheated 270℃ block for about 5 min to carbonize the sample and reduce bumping.",
+        "Cool briefly, add about 2 g catalyst tablet or catalyst mixture, then increase to 400℃.",
+        "The local example includes a 400°C stage. Confirm the validated endpoint and post-clearing digestion time for the matrix and catalyst."
+      ],
+      "settings": [
+        "Sample: 0.1 g dry powder",
+        "Catalyst: about 2 g",
+        "Initial carbonization: 270℃, 5 min",
+        "The validated method defines the post-clearing hold time."
+      ],
+      "notes": [
+        "Concentrated sulfuric acid fumes are highly hazardous; perform the step only in a working fume hood.",
+        "Do not look directly into the tube during early digestion because bumping can occur.",
+        "After cooling, cover tubes with foil to prevent dust contamination."
+      ],
+      "visual": [
+        "Step_1-1.png",
+        "Step_1-3.png",
+        "Step_1-5.png"
+      ]
+    },
+    "step2": {
+      "title": "Distillation",
+      "subtitle": "Ammonium → ammonia gas",
+      "tags": [
+        "NaOH",
+        "Steam",
+        "Boric acid trap"
+      ],
+      "protocol": [
+        "Add about 20 mL distilled water to the cooled digest and dissolve the residue completely.",
+        "Set up the distillation unit, check the boiling flask water, and turn on cooling water.",
+        "Prepare 50 mL of 2% boric acid with indicator in an Erlenmeyer flask and place it under the condenser outlet.",
+        "Mount the Kjeldahl tube and add 15 mL of 45% NaOH carefully.",
+        "Start distillation and collect distillate until the receiving solution reaches about 100 mL."
+      ],
+      "settings": [
+        "NaOH: 45%",
+        "NaOH volume: 15 mL",
+        "Boric acid receiver: 2%, 50 mL",
+        "Final receiver volume: about 100 mL"
+      ],
+      "notes": [
+        "Close the stopcock immediately after NaOH enters the tube to prevent ammonia loss.",
+        "The condenser tip should remain below the receiving solution surface during capture.",
+        "Follow the instrument shutdown and cooling procedure before refilling the reservoir."
+      ],
+      "visual": [
+        "Step_2-1.png",
+        "Step_2-2.png",
+        "Step_2-4.png"
+      ]
+    },
+    "step3": {
+      "title": "Titration",
+      "subtitle": "Quantification of Kjeldahl nitrogen",
+      "tags": [
+        "0.05 N H₂SO₄",
+        "Endpoint",
+        "Total N"
+      ],
+      "protocol": [
+        "Turn on the burette or automatic titrator and remove air bubbles from the line.",
+        "Fill the device with standardized 0.05 N H₂SO₄.",
+        "Add a magnetic bar to the receiver flask and stir at a moderate speed.",
+        "Titrate slowly until the indicator changes from blue/green to pale pink-orange endpoint.",
+        "Record the acid volume and the batch blank for Kjeldahl nitrogen."
+      ],
+      "settings": [
+        "Titrant: 0.05 N H₂SO₄",
+        "Stirring: moderate, no splashing",
+        "Subtract the blank volume before calculating nitrogen."
+      ],
+      "notes": [
+        "Air bubbles in the burette line cause systematic volume errors.",
+        "Use a reference endpoint flask when possible.",
+        "Record the blank titration volume for the same batch."
+      ],
+      "visual": [
+        "Step_3-1.png",
+        "Step_3-4.png",
+        "Step_3-6.png"
+      ]
+    }
+  }
+}

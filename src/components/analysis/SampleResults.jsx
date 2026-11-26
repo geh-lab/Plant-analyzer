@@ -1,423 +1,121 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { motion, AnimatePresence } from "framer-motion";
-import { getMeasurementFields, getMeasurementLabel } from "@/utils/analysisFields";
+import { useState } from 'react';
+import { Download, Pencil, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { getMeasurementFields } from '@/utils/analysisFields';
+import { displayNumber as fmt, downloadCsv, numeric } from '@/utils/resultData';
+import { absorbanceMetrics, effectiveSampleParams, resultIssue } from '@/utils/resultCalculations';
 
-const SampleEditForm = ({ sample, onSave, onCancel }) => {
-  const [formData, setFormData] = useState({
-    ...sample,
-    absorbance_values: { ...sample.absorbance_values }
-  });
-  const fields = getMeasurementFields(sample.analysis_type, "ko");
-  
-  const handleMeasurementChange = (key, value) => {
-    setFormData(prev => ({
-      ...prev,
-      absorbance_values: {
-        ...prev.absorbance_values,
-        [key]: value
-      }
-    }));
-  };
+function reading(sample, field) {
+  return [field.key, ...(field.aliases || [])].map(k => sample.absorbance_values?.[k]).find(v => numeric(v) !== null) ?? '';
+}
 
-  const handleSave = () => {
-    const processedValues = { ...formData.absorbance_values };
+function SampleEditor({ sample, fields, en, onSave, onClose }) {
+  const [usePlate, setUsePlate] = useState(Boolean(sample.plate_import?.overrides));
+  const [useCurrentCurve, setUseCurrentCurve] = useState(false);
+  const [draft, setDraft] = useState(() => ({ ...sample, absorbance_values: Object.fromEntries(fields.map(f => [f.key, reading(sample, f)])) }));
+  const text = (key, value) => setDraft(prev => ({ ...prev, [key]: value }));
+  function submit(event) {
+    event.preventDefault();
+    if (!draft.sample_name.trim() || !draft.treatment_name.trim()) return;
+    const values = { ...sample.absorbance_values };
+    for (const f of fields) {
+      for (const k of [f.key, ...(f.aliases || [])]) delete values[k];
+      const value = numeric(draft.absorbance_values[f.key]);
+      if (value !== null) values[f.key] = value;
+    }
+    const source = sample.plate_import ? { ...sample.plate_import } : null;
+    if (source && !usePlate) {
+      delete source.overrides;
+      delete source.curve;
+      delete source.controlWells;
+    }
+    onSave({ ...(source && {plate_import:source}), ...(useCurrentCurve && {calibration_snapshot:null}), id: sample.id, sample_name: draft.sample_name.trim(), treatment_name: draft.treatment_name.trim(),
+      replicate: draft.replicate, description: draft.description, weight: draft.weight, absorbance_values: values }, true);
+    onClose();
+  }
+  return <Dialog open onOpenChange={open => !open && onClose()}><DialogContent className="ra-dialog">
+    <DialogTitle>{en ? 'Edit sample' : '시료 수정'}</DialogTitle>
+    <DialogDescription>{en ? 'Changes update the calculated result and chart.' : '저장하면 계산값과 비교 차트에 반영됩니다.'}</DialogDescription>
+    <form onSubmit={submit} className="ra-form">
+      {sample.plate_import && <div className="sample-origin">
+        <strong>{en ? 'Workbook source' : '원본 엑셀'}</strong>
+        <p>{sample.plate_import.file} · {sample.plate_import.sheet} · {sample.plate_import.well}</p>
+        {sample.plate_import.channels?.map(ch=><span key={ch.field+ch.channel}>{ch.channel} · {ch.cell} · {ch.reading} AU</span>)}
+        {sample.plate_import.fit && <p>{sample.plate_import.fit.startSeconds}–{sample.plate_import.fit.endSeconds} s · n={sample.plate_import.fit.n} · R² {fmt(sample.plate_import.fit.rSquared)}</p>}
+        {sample.plate_import.overrides && <label><input type="checkbox" checked={usePlate} onChange={e=>setUsePlate(e.target.checked)}/>{en ? 'Use the imported plate’s calibration or controls' : '가져온 플레이트의 검량선 또는 대조값 사용'}</label>}
+      </div>}
+      {sample.calibration_snapshot && <div className="sample-origin">
+        <strong>{en ? 'Saved calibration' : '저장된 검량선'}</strong>
+        <p>{en ? 'This sample retains the settings it had before the latest Excel import.' : '이 시료에는 새 엑셀을 가져오기 전의 검량선 설정이 유지됩니다.'}</p>
+        <label><input type="checkbox" checked={useCurrentCurve} onChange={e=>setUseCurrentCurve(e.target.checked)}/>
+          {en ? 'Use the current workspace calibration for this sample' : '이 시료에 현재 계산 조건의 검량선 사용'}</label>
+      </div>}
+      {[[en ? 'Sample name' : '시료명', 'sample_name'], [en ? 'Treatment' : '처리구', 'treatment_name'], [en ? 'Replicate' : '반복', 'replicate'], [en ? 'Description' : '설명', 'description']].map(([label, key], i) =>
+        <label key={key}>{label}<input required={i < 2} value={draft[key] ?? ''} onChange={e => text(key, e.target.value)}/></label>)}
+      {fields.map(f => <label key={f.key}>{f.label}<input type="number" step="any" required={!f.optional} value={draft.absorbance_values[f.key]} onChange={e => text('absorbance_values', { ...draft.absorbance_values, [f.key]: e.target.value })}/></label>)}
+      {sample.analysis_type === 'h2o2' && <label>{en ? 'Fresh weight (g)' : '생체중 (g)'}<input type="number" min="0.000000001" step="any" value={draft.weight ?? ''} onChange={e => text('weight', e.target.value)}/></label>}
+      <div className="ra-actions"><button type="button" className="ra-action" onClick={onClose}>{en ? 'Cancel' : '취소'}</button><button type="submit" className="ra-action ra-primary">{en ? 'Save changes' : '수정 저장'}</button></div>
+    </form>
+  </DialogContent></Dialog>;
+}
 
-    fields.forEach(field => {
-      const value = formData.absorbance_values[field.key];
-      if (field.optional && (value === "" || value === null || value === undefined)) {
-        delete processedValues[field.key];
-        return;
-      }
-      const numValue = parseFloat(value);
-      processedValues[field.key] = Number.isFinite(numValue) ? numValue : 0;
+export default function SampleResults({ samples, selectedIds, onSelectionChange, onEdit, onRemoveMultiple, analysisType, lang = 'ko', params = {} }) {
+  const en = lang === 'en';
+  const [editing, setEditing] = useState(null);
+  const fields = getMeasurementFields(analysisType, lang);
+  const unit = samples[0]?.unit || '';
+  const metrics = absorbanceMetrics(analysisType, unit, lang);
+  const picked = samples.filter(s => selectedIds.has(s.id));
+  const all = samples.length > 0 && picked.length === samples.length;
+  const chosen = picked.length ? picked : samples;
+  function toggle(id) {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    onSelectionChange(next);
+  }
+  function remove(ids) {
+    const msg = en ? 'Delete ' + ids.length + ' sample(s) from this browser?' : '이 브라우저에서 시료 ' + ids.length + '개를 삭제할까요?';
+    if (window.confirm(msg)) onRemoveMultiple(ids);
+  }
+  function exportRows() {
+    const headers = ['Sample Name', 'Description', 'Treatment Name', 'Replicate', ...fields.map(f => f.key)];
+    if (analysisType === 'h2o2') headers.push('Weight');
+    if (analysisType === 'mda') headers.push('Path length (cm)');
+    headers.push(...metrics.map(m => m[1] + ' (' + m[2] + ')'), 'QC', 'Calculation parameters');
+    const hasSource = chosen.some(s=>s.plate_import);
+    if (hasSource) headers.push('Source file','Worksheet','Well','Source measurements');
+    const rows = chosen.map(s => {
+      const row = [s.sample_name, s.description, s.treatment_name, s.replicate, ...fields.map(f => numeric(reading(s, f)))];
+      if (analysisType === 'h2o2') row.push(numeric(s.weight));
+      if (analysisType === 'mda') row.push(numeric(params.mda?.pathlength, 1));
+      const output = row.concat(metrics.map(m => s[m[0]]), s.issue ? resultIssue(s.issue, lang) : 'OK', JSON.stringify(effectiveSampleParams(s,params)));
+      if (hasSource) output.push(s.plate_import?.file,s.plate_import?.sheet,s.plate_import?.well,s.plate_import ? JSON.stringify(s.plate_import) : '');
+      return output;
     });
-
-    const processedFormData = {
-      ...formData,
-      absorbance_values: processedValues
-    };
-    
-    onSave(processedFormData, true);
-    onCancel();
-  };
-
-  const getGridCols = (count) => {
-    if (count === 1) return "grid-cols-1";
-    if (count === 2) return "grid-cols-1 sm:grid-cols-2";
-    if (count === 3) return "grid-cols-1 sm:grid-cols-3";
-    return "grid-cols-1 sm:grid-cols-2";
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: -20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: -20 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30, duration: 0.3 }}
-        className="w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 p-6"
-      >
-        <div className="mb-6">
-          <h3 className="text-xl font-bold text-gray-900 text-center">샘플 수정</h3>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">처리구 이름</Label>
-              <Input 
-                value={formData.treatment_name || ''} 
-                onChange={e => setFormData({...formData, treatment_name: e.target.value})} 
-                className="h-12 text-base font-medium rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500/20" 
-                placeholder="예: Control"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-gray-700">샘플 이름</Label>
-              <Input 
-                value={formData.sample_name || ''} 
-                onChange={e => setFormData({...formData, sample_name: e.target.value})} 
-                className="h-12 text-base font-medium rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500/20" 
-                placeholder="예: Rep1"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <Label className="text-base font-semibold text-gray-700">측정값</Label>
-            <div className={`grid ${getGridCols(fields.length)} gap-4`}>
-              {fields.map(field => (
-                <div key={field.key} className="space-y-3">
-                  <div className="text-center">
-                    <Label className="text-sm font-medium text-gray-700">
-                      {field.label}{field.optional ? "" : " *"}
-                    </Label>
-                  </div>
-                  <Input 
-                    type="number" 
-                    inputMode="decimal"
-                    step="any"
-                    value={formData.absorbance_values[field.key] ?? ''} 
-                    onChange={e => handleMeasurementChange(field.key, e.target.value)} 
-                    className="h-14 text-center font-mono text-lg rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500/20" 
-                    placeholder={field.placeholder || "0.000"}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="flex gap-3 pt-4">
-            <Button onClick={onCancel} variant="outline" className="flex-1 h-12 rounded-xl border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold transition-colors">
-              취소
-            </Button>
-            <Button onClick={handleSave} className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors">
-              저장
-            </Button>
-          </div>
-        </div>
-      </motion.div>
+    downloadCsv(analysisType + '-samples', [headers, ...rows]);
+  }
+  return <section className="ra-panel">
+    <div className="ra-panel-head"><div><h2>{en ? 'Sample results' : '시료별 결과'}</h2><p>{picked.length ? (en ? 'Selected' : '선택') + ' ' + picked.length + ' / ' : ''}{samples.length}{en ? ' samples' : '개 시료'}</p></div>
+      {samples.length > 0 && <div className="ra-actions">
+        {picked.length > 0 && <button type="button" className="ra-action" onClick={() => remove(picked.map(s => s.id))}><Trash2 size={15}/>{en ? 'Delete selected' : '선택 삭제'}</button>}
+        <button type="button" className="ra-action" onClick={exportRows}><Download size={15}/>{picked.length ? (en ? 'Selected CSV' : '선택 CSV') : (en ? 'Export CSV' : 'CSV 내보내기')}</button>
+      </div>}
     </div>
-  );
-};
-
-export default function SampleResults({ samples, selectedIds, onSelectionChange, onEdit, onRemove, onRemoveMultiple, analysisType }) {
-  const [editingSample, setEditingSample] = useState(null);
-
-  // 선택된 샘플만 내보내기
-  const exportSelectedResults = () => {
-    const selectedSamples = samples.filter(sample => selectedIds.has(sample.id));
-    if (selectedSamples.length === 0) return;
-    
-    // Adjust headers and rows based on analysis_type for chlorophyll
-    const csvRows = [];
-    if (selectedSamples[0]?.analysis_type === "chlorophyll_a_b") {
-      csvRows.push(['처리구명', '샘플명', 'Chl a', 'Chl b', 'Carotenoid', '단위'].join(','));
-      selectedSamples.forEach(sample => {
-        csvRows.push([
-          `"${sample.treatment_name}"`,
-          `"${sample.sample_name}"`,
-          (sample.chl_a || 0).toFixed(4),
-          (sample.chl_b || 0).toFixed(4),
-          (sample.carotenoid || 0).toFixed(4),
-          `"${sample.unit}"`
-        ].join(','));
-      });
-    } else {
-      csvRows.push(['처리구명', '샘플명', '분석결과', '단위'].join(','));
-      selectedSamples.forEach(sample => {
-        csvRows.push([
-          `"${sample.treatment_name}"`,
-          `"${sample.sample_name}"`,
-          sample.result.toFixed(4),
-          `"${sample.unit}"`
-        ].join(','));
-      });
-    }
-
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `selected_results_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // 전체 샘플 내보내기
-  const exportAllResults = () => {
-    if (samples.length === 0) return;
-    
-    const csvRows = [];
-    if (samples[0]?.analysis_type === "chlorophyll_a_b") {
-      csvRows.push(['처리구명', '샘플명', 'Chl a', 'Chl b', 'Carotenoid', '단위'].join(','));
-      samples.forEach(sample => {
-        csvRows.push([
-          `"${sample.treatment_name}"`,
-          `"${sample.sample_name}"`,
-          (sample.chl_a || 0).toFixed(4),
-          (sample.chl_b || 0).toFixed(4),
-          (sample.carotenoid || 0).toFixed(4),
-          `"${sample.unit}"`
-        ].join(','));
-      });
-    } else {
-      csvRows.push(['처리구명', '샘플명', '분석결과', '단위'].join(','));
-      samples.forEach(sample => {
-        csvRows.push([
-          `"${sample.treatment_name}"`,
-          `"${sample.sample_name}"`,
-          sample.result.toFixed(4),
-          `"${sample.unit}"`
-        ].join(','));
-      });
-    }
-
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `all_results_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      onSelectionChange(new Set(samples.map(s => s.id)));
-    } else {
-      onSelectionChange(new Set());
-    }
-  };
-
-  const handleSelectOne = (id, checked) => {
-    const newSet = new Set(selectedIds);
-    if (checked) {
-      newSet.add(id);
-    } else {
-      newSet.delete(id);
-    }
-    onSelectionChange(newSet);
-  };
-
-  const handleDeleteSelected = () => {
-    if (selectedIds.size > 0) {
-      onRemoveMultiple(Array.from(selectedIds));
-    }
-  };
-
-  const handleDeleteAll = () => {
-    if (samples.length > 0) {
-      onRemoveMultiple(samples.map(s => s.id));
-    }
-  };
-
-  return (
-    <>
-      <Card className="ios-card ios-blur rounded-3xl ios-shadow-lg border-0 h-full">
-        <CardHeader className="pb-3">
-            <div className="flex flex-col space-y-3">
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="select-all"
-                        checked={selectedIds.size === samples.length && samples.length > 0}
-                        onCheckedChange={handleSelectAll}
-                    />
-                    <CardTitle className="text-gray-900 text-base sm:text-lg font-semibold flex items-center space-x-2">
-                        <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span>등록된 샘플 ({samples.length})</span>
-                    </CardTitle>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                    {selectedIds.size > 0 && (
-                        <Button 
-                            onClick={handleDeleteSelected}
-                            variant="outline" 
-                            size="sm"
-                            className="h-8 rounded-lg bg-red-50 border-red-200 text-red-600 hover:bg-red-100 font-medium text-xs px-3"
-                        >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            <span>선택 삭제 ({selectedIds.size})</span>
-                        </Button>
-                    )}
-                    <Button 
-                        onClick={handleDeleteAll}
-                        variant="outline"
-                        size="sm" 
-                        className="h-8 rounded-lg bg-red-50 border-red-200 text-red-600 hover:bg-red-100 font-medium text-xs px-3"
-                        disabled={samples.length === 0}
-                    >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        <span>전체 삭제</span>
-                    </Button>
-                    
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button 
-                                variant="outline"
-                                size="sm" 
-                                className="h-8 rounded-lg bg-white/80 border-gray-300 text-gray-700 hover:bg-gray-100 font-medium text-xs px-3"
-                            >
-                                <Download className="h-3 w-3 mr-1" />
-                                <span>내보내기</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-48">
-                            <DropdownMenuItem 
-                                onClick={exportSelectedResults}
-                                disabled={selectedIds.size === 0}
-                                className="cursor-pointer"
-                            >
-                                <Download className="h-4 w-4 mr-2" />
-                                선택 내보내기 ({selectedIds.size}개)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                                onClick={exportAllResults}
-                                disabled={samples.length === 0}
-                                className="cursor-pointer"
-                            >
-                                <Download className="h-4 w-4 mr-2" />
-                                전체 내보내기 ({samples.length}개)
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-2 max-h-80 overflow-y-auto">
-            {samples.map((sample) => (
-              <div key={sample.id} className="p-3 rounded-xl bg-white/60 ios-shadow border border-gray-100/50 flex items-center gap-2">
-                <Checkbox 
-                  checked={selectedIds.has(sample.id)}
-                  onCheckedChange={(checked) => handleSelectOne(sample.id, checked)}
-                  className="flex-shrink-0"
-                />
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 flex-shrink-0 px-2 py-0">
-                      {sample.treatment_name}
-                    </Badge>
-                    <span className="text-gray-800 font-medium text-sm truncate">{sample.sample_name}</span>
-                  </div>
-                  <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1">
-                    {Object.entries(sample.absorbance_values).map(([wl, val]) => (
-                      <div key={wl} className="text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded">
-                          <span className="text-gray-500">{getMeasurementLabel(sample.analysis_type, wl, "ko")}:</span>
-                          <span className="font-medium text-gray-800 ml-1">{Number(val).toFixed(3)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="text-right flex-shrink-0 px-2">
-                  {sample.analysis_type === "chlorophyll_a_b" ? (
-                    <div className="flex space-x-3 items-center">
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500">Chl a</div>
-                        <p className="text-gray-900 font-bold text-sm">
-                          {Number(sample.chl_a || 0).toFixed(3)}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500">Chl b</div>
-                        <p className="text-gray-900 font-bold text-sm">
-                          {Number(sample.chl_b || 0).toFixed(3)}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500">Car</div>
-                        <p className="text-gray-900 font-bold text-sm">
-                          {Number(sample.carotenoid || 0).toFixed(3)}
-                        </p>
-                      </div>
-                      <div className="self-end">
-                        <p className="text-gray-500 text-xs pb-0.5">{sample.unit}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-baseline justify-end">
-                      <p className="text-gray-900 font-bold text-sm">
-                        {Number(sample.result).toFixed(3)}
-                      </p>
-                      <p className={`text-gray-500 text-xs ${!sample.unit || sample.unit.startsWith('%') ? 'ml-0.5' : 'ml-1'}`}>{sample.unit}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center space-x-1 flex-shrink-0">
-                  <Button 
-                    onClick={() => setEditingSample(sample)} 
-                    variant="ghost" 
-                    size="icon" 
-                    className="w-7 h-7 p-0 rounded-full text-blue-600 hover:bg-blue-50"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button 
-                    onClick={() => onRemove(sample.id)} 
-                    variant="ghost" 
-                    size="icon" 
-                    className="w-7 h-7 p-0 rounded-full text-red-500 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {samples.length === 0 && (
-              <div className="text-center py-8 text-gray-500 text-sm">
-                등록된 샘플이 없습니다
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <AnimatePresence>
-        {editingSample && (
-          <SampleEditForm 
-            sample={editingSample} 
-            onSave={onEdit} 
-            onCancel={() => setEditingSample(null)} 
-          />
-        )}
-      </AnimatePresence>
-    </>
-  );
+    {!samples.length ? <div className="ra-empty"><p>{en ? 'Your sample results will appear here after entry or file import.' : '시료를 직접 입력하거나 엑셀 또는 CSV를 불러오면 결과가 표시됩니다.'}</p></div> : <div className="ra-scroll">
+      <table><thead><tr>
+        <th><input type="checkbox" aria-label={en ? 'Select all samples' : '전체 시료 선택'} ref={node => { if (node) node.indeterminate = picked.length > 0 && !all; }} checked={all} onChange={() => onSelectionChange(all ? new Set() : new Set(samples.map(s => s.id)))}/></th>
+        <th>{en ? 'Sample' : '시료'}</th><th>{en ? 'Treatment' : '처리구'}</th>
+        {fields.map(f => <th key={f.key}>{f.label}</th>)}
+        {metrics.map(m => <th key={m[0]}>{m[1]} <small>({m[2]})</small></th>)}<th>{en ? 'Actions' : '관리'}</th>
+      </tr></thead><tbody>{samples.map(s => <tr key={s.id}>
+        <td><input type="checkbox" aria-label={(en ? 'Select ' : '선택 ') + s.sample_name} checked={selectedIds.has(s.id)} onChange={() => toggle(s.id)}/></td>
+        <th scope="row">{s.sample_name}{s.plate_import && <small className="ra-block" title={s.plate_import.file}>{s.plate_import.plate} · {s.plate_import.well}</small>}{s.replicate && <small className="ra-block">{s.replicate}</small>}</th><td>{s.treatment_name || '—'}</td>
+        {fields.map(f => <td key={f.key}>{fmt(reading(s, f))}</td>)}
+        {metrics.map(([key], i) => <td key={key}>{fmt(s[key])}{i === 0 && s.issue && <small className="ra-block ra-warning-text">{resultIssue(s.issue, lang)}</small>}</td>)}
+        <td><div className="ra-actions"><button className="ra-icon" type="button" aria-label={(en ? 'Edit ' : '수정 ') + s.sample_name} onClick={() => setEditing(s)}><Pencil size={15}/></button>
+        <button className="ra-icon" type="button" aria-label={(en ? 'Delete ' : '삭제 ') + s.sample_name} onClick={() => remove([s.id])}><Trash2 size={15}/></button></div></td>
+      </tr>)}</tbody></table>
+    </div>}
+    {editing && <SampleEditor sample={editing} fields={fields} en={en} onSave={onEdit} onClose={() => setEditing(null)}/>}
+  </section>;
 }
