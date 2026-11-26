@@ -6,7 +6,8 @@ const COMMON_FIELDS = {
   glucosinolate: ["425"],
   dpph_scavenging: ["517"],
   anthocyanin: ["530", "600"],
-  h2o2: ["390"]
+  h2o2: ["390"],
+  mda: ["532", "600"]
 };
 
 const LABELS = {
@@ -43,6 +44,10 @@ const baseField = (key) => ({
 
 export const getMeasurementFields = (analysisType, lang = "ko") => {
   const text = LABELS[lang] || LABELS.ko;
+
+  if (analysisType === "dpph_scavenging") {
+    return [baseField("517"), { key: "sample_blank", label: lang === "en" ? "Sample blank A517 (optional)" : "시료 블랭크 A517 (선택)", shortLabel: "Blank A517", placeholder: "0.000", optional: true, aliases: ["blank_517"] }];
+  }
 
   if (analysisType === "cat") {
     return [
@@ -87,6 +92,10 @@ export const getMeasurementFields = (analysisType, lang = "ko") => {
         placeholder: text.emptyHint,
         optional: true,
         aliases: ["560_dark_blank", "sample_dark", "sample_dark_abs", "sample_dark_a560"]
+      }, {
+        key: "endpoint_ul",
+        label: lang === "en" ? "Undiluted extract equivalent at 50% inhibition (µL, optional)" : "50% 억제점의 원추출액 상당 부피 (µL, 선택)",
+        shortLabel: "V₅₀ (µL)", placeholder: text.emptyHint, optional: true, aliases: ["V50"]
       }
     ];
   }
@@ -94,6 +103,12 @@ export const getMeasurementFields = (analysisType, lang = "ko") => {
   const commonFields = (COMMON_FIELDS[analysisType] || []).map(baseField);
   if (["total_phenol", "total_flavonoid"].includes(analysisType) && commonFields[0]) {
     commonFields[0].aliases = ["Absorbance", "absorbance"];
+  }
+  if (analysisType === "mda") {
+    for (const field of commonFields) {
+      field.aliases = [`A${field.key}`, `A_${field.key}`, `${field.key} nm`];
+      field.label = `A${field.key} (${field.key} nm)`;
+    }
   }
   return commonFields;
 };
@@ -113,5 +128,5 @@ export const getFieldValueFromRow = (row, field) => {
       return row[key];
     }
   }
-  return field.optional ? "" : "0";
+  return "";
 };

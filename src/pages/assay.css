@@ -1,0 +1,300 @@
+.assay-page {
+  background: #f6f7f3;
+  color: #1d3028;
+  min-height: 75vh;
+  min-width: 0;
+  padding: clamp(1.4rem, 3vw, 3rem) 0 clamp(3rem, 7vw, 6rem);
+}
+.assay-wrap { width: min(1280px, 92%); margin-inline: auto; }
+.assay-crumb, .assay-detail-meta, .assay-aux, .assay-appendix a { display: flex; align-items: center; gap: .6rem; }
+.assay-crumb { color: #55655c; font-size: .81rem; }
+.assay-crumb a { text-decoration: underline; text-decoration-color: #b5c3b7; text-underline-offset: 3px; }
+.assay-head { padding: clamp(1.8rem, 5vw, 4rem) 0 clamp(1.8rem, 3.5vw, 3rem); }
+.assay-page h1, .assay-page h2, .assay-page h3 { margin: 0; color: inherit; font-weight: 650; line-height: 1.18; letter-spacing: -.045em; }
+.assay-page .assay-head h1 { font-size: clamp(2.1rem, calc(4.3vw * var(--type-scale, 1)), 4rem); }
+.assay-head p { color: #55655c; font-size: clamp(.93rem, calc(1.3vw * var(--type-scale, 1)), 1.12rem); line-height: 1.7; margin: .8rem 0 0; }
+.assay-instruments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.65rem); }
+.assay-instrument, .assay-detail, .assay-shelf { border: 1px solid #d5dfd5; border-radius: .9rem; background: white; }
+.assay-instrument { color: inherit; display: flex; flex-direction: column; transition: border-color 180ms ease-out; }
+.assay-instrument .assay-photo { overflow: hidden; aspect-ratio: 1.87; border-radius: .85rem .85rem 0 0; background: #d9e2da; }
+.assay-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 260ms ease-out; }
+.assay-instrument-body { padding: clamp(1.1rem, 2.5vw, 1.8rem); }
+.assay-kicker, .assay-detail-meta { font: 600 .78rem/1.4 ui-monospace, SFMono-Regular, monospace; color: #506459; }
+.assay-instrument h2 { display: flex; justify-content: space-between; align-items: center; gap: .65rem; margin: .65rem 0; font-size: clamp(1.4rem,calc(2.2vw * var(--type-scale, 1)),2rem); }
+.assay-instrument p, .assay-detail p, .assay-appendix li, .assay-steps li, .assay-shelf p { font-size: .94rem; line-height: 1.72; color: #4a5b50; }
+.assay-library { display: grid; grid-template-columns: minmax(235px, .86fr) minmax(0, 2.35fr); align-items: start; gap: clamp(.9rem, 2.8vw, 2.4rem); }
+.assay-shelf { padding: .9rem; }
+.assay-shelf section + section { padding-top: .3rem; border-top: 1px solid #e2e8e0; margin-top: .65rem; }
+.assay-shelf section h2, .assay-mobile-picker label { font-weight: 650; color: #506457; font-size: .8rem; margin: 1rem .4rem .45rem; letter-spacing: 0; }
+.assay-search { display: flex; gap: .5rem; padding: .48rem .6rem; align-items: center; border: 1px solid #bdcbbf; border-radius: .45rem; }
+.assay-search input { font: inherit; font-size: .88rem; border: none; background: transparent; width: 100%; min-width: 0; }
+.assay-search:focus-within { outline: 2px solid #33825a; outline-offset: 2px; }
+.assay-search input:focus { outline: none; box-shadow: none; }
+.assay-shelf section button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: .4rem; text-align: left; padding: .65rem .58rem; border: none; border-radius: .4rem; font-size: .87rem; font-weight: 550; line-height: 1.4; color: #34473b; background: white; }
+.assay-shelf section button span { font: 500 .7rem/1.3 ui-monospace, monospace; color: #647368; white-space: nowrap; }
+.assay-shelf section button[aria-pressed=true] { color: #17482f; background: #e4efe2; }
+.assay-mobile-picker { display: none; }
+.assay-detail { overflow: hidden; min-width: 0; }
+.assay-detail-head { background: #e6efe3; padding: clamp(1.15rem, 3vw, 2.3rem); }
+.assay-detail-head h2 { font-size: clamp(1.7rem, calc(2.7vw * var(--type-scale, 1)), 2.65rem); margin: .8rem 0 .4rem; }
+.assay-detail-head p { margin: 0; }
+.assay-detail-head .assay-start { background: #205539; color: white; height: auto; margin-top: 1.2rem; padding: .65rem 1rem; border-radius: .45rem; font-weight: 600; }
+.assay-detail-section, .assay-appendix { padding: clamp(1.2rem, 2.8vw, 2.2rem); }
+.assay-detail-section + .assay-detail-section, .assay-appendix { border-top: 1px solid #e1e7df; }
+.assay-detail-section h3 { font-size: 1.12rem; margin-bottom: .85rem; }
+.assay-detail-section p { margin: .8rem 0 0; }
+.assay-equations { font-family: ui-monospace, SFMono-Regular, monospace; padding: 1rem; border-radius: .4rem; background: #f2f5ef; color: #244834; font-size: .91rem; overflow-wrap: anywhere; }
+.assay-equations div + div { margin-top: .38rem; }
+.assay-steps { padding-left: 1.6rem; margin: 0; list-style-type: decimal; }
+.assay-steps li { padding-left: .25rem; }
+.assay-steps li + li { margin-top: .55rem; }
+.assay-steps li::marker { font-variant-numeric: tabular-nums; font-weight: 650; color: #2e6040; }
+.assay-appendix { padding-block: .3rem; }
+.assay-appendix details + details { border-top: 1px solid #e1e7df; }
+.assay-appendix summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; line-height: 1.5; padding-block: 1rem; font-weight: 600; font-size: .92rem; }
+.assay-appendix summary::-webkit-details-marker { display: none; }
+.assay-appendix details[open] summary svg { transform: rotate(180deg); }
+.assay-appendix ul { padding-left: 1.1rem; list-style: disc; margin: 0 0 1rem; }
+.assay-appendix a { display: inline-flex; gap: .15rem; color: #205539; text-decoration: underline; }
+.assay-controls, .assay-form-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%),1fr)); gap: .85rem; align-items: end; }
+.assay-controls { margin-block: 1rem; }
+.assay-controls label, .assay-form label { display: grid; gap: .35rem; font-size: .86rem; font-weight: 550; color: #344c3d; }
+.assay-controls input, .assay-form input:not([type=file]) { box-sizing: border-box; width: 100%; min-width: 0; height: 2.65rem; border: 1px solid #afc0b3; border-radius: .42rem; padding: .5rem .7rem; color: #22382b; font-size: .94rem; background: #fff; box-shadow: none; }
+.assay-page :where(button,a,input,select,summary):focus-visible,.assay-form :where(button,input):focus-visible { outline: 2px solid #26794a; outline-offset: 2px; }
+.assay-aux { justify-self: start; height: 2.65rem; padding: .4rem .65rem; border: 1px solid #c0cec2; border-radius: .45rem; }
+.assay-table-scroll { overflow-x: auto; }
+.assay-plan-table { border-collapse: collapse; width: 100%; color: #304739; font-size: .84rem; font-variant-numeric: tabular-nums; }
+.assay-plan-table td, .assay-plan-table th { text-align:left; padding: .5rem .45rem; border-bottom: 1px solid #e1e8dd; }
+.assay-plan-table thead th { font-weight: 650; background: #eff4ed; }
+.assay-portion { display: inline-block; width: 40px; height: 5px; border-radius: 4px; background: linear-gradient(to right,#42845b var(--portion),#dce8dc var(--portion)); margin-right: .4rem; vertical-align: middle; }
+.assay-form { display: grid; gap: 1rem; text-align:left; }
+.assay-form p { margin: 0; font-size: .85rem; line-height: 1.65; color: #516658; }
+.assay-form button { min-height: 2.55rem; border-radius: .45rem; }
+.assay-form .assay-form-submit { justify-self: start; font-weight: 600; padding-inline: 1rem; background: #205539; color: white; }
+.assay-form-submit:disabled { opacity: .55; }
+.assay-form .assay-form-tools { display: flex; flex-wrap: wrap; align-items:center; gap:.7rem; }
+.assay-form .assay-form-error { color: #9d3828; }
+.assay-form-drop { border: 1px dashed #94ab98; border-radius: .65rem; padding: 1rem; background: #f6f9f4; }
+.assay-form-drop[data-dragging=true] { border-color: #2c7046; background: #e5f1e5; }
+@media (hover: hover) {
+  .assay-instrument:hover { border-color: #71937a; }
+  .assay-instrument:hover img { transform: scale(1.025); }
+  .assay-shelf section button:hover { background: #eff4eb; }
+  .assay-start:hover, .assay-form-submit:hover { background:#17462d; }
+}
+@media (max-width: 780px) {
+  .assay-library, .assay-instruments { grid-template-columns: 1fr; }
+  .assay-instrument { display: grid; grid-template-columns: minmax(85px, .55fr) 1fr; }
+  .assay-instrument .assay-photo { height: 100%; aspect-ratio: auto; border-radius: .85rem 0 0 .85rem; }
+  .assay-index { display: none; }
+  .assay-mobile-picker { display: grid; gap: .4rem; }
+  .assay-mobile-picker label { margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assay-instrument, .assay-photo img { transition: none; }
+  .assay-instrument:hover img { transform: none; }
+}
+
+.assay-references li + li { margin-top: .85rem; }
+.assay-references li > p { margin: .25rem 0; color: #485b4d; }
+.assay-references li > div { display: flex; flex-wrap: wrap; gap: .85rem; }
+
+.assay-method-page { padding-top: clamp(.75rem, 1.4vw, 1.25rem); }
+.assay-method-page .assay-wrap { width: min(100% - clamp(1.25rem, 5vw, 5rem), 1570px); }
+.assay-page-location { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .45rem .85rem; margin-bottom: .9rem; }
+.assay-page .assay-page-location h1 { font-size: clamp(1.35rem, 2.25vw, 1.95rem); color: var(--ui-ink, #20372c); }
+.assay-return-links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.assay-return-links a { display: inline-flex; align-items: center; gap: .4rem; min-height: 42px; padding: .36rem .7rem; border: 1px solid var(--ui-line); border-radius: .55rem; background: var(--ui-panel); color: var(--ui-ink); font-weight: 620; font-size: .83rem; line-height: 1.3; }
+.assay-return-links a:hover { background: var(--ui-hover); }
+.assay-return-links a:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+.assay-method-page .assay-library { grid-template-columns: clamp(13rem, 16.5vw, 16rem) minmax(0, 1fr); gap: clamp(.85rem, 1.4vw, 1.4rem); scroll-margin-top: .8rem; }
+@media (min-width:1100px) and (min-height:800px) {
+  .assay-method-page .assay-shelf { position: sticky; top: .8rem; }
+}
+.assay-method-page .assay-shelf { padding: .85rem; }
+.assay-method-page .assay-shelf .assay-index-entry { justify-content: start; gap: .65rem; padding: .45rem .35rem; min-height: 2.5rem; }
+.assay-method-page .assay-index-entry .assay-index-code { min-width: 2.65rem; padding: .25rem .21rem; text-align: center; border-radius: .3rem; font: 640 .69rem/1.25 ui-monospace, monospace; color: var(--method-ink); background: var(--method-tint); }
+.assay-method-page .assay-index-entry .assay-index-label { font-family: inherit; font-size: .86rem; font-weight: 550; line-height: 1.4; color: inherit; white-space: normal; }
+.assay-method-page .assay-shelf .assay-index-entry[aria-pressed=true] { color: var(--method-ink); background: var(--method-tint); }
+.assay-method-page .assay-index-entry[aria-pressed=true] .assay-index-code { color: white; background: var(--method-ink); }
+.assay-method-page {
+  background-color: #edf4ee;
+  background-image: radial-gradient(ellipse at 3% 2%, #cae4d8 0, transparent 36rem), radial-gradient(ellipse at 96% 12%, #d9e9ec 0, transparent 44rem);
+}
+.assay-method-page .assay-shelf {
+  background: rgb(248 253 248 / .62); border-color: rgb(255 255 255 / .88);
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #9ab9aa66, 0 5px 20px #214d380b;
+  backdrop-filter: blur(5px) saturate(1.12);
+}
+.assay-method-page .assay-shelf section button { background: transparent; }
+.assay-method-page .assay-shelf .assay-index-entry[aria-pressed=true] { background: var(--method-tint); box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--method-ink) 25%,transparent); }
+.assay-method-page .assay-shelf .assay-search { background:#ffffff99; }
+.assay-method-page .assay-detail { border: 1px solid #cad9cf; border-radius: 1.05rem; box-shadow: 0 10px 32px #244e3b0a; }
+.assay-method-page .assay-detail-head { display: block; padding: 0; background: #fffefb; border-bottom: 1px solid #cfdbd1; }
+.assay-detail-intro {
+  display: flex; align-items: center; justify-content: space-between; gap: 1.4rem; min-width: 0;
+  padding: clamp(1.2rem, 2.5vw, 2.2rem) clamp(1.1rem, 2.5vw, 2.25rem);
+  background: linear-gradient(118deg, #fffefb 25%, var(--method-tint) 150%);
+  box-shadow: inset 0 1px 0 #fff;
+}
+.assay-detail-intro h2 { display: grid; min-width: 0; gap: .35rem; margin:0; }
+.assay-detail-code {
+  color: var(--method-ink); font-family: Arial, Helvetica, sans-serif; font-size: clamp(3.2rem, calc(5.55vw * var(--type-scale, 1)), 5.8rem);
+  line-height: .95; font-weight: 620; letter-spacing: -.075em;
+}
+.assay-detail-code sub { position:static; font-size:.54em; line-height:0; vertical-align:-.18em; letter-spacing:-.04em; }
+.assay-detail-name { color:#22392c; font-size:clamp(1.12rem,calc(1.63vw * var(--type-scale, 1)),1.65rem); line-height:1.36; letter-spacing:-.025em; font-weight:600; text-wrap:balance; }
+.assay-detail-tools { display: grid; justify-items: end; flex-shrink: 0; gap: .9rem; }
+.assay-detail-measure { margin:0; display: grid; gap: .21rem; }
+.assay-detail-measure > div { display:flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap:.6rem; }
+.assay-detail-measure dt { color:#58685d; font-size:.76rem; }
+.assay-detail-measure dd { margin:0; color:#2b4233; font-size:.82rem; line-height:1.5; font-weight:620; font-variant-numeric:tabular-nums; }
+.assay-method-page .assay-start { margin:0; min-height: 2.5rem; border-radius:.6rem; }
+.assay-plates { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); border-top:1px solid #d2ded0; }
+.assay-specimen, .assay-diagram {
+  display:grid; grid-template-rows:auto auto 1fr; align-content:start;
+  min-width:0; padding:clamp(.95rem,1.9vw,1.65rem); margin:0;
+}
+.assay-specimen { color:#254635; background:#f0f3e9; }
+.assay-specimen figcaption, .assay-diagram figcaption { display:grid; align-content:start; gap:.33rem; }
+.assay-specimen figcaption span, .assay-diagram figcaption span { font:600 .72rem/1.4 ui-monospace, monospace; }
+.assay-specimen figcaption span { color:#506856; }
+.assay-specimen figcaption strong, .assay-diagram figcaption strong { font-size:clamp(1.05rem,calc(1.35vw * var(--type-scale, 1)),1.32rem); line-height:1.35; font-weight:630; letter-spacing:-.025em; }
+.assay-specimen-window { display:grid; align-items:center; padding:.48rem 0; margin:.85rem 0 .65rem; border-block:1px solid #a4b69c8c; }
+.assay-specimen svg { display:block; width:100%; height:auto; max-height:160px; font-family:Arial,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+.assay-detail .assay-specimen p { color:#455948; margin:0; font-size:.82rem; line-height:1.58; }
+.assay-mobile-tools { min-width:0; display:grid; gap:.5rem; grid-template-columns:minmax(0,1fr) 42px; }
+.assay-search-toggle { border:1px solid #bacdc0; border-radius:.5rem; background:#fbfdf9; color:#335843; display:grid; place-items:center; min-height:42px; }
+.assay-diagram {
+  --diagram-line: #a6b9bb; --diagram-label: #edf2ef; --diagram-glass: #24313a;
+  margin: 0; min-width: 0; align-self: stretch;
+  color: #edf3ec; background: #142128;
+  background-image: radial-gradient(ellipse at 72% 44%, color-mix(in srgb, var(--method-ink) 39%, transparent), transparent 79%);
+  border-left: 1px solid #27393c;
+}
+.assay-diagram figcaption { display: flex; gap: .38rem; flex-direction: column; align-items: flex-start; }
+.assay-diagram figcaption span { color: #becdc8; font-family: ui-monospace, monospace; font-size: .72rem; font-weight: 550; }
+.assay-diagram figcaption strong { color: #fff; font-size: clamp(1.05rem, calc(1.5vw * var(--type-scale, 1)), 1.4rem); font-weight: 600; letter-spacing: -.025em; line-height: 1.35; }
+.assay-diagram-window { position:relative; display:grid; align-items:center; margin: .85rem 0 .65rem; padding: .48rem .1rem; border-block: 1px solid #c4d4d329; background-image: radial-gradient(#a6b9bb24 .7px, transparent .8px); background-size: 13px 13px; }
+.assay-diagram-window::before, .assay-diagram-window::after { content:''; position:absolute; width:9px; height:9px; border-color:#d0dbd875; border-style:solid; pointer-events:none; }
+.assay-diagram-window::before { left:0; top:-1px; border-width:1px 0 0 1px; }
+.assay-diagram-window::after { right:0; bottom:-1px; border-width:0 1px 1px 0; }
+.assay-diagram svg { display: block; width: 100%; height: auto; max-height: 160px; min-width: 0; overflow: visible; font-family: Arial, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+.assay-detail .assay-diagram p { margin: 0; color: #d9e2dd; font-size: .8rem; line-height: 1.58; }
+@media (min-width:781px) {
+  .assay-detail-intro { padding:.9rem clamp(1rem,1.6vw,1.65rem); }
+  .assay-detail-intro h2 { display:flex; flex-wrap:wrap; align-items:baseline; gap:.25rem 1rem; }
+  .assay-detail-code { font-size:clamp(3rem,calc(4.1vw * var(--type-scale,1)),4.15rem); line-height:1.16; }
+  .assay-detail-tools { grid-template-columns:auto auto; align-items:center; gap:.35rem 1rem; }
+  .assay-detail-tools .method-quick-links { grid-column:1 / -1; }
+  .assay-specimen,.assay-diagram { padding:.9rem clamp(.9rem,1.4vw,1.45rem); }
+  .assay-specimen figcaption,.assay-diagram figcaption { display:flex; flex-flow:row wrap; align-items:baseline; gap:.15rem .7rem; }
+  .assay-specimen-window,.assay-diagram-window { margin:.45rem 0; padding:.25rem 0; }
+}
+.diagram-liquid, .diagram-well-core, .diagram-complex { filter: drop-shadow(0 0 3px #d6ebdd2e); }
+.diagram-beams { filter: drop-shadow(0 0 3px #f7c3b26b); }
+@media (prefers-reduced-motion: no-preference) {
+  .diagram-trace { animation: assay-draw-signal 650ms cubic-bezier(.22,.74,.19,1) both; }
+  .diagram-beams { animation: assay-scan-beams 700ms cubic-bezier(.22,.74,.19,1) both; }
+  .diagram-well-core, .diagram-liquid, .diagram-complex, .diagram-marker { animation: assay-read-signal 440ms ease-out var(--delay,0ms) both; }
+}
+@keyframes assay-draw-signal { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
+@keyframes assay-scan-beams { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes assay-read-signal { from { opacity: .18; } to { opacity: 1; } }
+.assay-method-page .assay-detail-section { padding: clamp(1rem, 2.3vw, 1.75rem); }
+.assay-method-page .assay-equations { padding: .85rem 1rem; font-size: .9rem; }
+@media (min-width:781px) and (max-width:1099px) {
+  .assay-method-page .assay-library { grid-template-columns:minmax(0,1fr); }
+  .assay-method-page .assay-index { display:grid; grid-template-columns:minmax(8rem, .65fr) minmax(0, 3fr); gap:.35rem .85rem; align-items:center; }
+  .assay-method-page .assay-search { grid-row:1 / span 2; }
+  .assay-method-page .assay-index > section { display:flex; flex-wrap:wrap; align-items:center; gap:.25rem; border:0; margin:0; padding:0; }
+  .assay-method-page .assay-index > section h2 { width:8em; margin:0 .3rem 0 0; }
+  .assay-method-page .assay-index .assay-index-entry { position:relative; width:auto; min-height:2rem; padding:.15rem .22rem; }
+  .assay-method-page .assay-index-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .assay-specimen, .assay-diagram { padding:1rem; }
+}
+@media (max-width:780px) {
+  .assay-method-page .assay-library { grid-template-columns:minmax(0,1fr); }
+  .assay-method-page .assay-shelf { padding:.65rem .85rem; }
+  .assay-index[data-searching=true] { display:block; margin-top:.85rem; }
+  .assay-method-page .assay-shelf .assay-index-entry { min-height:44px; }
+}
+@media (max-width:600px) {
+  .assay-plates { grid-template-columns:minmax(0,1fr); }
+  .assay-detail-intro { flex-wrap:wrap; gap:1rem; padding:1.1rem; }
+  .assay-detail-intro h2 { gap:.35rem; }
+  .assay-detail-tools { width:100%; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:.6rem; }
+  .assay-detail-measure { justify-self:start; }
+  .assay-detail-measure > div { justify-content:start; gap:.42rem; }
+  .assay-detail-measure dd { font-size:.77rem; }
+  .assay-method-page .assay-start { font-size:.78rem; padding:.55rem .7rem; }
+  .assay-diagram { border-left:0; }
+}
+@media (hover:hover) {
+  .assay-method-page .assay-shelf .assay-index-entry:hover { background:#e7efe5; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .specimen-pointer { animation: assay-read-signal 350ms ease-out both; }
+}
+@media (prefers-reduced-transparency:reduce) {
+  .assay-method-page,.assay-detail-intro,.assay-diagram { background-image:none; }
+  .assay-method-page .assay-shelf { background:#f7faf5; border:1px solid #aebfb0; box-shadow:none; backdrop-filter:none; }
+  .assay-method-page .assay-shelf .assay-search { background:#fff; }
+  .diagram-liquid,.diagram-well-core,.diagram-complex,.diagram-beams { filter:none; }
+}
+html[data-theme=dark] .assay-method-page {
+  color:var(--ui-ink); background-color:var(--ui-bg);
+  background-image:radial-gradient(ellipse at 4% 4%, #1c392b 0, transparent 38rem),radial-gradient(ellipse at 96% 14%, #1b3234 0, transparent 42rem);
+}
+html[data-theme=dark] .assay-method-page .assay-shelf {
+  background:color-mix(in srgb,var(--ui-panel) 86%,transparent); border-color:var(--ui-line);
+  box-shadow:inset 1px 1px 0 #b4e6c316,0 8px 25px #060e0a32;
+}
+html[data-theme=dark] .assay-method-page .assay-search,
+html[data-theme=dark] .assay-search-toggle { color:var(--ui-ink);background:var(--ui-well);border-color:var(--ui-line); }
+html[data-theme=dark] .assay-search input {color:var(--ui-ink)}
+html[data-theme=dark] .assay-search input::placeholder,
+html[data-theme=dark] .assay-method-page .assay-shelf section h2,
+html[data-theme=dark] .assay-mobile-picker label,
+html[data-theme=dark] .assay-method-page .assay-shelf p {color:var(--ui-muted)}
+html[data-theme=dark] .assay-method-page .assay-shelf section {border-color:var(--ui-line)}
+html[data-theme=dark] .assay-method-page .assay-index-entry {color:var(--ui-ink)}
+html[data-theme=dark] .assay-method-page .assay-index-code {
+  color:color-mix(in srgb,var(--method-tint) 83%,var(--method-ink)); background:color-mix(in srgb,var(--method-ink) 36%,var(--ui-panel));
+}
+html[data-theme=dark] .assay-method-page .assay-index-entry[aria-pressed=true] {
+  color:var(--ui-ink); background:color-mix(in srgb,var(--method-ink) 32%,var(--ui-panel)); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--method-tint) 38%,var(--ui-panel));
+}
+html[data-theme=dark] .assay-method-page .assay-index-entry[aria-pressed=true] .assay-index-code {
+  color:#19271f; background:var(--method-tint);
+}
+html[data-theme=dark] .assay-method-page .assay-detail,
+html[data-theme=dark] .assay-method-page .assay-detail-head,
+html[data-theme=dark] .assay-method-page .assay-plates {border-color:var(--ui-line)}
+html[data-theme=dark] .assay-method-page .assay-detail-head,
+html[data-theme=dark] .assay-method-page .assay-detail-intro {background-color:var(--ui-panel)}
+html[data-theme=dark] .assay-method-page .assay-detail-intro {
+  background-image:linear-gradient(118deg,var(--ui-panel) 18%,color-mix(in srgb,var(--method-ink) 22%,var(--ui-panel)));
+  box-shadow:inset 0 1px 0 #e7f6e813;
+}
+html[data-theme=dark] .assay-detail-code {color:color-mix(in srgb,var(--method-tint) 70%,var(--method-ink))}
+html[data-theme=dark] .assay-detail-name,html[data-theme=dark] .assay-detail-measure dd {color:var(--ui-ink)}
+html[data-theme=dark] .assay-detail-measure dt {color:var(--ui-muted)}
+html[data-theme=dark] .assay-method-page .assay-start {color:#13291c;background:var(--ui-accent)}
+html[data-theme=dark] .assay-specimen {color:var(--ui-ink);background:var(--ui-well)}
+html[data-theme=dark] .assay-specimen-window {border-color:var(--ui-line)}
+html[data-theme=dark] .assay-specimen figcaption span,
+html[data-theme=dark] .assay-detail .assay-specimen p {color:var(--ui-muted)}
+html[data-theme=dark] .assay-specimen figcaption strong {color:var(--ui-ink)}
+html[data-theme=dark] .specimen-pointer text {fill:var(--ui-ink)}
+html[data-theme=dark] .specimen-pointer path {stroke:#adc7b5}
+html[data-theme=dark] .specimen-pointer circle {fill:#284c39;stroke:#f2f8ec}
+@media (hover:hover) {
+  html[data-theme=dark] .assay-method-page .assay-shelf .assay-index-entry:hover {background:var(--ui-hover)}
+  html[data-theme=dark] .assay-method-page .assay-start:hover {background:#c7f1cd}
+}
+@media (prefers-reduced-transparency:reduce) {
+  html[data-theme=dark] .assay-method-page,
+  html[data-theme=dark] .assay-method-page .assay-detail-intro {background-image:none}
+  html[data-theme=dark] .assay-method-page .assay-shelf {background:var(--ui-panel);box-shadow:none}
+}

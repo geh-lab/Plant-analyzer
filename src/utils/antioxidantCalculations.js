@@ -1,89 +1,70 @@
-const toNumber = (value, fallback = 0) => {
-  if (value === "" || value === null || value === undefined) return fallback;
-  const parsed = parseFloat(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-};
+import { numeric } from './resultData.js';
 
-const firstNumber = (source, keys, fallback = 0) => {
-  if (!source) return fallback;
+export const enzymeDefaults = {
+  extractMl: 2,
+  dryMassMg: 20,
+  reactionUl: 200,
+  catAliquotUl: 3,
+  podAliquotUl: 20
+};
+const activityUnit = 'μmol/min/mg DW';
+const inhibitionUnit = '% inhibition';
+
+// Keep aliases used by saved runs and imported instrument tables.
+function firstValue(source, keys) {
   for (const key of keys) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      return toNumber(source[key], fallback);
-    }
+    const value = source[key];
+    if (value != null && value !== '') return value;
   }
-  return fallback;
-};
+}
+function setting(local, shared, keys, fallback) {
+  return numeric(firstValue(local, keys) ?? firstValue(shared, keys), fallback);
+}
 
-const firstNumberOrUndefined = (source, keys) => {
-  if (!source) return undefined;
-  for (const key of keys) {
-    if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== "" && source[key] !== null && source[key] !== undefined) {
-      const parsed = parseFloat(source[key]);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    }
-  }
-  return undefined;
-};
+function kineticActivity(type, values, params) {
+  const cat = type === 'cat';
+  const p = params[type] || {};
+  const issue = code => ({ result: null, unit: activityUnit, correctedDeltaA: null, issue: code });
+  const sampleKeys = ['sample_slope', type + '_sample_slope', cat ? '240' : '470', 'dA_min', 'delta_A', 'slope'];
+  const blankKeys = cat ? ['h2o2_control_slope', 'H2O2_control_slope', 'control_slope'] : ['blank_slope', 'Blank_slope'];
+  const sample = numeric(firstValue(values, sampleKeys));
+  const blank = setting(values, p, blankKeys, 0);
+  if (sample === null) return issue('missing_reading');
+  if (blank === null) return issue('invalid_control');
+  const path = setting(p, params, ['pathlength', 'path_length', 'l'], 1);
+  const df = setting(p, params, ['dilutionFactor', 'df', 'DF'], 1);
+  const extract = numeric(p.extractMl, enzymeDefaults.extractMl);
+  const mass = numeric(p.dryMassMg, enzymeDefaults.dryMassMg);
+  const volume = numeric(p.reactionUl, enzymeDefaults.reactionUl);
+  const aliquot = numeric(p.aliquotUl, cat ? enzymeDefaults.catAliquotUl : enzymeDefaults.podAliquotUl);
+  if (![path, df, extract, mass, volume, aliquot].every(n => n > 0) || aliquot > volume) return issue('invalid_params');
+  const correctedDeltaA = cat ? blank - sample : sample - blank;
+  if (correctedDeltaA < 0) return { ...issue('wrong_slope'), correctedDeltaA };
+  // ε in mM⁻¹ cm⁻¹ yields µmol/mL/min. Both reaction volume and aliquot are in µL.
+  const epsilon = cat ? 0.0436 : 26.6;
+  const result = correctedDeltaA / (epsilon * path) * (volume / aliquot) * extract / mass * df;
+  return Number.isFinite(result) ? { result, correctedDeltaA, unit: activityUnit } : issue('invalid_params');
+}
+export const calculateCatActivity = (values = {}, params = {}) => kineticActivity('cat', values, params);
+export const calculatePodActivity = (values = {}, params = {}) => kineticActivity('pod', values, params);
 
-const positiveOrDefault = (value, fallback = 1) => {
-  const parsed = toNumber(value, fallback);
-  return parsed > 0 ? parsed : fallback;
-};
-
-export const calculateCatActivity = (values = {}, params = {}) => {
-  const catParams = params.cat || {};
-  const sampleSlope = firstNumber(values, ["sample_slope", "cat_sample_slope", "240", "dA_min", "delta_A", "slope"], 0);
-  const rowControlSlope = firstNumberOrUndefined(values, ["h2o2_control_slope", "H2O2_control_slope", "control_slope"]);
-  const controlSlope = rowControlSlope ?? firstNumber(catParams, ["h2o2_control_slope", "H2O2_control_slope", "control_slope"], 0);
-  const pathlength = positiveOrDefault(firstNumber(catParams, ["pathlength", "path_length", "l"], firstNumber(params, ["pathlength", "path_length", "l"], 1)), 1);
-  const dilutionFactor = positiveOrDefault(firstNumber(catParams, ["dilutionFactor", "df", "DF"], firstNumber(params, ["dilutionFactor", "df", "DF"], 1)), 1);
-
-  const correctedDeltaA = -(sampleSlope - controlSlope);
-  const result = correctedDeltaA * 152.9 / pathlength * dilutionFactor;
-
-  return {
-    result,
-    correctedDeltaA,
-    unit: "μmol/min/mg DW"
-  };
-};
-
-export const calculatePodActivity = (values = {}, params = {}) => {
-  const podParams = params.pod || {};
-  const sampleSlope = firstNumber(values, ["sample_slope", "pod_sample_slope", "470", "dA_min", "delta_A", "slope"], 0);
-  const rowBlankSlope = firstNumberOrUndefined(values, ["blank_slope", "Blank_slope"]);
-  const blankSlope = rowBlankSlope ?? firstNumber(podParams, ["blank_slope", "Blank_slope"], 0);
-  const pathlength = positiveOrDefault(firstNumber(podParams, ["pathlength", "path_length", "l"], firstNumber(params, ["pathlength", "path_length", "l"], 1)), 1);
-  const dilutionFactor = positiveOrDefault(firstNumber(podParams, ["dilutionFactor", "df", "DF"], firstNumber(params, ["dilutionFactor", "df", "DF"], 1)), 1);
-
-  const correctedDeltaA = sampleSlope - blankSlope;
-  const result = correctedDeltaA * 0.0376 / pathlength * dilutionFactor;
-
-  return {
-    result,
-    correctedDeltaA,
-    unit: "μmol/min/mg DW"
-  };
-};
-
-export const calculateSodActivity = (values = {}, params = {}) => {
-  const sodParams = params.sod || {};
-  const lightControl = firstNumber(sodParams, ["light_control_abs", "control_abs", "light_control"], 0);
-  const darkBlank = firstNumber(sodParams, ["dark_blank_abs", "dark_blank"], 0);
-  const sampleAbs = firstNumber(values, ["560", "sample_abs", "sample_a560", "A560"], 0);
-  const sampleDarkBlank = firstNumberOrUndefined(values, ["sample_dark_blank", "560_dark_blank", "sample_dark", "sample_dark_abs", "sample_dark_a560"]);
-  const dilutionFactor = positiveOrDefault(firstNumber(sodParams, ["dilutionFactor", "df", "DF"], firstNumber(params, ["dilutionFactor", "df", "DF"], 1)), 1);
-
-  const controlCorr = lightControl - darkBlank;
-  const sampleCorr = sampleAbs - (sampleDarkBlank ?? darkBlank);
-  const inhibition = controlCorr !== 0 ? ((controlCorr - sampleCorr) / controlCorr) * 100 : 0;
-  const result = inhibition * 0.02 * dilutionFactor;
-
-  return {
-    result,
-    inhibition,
-    controlCorr,
-    sampleCorr,
-    unit: "unit/mg DW"
-  };
-};
+export function calculateSodActivity(values = {}, params = {}) {
+  const p = params.sod || {};
+  const empty = { result: null, unit: inhibitionUnit, inhibition: null, endpointActivity: null };
+  const light = numeric(firstValue(p, ['light_control_abs', 'control_abs', 'light_control']));
+  const dark = numeric(firstValue(p, ['dark_blank_abs', 'dark_blank']), 0);
+  const sample = numeric(firstValue(values, ['560', 'sample_abs', 'sample_a560', 'A560']));
+  const sampleDark = numeric(firstValue(values, ['sample_dark_blank', '560_dark_blank', 'sample_dark', 'sample_dark_abs', 'sample_dark_a560']), dark);
+  if (light === null || dark === null || light <= dark) return { ...empty, issue: 'invalid_control' };
+  if (sample === null || sampleDark === null) return { ...empty, issue: 'missing_reading' };
+  const controlCorr = light - dark, sampleCorr = sample - sampleDark;
+  const inhibition = 100 * (controlCorr - sampleCorr) / controlCorr;
+  const diagnostics = { ...empty, controlCorr, sampleCorr, inhibition };
+  if (!Number.isFinite(inhibition) || inhibition < 0 || inhibition > 100) return { ...diagnostics, issue: 'invalid_inhibition' };
+  const endpoint = firstValue(values, ['endpoint_ul', 'V50']);
+  if (endpoint === undefined) return { ...diagnostics, result: inhibition };
+  const v50 = numeric(endpoint), extract = numeric(p.extractMl, enzymeDefaults.extractMl), mass = numeric(p.dryMassMg, enzymeDefaults.dryMassMg);
+  if (!(v50 > 0 && extract > 0 && mass > 0)) return { ...diagnostics, result: inhibition, issue: 'invalid_endpoint' };
+  const endpointActivity = extract * 1000 / (v50 * mass);
+  return { ...diagnostics, result: inhibition, endpointActivity, issue: null };
+}

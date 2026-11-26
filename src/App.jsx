@@ -1,14 +1,6 @@
-import './App.css'
-import Pages from "@/pages/index.jsx"
-import { Toaster } from "@/components/ui/toaster"
+import "./App.css";
+import Pages from "@/pages/index.jsx";
 
-function App() {
-  return (
-    <>
-      <Pages />
-      <Toaster />
-    </>
-  )
+export default function App() {
+  return <Pages/>;
 }
-
-export default App 

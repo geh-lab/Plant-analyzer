@@ -1,136 +1,44 @@
-import Layout from "./Layout.jsx";
-
-import Analysis from "./Analysis";
-import AnalysisEn from "./Analysis_en";
-
-import Results from "./Results";
-import ResultsEn from "./Results_en";
-
-import Home from "./Home";
-import HomeEn from "./Home_en";
-
-import HPLC from "./HPLC";
-import HPLCEn from "./HPLC_en";
-
-import HPLC_Results from "./HPLC_Results";
-import HPLCResultsEn from "./HPLC_Results_en";
-
-import Kjeldahl from "./Kjeldahl";
-import KjeldahlEn from "./Kjeldahl_en";
-
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
+import Layout from "./Layout";
 import MainHome from "./MainHome";
-import MainHomeEn from "./MainHome_en";
+import { pageUrl } from "@/data/workspaces";
 
-import PhysiologicalMeasurement from "./PhysiologicalMeasurement";
-import PhysiologicalMeasurementEn from "./PhysiologicalMeasurement_en";
+const routes = {
+  analysis: [lazy(() => import("./Analysis")), lazy(() => import("./Analysis_en"))],
+  results: [lazy(() => import("./Results")), lazy(() => import("./Results_en"))],
+  home: [lazy(() => import("./Home")), lazy(() => import("./Home_en"))],
+  hplc: [lazy(() => import("./HPLC")), lazy(() => import("./HPLC_en"))],
+  hplc_results: [lazy(() => import("./HPLC_Results")), lazy(() => import("./HPLC_Results_en"))],
+  kjeldahl: [lazy(() => import("./Kjeldahl")), lazy(() => import("./Kjeldahl_en"))],
+  physiological: [lazy(() => import("./PhysiologicalMeasurement")), lazy(() => import("./PhysiologicalMeasurement_en"))],
+  fp100: [lazy(() => import("./Fp100")), lazy(() => import("./Fp100_en"))],
+  li6800: [lazy(() => import("./Li6800")), lazy(() => import("./Li6800_en"))]
+};
 
-import Li6800 from "./Li6800";
-import Li6800En from "./Li6800_en";
-
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-
-const PAGES = {
-    Analysis: Analysis,
-    Analysis_en: AnalysisEn,
-    
-    Results: Results,
-    Results_en: ResultsEn,
-    
-    Home: Home,
-    Home_en: HomeEn,
-    
-    HPLC: HPLC,
-    HPLC_en: HPLCEn,
-    
-    HPLC_Results: HPLC_Results,
-    HPLC_Results_en: HPLCResultsEn,
-
-    Kjeldahl: Kjeldahl,
-    Kjeldahl_en: KjeldahlEn,
-
-    Physiological: PhysiologicalMeasurement,
-    Physiological_en: PhysiologicalMeasurementEn,
-
-    Li6800: Li6800,
-    Li6800_en: Li6800En,
-
-    // [추가] MainHome도 PAGES 목록에 명시적으로 추가해두는 것이 안전합니다.
-    MainHome: MainHome,
-    MainHome_en: MainHomeEn,
-}
-
-function _getCurrentPage(url) {
-    // ✨ [핵심 수정] 루트 경로('/')이거나 비어있을 때 'MainHome'을 반환하도록 강제 설정
-    if (url === '/' || url === '') {
-        return 'MainHome';
-    }
-
-    if (url.endsWith('/')) {
-        url = url.slice(0, -1);
-    }
-    let urlLastPart = url.split('/').pop();
-    if (urlLastPart.includes('?')) {
-        urlLastPart = urlLastPart.split('?')[0];
-    }
-
-    // 대소문자 구분 없이 찾기
-    const pageName = Object.keys(PAGES).find(page => page.toLowerCase() === urlLastPart.toLowerCase());
-    
-    // 페이지를 못 찾으면 기본값으로 첫 번째 페이지를 반환하는데, 
-    // 루트 경로 처리를 위에서 했으므로 이제 안전합니다.
-    return pageName || Object.keys(PAGES)[0];
-}
-
-// Create a wrapper component that uses useLocation inside the Router context
 function PagesContent() {
-    const location = useLocation();
-    const currentPage = _getCurrentPage(location.pathname);
-    
-    return (
-        <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                <Route path="/" element={<MainHome />} />
-                <Route path="/mainhome_en" element={<MainHomeEn />} />
-                
-                <Route path="/Analysis" element={<Analysis />} />
-                <Route path="/analysis_en" element={<AnalysisEn />} />
-                
-                <Route path="/Results" element={<Results />} />
-                <Route path="/results_en" element={<ResultsEn />} />
-                
-                <Route path="/Home" element={<Home />} />
-                <Route path="/home_en" element={<HomeEn />} />
-                
-                <Route path="/HPLC" element={<HPLC />} />
-                <Route path="/hplc" element={<HPLC />} />
-                <Route path="/hplc_en" element={<HPLCEn />} />
-                
-                <Route path="/HPLC_Results" element={<HPLC_Results />} />
-                <Route path="/hplc_results" element={<HPLC_Results />} />
-                <Route path="/hplc_results_en" element={<HPLCResultsEn />} />
+  const location = useLocation();
+  const path = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
+  const english = path.endsWith("_en");
+  const page = path.replace(/_en$/, "") || "mainhome";
 
-                <Route path="/Kjeldahl" element={<Kjeldahl />} />
-                <Route path="/kjeldahl" element={<Kjeldahl />} />
-                <Route path="/kjeldahl_en" element={<KjeldahlEn />} />
-
-                <Route path="/Physiological" element={<PhysiologicalMeasurement />} />
-                <Route path="/physiological" element={<PhysiologicalMeasurement />} />
-                <Route path="/physiological_en" element={<PhysiologicalMeasurementEn />} />
-
-                <Route path="/Li6800" element={<Li6800 />} />
-                <Route path="/li6800" element={<Li6800 />} />
-                <Route path="/li6800_en" element={<Li6800En />} />
-
-            </Routes>
-        </Layout>
-    );
+  return (
+    <Layout page={page} english={english}>
+      <Suspense fallback={<div className="route-loading" role="status">{english ? "Loading analysis…" : "분석 화면을 불러오는 중…"}</div>}>
+        <Routes>
+          <Route path="/" element={<MainHome/>}/>
+          <Route path="/mainhome" element={<MainHome/>}/>
+          <Route path="/mainhome_en" element={<MainHome english/>}/>
+          {Object.entries(routes).flatMap(([name, pages]) => pages.map((Page, index) => (
+            <Route key={name + index} path={pageUrl(name, Boolean(index))} element={<Page/>}/>
+          )))}
+          <Route path="*" element={<div className="route-loading"><h1>{english ? "Page unavailable" : "페이지를 찾을 수 없습니다"}</h1><Link to={pageUrl("mainhome", english)}>{english ? "Back to workspace" : "워크스페이스로 돌아가기"}</Link></div>}/>
+        </Routes>
+      </Suspense>
+    </Layout>
+  );
 }
 
 export default function Pages() {
-    return (
-        <Router>
-            <PagesContent />
-        </Router>
-    );
+  return <BrowserRouter><PagesContent/></BrowserRouter>;
 }

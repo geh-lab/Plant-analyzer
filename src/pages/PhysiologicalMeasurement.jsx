@@ -1,113 +1,53 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Activity, Play, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // [추가] 리액트 페이지 이동 훅
-import { createPageUrl } from '@/utils';        // [수정] 경로 @/utils 로 통일
-import LiquidGlass from '@/components/LiquidGlass.jsx'; // [수정] 경로 @/components/... 로 통일
-
-// [추가] 비디오 파일 import (경로가 맞는지 확인해주세요)
-import backgroundVideo from "@/videos/PM_background.mp4"; 
-
-const CardContent = ({ icon, title, description }) => (
-  <div className="flex flex-col h-full text-left">
-    <div className="flex items-center space-x-4 mb-4">
-      <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.15)]">
-        {React.cloneElement(icon, { className: 'h-6 w-6 text-green-200' })}
-      </div>
-      <h3 className="text-xl font-bold text-white drop-shadow-sm">{title}</h3>
-    </div>
-    <p className="text-sm leading-relaxed text-gray-200 mb-6 font-medium">
-      {description}
-    </p>
-    
-    <div className="mt-auto pt-4 flex items-center text-green-300 text-sm font-semibold group-hover:text-white transition-colors">
-      <span>가이드 보기</span>
-      <Play className="w-3 h-3 ml-2 fill-current" />
-    </div>
-  </div>
-);
-
-export default function Physiological() {
-  const navigate = useNavigate(); // [추가] 이동 함수 생성
-
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { InstrumentFrame } from "@/components/instruments/InstrumentFrame";
+export default function PhysiologicalMeasurement({ lang = "ko" }) {
+  const en = lang === "en";
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-900">
-        
-      {/* 1. Background Video Layer */}
-      <div className="absolute inset-0 z-0 w-full h-full">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="object-cover w-full h-full opacity-80"
-          src={backgroundVideo} // [수정] import한 변수 사용
+    <InstrumentFrame
+      parent={en ? "Plant Analyzer" : "분석 홈"}
+      parentPath={en ? "/mainhome_en" : "/"}
+      title={en ? "Plant physiology" : "식물 생리 측정"}
+      summary={
+        en
+          ? "Explore leaf gas exchange and chlorophyll fluorescence."
+          : "잎의 가스 교환과 엽록소 형광을 측정한 장비를 선택하세요."
+      }
+    >
+      <article className="inst-figure-card">
+        <img
+          src="/instruments/li6800.webp"
+          alt={
+            en
+              ? "Greenhouse growing area"
+              : "온실 재배 시설"
+          }
         />
-        
-      </div>
-
-      {/* 2. Main Content Layer */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-        
-        {/* Back Navigation */}
-        <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate('/')} // [수정] 메인으로 돌아가기 (useNavigate 사용)
-            className="mb-12 flex items-center text-gray-400 hover:text-white transition-colors group"
-        >
-            <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 mr-3">
-                 <ArrowLeft className="w-4 h-4" />
-            </div>
-            <span className="text-sm font-medium">메인으로 돌아가기</span>
-        </motion.button>
-
-        {/* Title Section */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-4 drop-shadow-lg">
-            Physiological Measurement
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto font-light drop-shadow">
-            식물 생리·광합성 특성 분석을 위한 장비 사용법을 제공합니다.
-            <br className="hidden sm:block" />
-            확인하고 싶은 항목을 선택하면 해당 가이드 페이지로 이동합니다.
+        <div>
+          <p className="inst-caption">LI-COR</p>
+          <h2>LI-6800</h2>
+          <p className="inst-muted">
+            {en
+              ? "Plot measured A/Q and A/Ci response curves. The instrument guide covers chamber setup, matching and data logging."
+              : "측정 로그를 불러와 A/Q와 A/Ci 반응을 비교하세요. 장비 안내에서 챔버 설정, 매칭, 데이터 기록 절차도 확인할 수 있습니다."}
           </p>
-        </motion.div>
-
-        {/* Liquid Glass Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          
-          {/* Li-6800 Card */}
-          <div 
-            onClick={() => navigate('/li6800')} // [수정] 클릭 시 이동 (경로 확인 필요)
-            className="h-full cursor-pointer group"
-          >
-            <LiquidGlass
-               displacementScale={40}
-               blurAmount={12}
-               saturation={110}
-               elasticity={0.3}
-               cornerRadius={24}
-               padding="32px"
-               className="h-full pointer-events-none md:pointer-events-auto"
-            >
-               <CardContent
-                  icon={<Activity />}
-                  title="Li-6800"
-                  description="광합성(A/Q, A/Ci), 기공전도도, leaf chamber 설정 가이드"
-               />
-            </LiquidGlass>
+          <div className="inst-actions" style={{ marginTop: 20 }}>
+            <Link className="inst-button" to={en ? "/li6800_en" : "/li6800"}>
+              {en ? "Open gas exchange" : "가스 교환 분석 열기"}
+              <ArrowRight size={16} />
+            </Link>
           </div>
-
-          {/* 추가 장비가 있다면 위 div 구조를 복사해서 경로와 내용을 수정하여 추가하세요 */}
-
         </div>
-      </div>
-    </div>
+      </article>
+      <article className="inst-figure-card" style={{marginTop:20}}>
+        <img src="/specimens/hemp-geh.webp" alt={en ? "Cannabis plants in the GEH Lab collection" : "GEH Lab의 헴프 식물"} />
+        <div>
+          <p className="inst-caption">Photon Systems Instruments</p>
+          <h2>FluorPen FP100</h2>
+          <p className="inst-muted">{en ? "Open an OJIP text file or a FluorPen LC or NPQ workbook to compare fluorescence traces and instrument-reported values." : "OJIP 텍스트나 LC·NPQ 엑셀을 열어 시료별 형광 곡선과 장비가 기록한 지표를 비교하세요."}</p>
+          <div className="inst-actions" style={{marginTop:20}}><Link className="inst-button" to={en ? "/fp100_en" : "/fp100"}>{en ? "Open fluorescence analysis" : "형광 분석 열기"}<ArrowRight size={16}/></Link></div>
+        </div>
+      </article>
+    </InstrumentFrame>
   );
 }
